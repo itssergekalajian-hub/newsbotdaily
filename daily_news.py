@@ -12,8 +12,10 @@ All free: Gemini Flash free tier, edge-tts (no key), GitHub Actions.
 import asyncio
 import datetime as dt
 import os
+import re
 import subprocess
 import sys
+import time
 from zoneinfo import ZoneInfo
 
 import edge_tts
@@ -31,7 +33,7 @@ GEMINI_KEY = os.environ["GEMINI_API_KEY"]
 # EET / EEST — the +2/+3 switch is handled by the zone, never hardcode an offset
 TZ = ZoneInfo(os.getenv("TIMEZONE", "Asia/Beirut"))
 
-MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+MODEL = os.getenv("GEMINI_MODEL", "").strip()   # empty = auto-detect a Flash model
 VOICE = os.getenv("VOICE", "en-US-AndrewMultilingualNeural")
 MAKE_VIDEO = os.getenv("MAKE_VIDEO", "1") == "1"
 PRESENTER = os.getenv("PRESENTER_IMAGE", "presenter.png")
@@ -156,23 +158,71 @@ POSTS FROM {date}:
 """
 
 
+GEMINI_ROOT = "https://generativelanguage.googleapis.com/v1beta"
+_SKIP = ("embedding", "aqa", "image", "tts", "live", "vision", "learnlm", "gemma")
+
+
+def discover_model() -> str:
+    """Ask the key which models it can actually use, and pick a Flash one.
+
+    Model names get retired on their own schedule — hardcoding one means the
+    bot breaks silently months later with a 404. This asks every time.
+    """
+    r = requests.get(f"{GEMINI_ROOT}/models",
+                     headers={"x-goog-api-key": GEMINI_KEY}, timeout=60)
+    r.raise_for_status()
+    usable = [m["name"].removeprefix("models/") for m in r.json().get("models", [])
+              if "generateContent" in m.get("supportedGenerationMethods", [])]
+    flash = [n for n in usable
+             if "flash" in n and not any(s in n for s in _SKIP)]
+    if not flash:
+        raise RuntimeError(f"no usable Flash model on this key; saw: {usable}")
+
+    # plain > lite, stable > preview, newest generation, then short alias
+    def rank(n: str) -> tuple:
+        m = re.search(r"gemini-(\d+(?:\.\d+)?)", n)
+        version = float(m.group(1)) if m else 0.0
+        return ("lite" in n, "preview" in n or "exp" in n, -version, len(n))
+
+    return sorted(flash, key=rank)[0]
+
+
 def summarize(posts: list[dict], day: dt.date) -> str:
     items = "\n\n---\n\n".join(f"[{p['time']}] {p['text']}" for p in posts)
     prompt = PROMPT.format(date=f"{day:%A, %d %B %Y}", items=items[:600_000])
-    r = requests.post(
-        f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent",
-        headers={"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"},
-        json={
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": 0.4,
-                "maxOutputTokens": 4096,
-                "thinkingConfig": {"thinkingBudget": 0},
-            },
-        },
-        timeout=180,
-    )
-    r.raise_for_status()
+    model = MODEL or discover_model()
+    print(f"using model: {model}")
+
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 4096,
+                             "thinkingConfig": {"thinkingBudget": 0}},
+    }
+    headers = {"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"}
+
+    for attempt in range(4):
+        r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
+                          headers=headers, json=body, timeout=180)
+        if r.ok:
+            break
+        if r.status_code == 404 and attempt == 0:
+            model = discover_model()          # pinned name is gone, find another
+            print(f"model not found, falling back to: {model}")
+            continue
+        if r.status_code == 400 and "thinking" in r.text.lower():
+            body["generationConfig"].pop("thinkingConfig", None)
+            print("model rejected thinkingConfig, retrying without it")
+            continue
+        if r.status_code == 429:
+            wait = 30 * (attempt + 1)
+            print(f"rate limited, waiting {wait}s")
+            time.sleep(wait)
+            continue
+        print(f"gemini error {r.status_code}: {r.text[:500]}", file=sys.stderr)
+        r.raise_for_status()
+    else:
+        raise RuntimeError("gemini call failed after retries")
+
     parts = r.json()["candidates"][0]["content"]["parts"]
     return "\n".join(p["text"] for p in parts if "text" in p).strip()
 
