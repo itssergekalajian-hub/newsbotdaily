@@ -191,40 +191,53 @@ def summarize(posts: list[dict], day: dt.date) -> str:
     items = "\n\n---\n\n".join(f"[{p['time']}] {p['text']}" for p in posts)
     prompt = PROMPT.format(date=f"{day:%A, %d %B %Y}", items=items[:600_000])
     model = MODEL or discover_model()
-    print(f"using model: {model}")
+    print(f"using model: {model}  |  prompt: {len(prompt):,} chars")
 
+    # No thinkingConfig here on purpose: the parameter differs between model
+    # generations and a rejected field returns a generic INVALID_ARGUMENT that
+    # says nothing about which field it disliked.
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 4096,
-                             "thinkingConfig": {"thinkingBudget": 0}},
+        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 8192},
     }
     headers = {"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"}
 
-    for attempt in range(4):
+    for attempt in range(5):
         r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
-                          headers=headers, json=body, timeout=180)
+                          headers=headers, json=body, timeout=300)
         if r.ok:
             break
         if r.status_code == 404 and attempt == 0:
             model = discover_model()          # pinned name is gone, find another
             print(f"model not found, falling back to: {model}")
             continue
-        if r.status_code == 400 and "thinking" in r.text.lower():
-            body["generationConfig"].pop("thinkingConfig", None)
-            print("model rejected thinkingConfig, retrying without it")
+        if r.status_code == 400 and "generationConfig" in body:
+            # something in the tuning knobs is unsupported; let the model default
+            print("400 — retrying with default generation settings")
+            body.pop("generationConfig")
             continue
         if r.status_code == 429:
             wait = 30 * (attempt + 1)
             print(f"rate limited, waiting {wait}s")
             time.sleep(wait)
             continue
-        print(f"gemini error {r.status_code}: {r.text[:500]}", file=sys.stderr)
+        print(f"gemini error {r.status_code}: {r.text[:1000]}", file=sys.stderr)
         r.raise_for_status()
     else:
         raise RuntimeError("gemini call failed after retries")
 
-    parts = r.json()["candidates"][0]["content"]["parts"]
-    return "\n".join(p["text"] for p in parts if "text" in p).strip()
+    data = r.json()
+    candidates = data.get("candidates") or []
+    if not candidates:
+        raise RuntimeError(f"no candidates returned: {str(data)[:400]}")
+    parts = candidates[0].get("content", {}).get("parts", [])
+    text = "\n".join(p["text"] for p in parts if "text" in p).strip()
+    if not text:
+        raise RuntimeError(
+            f"empty response, finishReason={candidates[0].get('finishReason')} — "
+            "usually means the token budget was spent before any text was written"
+        )
+    return text
 
 
 # ----------------------------------------------------------------------------
