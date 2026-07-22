@@ -243,24 +243,69 @@ def summarize(posts: list[dict], day: dt.date) -> str:
 # ----------------------------------------------------------------------------
 # 3. Voice + subtitles — edge-tts, free, no API key
 # ----------------------------------------------------------------------------
+def _srt_time(ticks: int) -> str:
+    """edge-tts reports offsets in 100-nanosecond units."""
+    ms = ticks // 10_000
+    h, ms = divmod(ms, 3_600_000)
+    m, ms = divmod(ms, 60_000)
+    s, ms = divmod(ms, 1000)
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+
+def write_srt(words: list[dict], path: str,
+              max_chars: int = 68, max_secs: float = 4.0) -> int:
+    """Group word timings into readable caption lines and write an SRT.
+
+    Written by hand rather than via edge_tts.SubMaker: that helper's API has
+    moved between versions and a silently empty subtitle file makes ffmpeg
+    fail with a bare INVALID_DATA, which is miserable to diagnose.
+    """
+    cues, current = [], []
+    for w in words:
+        current.append(w)
+        line = " ".join(x["text"] for x in current)
+        span = (current[-1]["offset"] + current[-1]["duration"]
+                - current[0]["offset"]) / 1e7
+        if (len(line) >= max_chars or span >= max_secs
+                or w["text"].endswith((".", "?", "!", "—"))):
+            cues.append(current)
+            current = []
+    if current:
+        cues.append(current)
+
+    with open(path, "w", encoding="utf-8") as f:
+        for i, cue in enumerate(cues, 1):
+            start = _srt_time(cue[0]["offset"])
+            end = _srt_time(cue[-1]["offset"] + cue[-1]["duration"])
+            text = " ".join(x["text"] for x in cue)
+            f.write(f"{i}\n{start} --> {end}\n{text}\n\n")
+    return len(cues)
+
+
 async def synthesize(text: str, mp3_path: str, srt_path: str) -> None:
     comm = edge_tts.Communicate(text, VOICE)
-    sub = edge_tts.SubMaker()
+    words: list[dict] = []
     with open(mp3_path, "wb") as f:
         async for chunk in comm.stream():
             if chunk["type"] == "audio":
                 f.write(chunk["data"])
-            elif chunk["type"] == "WordBoundary":
-                sub.feed(chunk)
-    with open(srt_path, "w", encoding="utf-8") as f:
-        f.write(sub.get_srt())
+            elif chunk["type"] == "WordBoundary" and chunk.get("text"):
+                words.append({"text": chunk["text"],
+                              "offset": int(chunk.get("offset", 0)),
+                              "duration": int(chunk.get("duration", 0))})
+    cues = write_srt(words, srt_path)
+    print(f"audio: {os.path.getsize(mp3_path):,} bytes  |  "
+          f"{len(words)} word timings -> {cues} caption lines")
 
 
 # ----------------------------------------------------------------------------
 # 4. Package — ogg voice note, and a still-presenter video with captions
 # ----------------------------------------------------------------------------
 def run(cmd: list[str]) -> None:
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    p = subprocess.run(cmd, capture_output=True, text=True)
+    if p.returncode != 0:
+        tail = "\n".join((p.stderr or p.stdout or "").strip().splitlines()[-25:])
+        raise RuntimeError(f"ffmpeg failed ({p.returncode}):\n{tail}")
 
 
 def to_voice_note(mp3_path: str, ogg_path: str) -> None:
@@ -269,14 +314,31 @@ def to_voice_note(mp3_path: str, ogg_path: str) -> None:
 
 
 def to_video(mp3_path: str, srt_path: str, mp4_path: str) -> None:
-    style = ("FontName=DejaVu Sans,Fontsize=16,PrimaryColour=&H00FFFFFF,"
-             "BackColour=&HB0000000,BorderStyle=4,Outline=0,MarginV=40")
-    vf = ("scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,"
-          f"subtitles={srt_path}:force_style='{style}'")
-    run(["ffmpeg", "-y", "-loop", "1", "-i", PRESENTER, "-i", mp3_path,
-         "-vf", vf, "-r", "25", "-c:v", "libx264", "-tune", "stillimage",
-         "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k",
-         "-movflags", "+faststart", "-shortest", mp4_path])
+    """Build the presenter video, dropping captions if the subtitle file is bad."""
+    style = ("Fontsize=16,PrimaryColour=&H00FFFFFF,BackColour=&HB0000000,"
+             "BorderStyle=4,Outline=0,MarginV=40")
+    base = "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720"
+    tail = ["-r", "25", "-c:v", "libx264", "-tune", "stillimage",
+            "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k",
+            "-movflags", "+faststart", "-shortest", mp4_path]
+
+    has_subs = os.path.exists(srt_path) and os.path.getsize(srt_path) > 50
+    print(f"subtitles: {'yes' if has_subs else 'no'} "
+          f"({os.path.getsize(srt_path) if os.path.exists(srt_path) else 0} bytes)")
+
+    attempts = []
+    if has_subs:
+        attempts.append(f"{base},subtitles={srt_path}:force_style='{style}'")
+    attempts.append(base)          # plain still + audio, no captions
+
+    for i, vf in enumerate(attempts):
+        try:
+            run(["ffmpeg", "-y", "-loop", "1", "-i", PRESENTER, "-i", mp3_path,
+                 "-vf", vf, *tail])
+            return
+        except RuntimeError as e:
+            print(f"video attempt {i + 1} failed:\n{e}", file=sys.stderr)
+    raise RuntimeError("could not build the video")
 
 
 # ----------------------------------------------------------------------------
@@ -289,20 +351,23 @@ def send(method: str, data: dict, files: dict | None = None) -> None:
         r.raise_for_status()
 
 
-def publish(script: str, day: dt.date, ogg_path: str, mp4_path: str | None) -> None:
+def publish_text(script: str, day: dt.date) -> None:
     body = f"{DIGEST_MARK} — {day:%A, %d %B %Y}\n\n{script}"
     for i in range(0, len(body), 4000):
         send("sendMessage", {"chat_id": TARGET, "text": body[i:i + 4000],
                              "disable_web_page_preview": True})
 
+
+def publish_voice(day: dt.date, ogg_path: str) -> None:
     with open(ogg_path, "rb") as f:
         send("sendVoice", {"chat_id": TARGET,
                            "caption": f"🎧 {day:%d %B %Y} in full"}, {"voice": f})
 
-    if mp4_path:
-        with open(mp4_path, "rb") as f:
-            send("sendVideo", {"chat_id": TARGET, "supports_streaming": True,
-                               "caption": f"📺 {day:%d %B %Y}"}, {"video": f})
+
+def publish_video(day: dt.date, mp4_path: str) -> None:
+    with open(mp4_path, "rb") as f:
+        send("sendVideo", {"chat_id": TARGET, "supports_streaming": True,
+                           "caption": f"📺 {day:%d %B %Y}"}, {"video": f})
 
 
 def main() -> None:
@@ -322,13 +387,21 @@ def main() -> None:
     asyncio.run(synthesize(script, "brief.mp3", "brief.srt"))
     to_voice_note("brief.mp3", "brief.ogg")
 
-    video = None
-    if MAKE_VIDEO and os.path.exists(PRESENTER):
-        to_video("brief.mp3", "brief.srt", "brief.mp4")
-        video = "brief.mp4"
+    # Text and voice go out first — they're the point. The video is a bonus and
+    # must never be able to swallow a brief that was already built.
+    publish_text(script, day)
+    publish_voice(day, "brief.ogg")
+    print("published text + voice")
 
-    publish(script, day, "brief.ogg", video)
-    print("published")
+    if MAKE_VIDEO and os.path.exists(PRESENTER):
+        try:
+            to_video("brief.mp3", "brief.srt", "brief.mp4")
+            publish_video(day, "brief.mp4")
+            print("published video")
+        except Exception as e:
+            print(f"video skipped: {e}", file=sys.stderr)
+    elif MAKE_VIDEO:
+        print(f"no {PRESENTER} in the repo — voice only")
 
 
 if __name__ == "__main__":
