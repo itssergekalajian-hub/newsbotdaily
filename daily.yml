@@ -1,0 +1,44 @@
+name: MidWorld Daily
+
+on:
+  schedule:
+    # GitHub cron is always UTC. Two runs are scheduled so that exactly one of
+    # them falls inside the local 00:00 hour in Beirut year round:
+    - cron: "0 21 * * *"   # = 00:00 local while EEST (UTC+3) is in effect
+    - cron: "0 22 * * *"   # = 00:00 local while EET  (UTC+2) is in effect
+    # The run that isn't at local midnight exits immediately, so only one
+    # brief is ever published per day.
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: "Rebuild one specific day (YYYY-MM-DD). Leave empty for a normal run."
+        required: false
+        default: ""
+
+jobs:
+  brief:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - name: Install dependencies
+        run: pip install -q -r requirements.txt
+
+      - name: Build and publish the brief
+        env:
+          SOURCE_CHANNEL: midworldnews
+          TARGET_CHAT_ID: ${{ secrets.TARGET_CHAT_ID }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TIMEZONE: Asia/Beirut
+          VOICE: en-US-AndrewMultilingualNeural
+          MAKE_VIDEO: "1"
+          TARGET_DATE: ${{ github.event.inputs.target_date }}
+        run: python daily_news.py
