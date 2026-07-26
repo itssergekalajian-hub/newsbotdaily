@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 """
 MidWorld Daily — one full calendar-day news brief.
 
@@ -11,6 +11,7 @@ All free: Gemini Flash free tier, edge-tts (no key), GitHub Actions.
 
 import asyncio
 import datetime as dt
+import functools
 import os
 import re
 import subprocess
@@ -162,11 +163,12 @@ GEMINI_ROOT = "https://generativelanguage.googleapis.com/v1beta"
 _SKIP = ("embedding", "aqa", "image", "tts", "live", "vision", "learnlm", "gemma")
 
 
-def discover_model() -> str:
-    """Ask the key which models it can actually use, and pick a Flash one.
+@functools.lru_cache(maxsize=1)
+def candidate_models() -> tuple[str, ...]:
+    """Every Flash model this key can use, best first.
 
     Model names get retired on their own schedule — hardcoding one means the
-    bot breaks silently months later with a 404. This asks every time.
+    bot breaks silently months later with a 404. This asks the API instead.
     """
     r = requests.get(f"{GEMINI_ROOT}/models",
                      headers={"x-goog-api-key": GEMINI_KEY}, timeout=60)
@@ -184,7 +186,11 @@ def discover_model() -> str:
         version = float(m.group(1)) if m else 0.0
         return ("lite" in n, "preview" in n or "exp" in n, -version, len(n))
 
-    return sorted(flash, key=rank)[0]
+    return tuple(sorted(flash, key=rank))
+
+
+def discover_model() -> str:
+    return candidate_models()[0]
 
 
 def summarize(posts: list[dict], day: dt.date) -> str:
@@ -202,7 +208,13 @@ def summarize(posts: list[dict], day: dt.date) -> str:
     }
     headers = {"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"}
 
-    for attempt in range(5):
+    # Alternates to fall back to when the first choice is overloaded. The
+    # newest generation is the busiest, so an older Flash is often free when
+    # 3.x is throwing 503s — a slightly older model beats no brief at all.
+    alternates = [m for m in candidate_models() if m != model]
+    tried = 0
+
+    for attempt in range(8):
         r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
                           headers=headers, json=body, timeout=300)
         if r.ok:
@@ -216,15 +228,23 @@ def summarize(posts: list[dict], day: dt.date) -> str:
             print("400 — retrying with default generation settings")
             body.pop("generationConfig")
             continue
-        if r.status_code == 429:
-            wait = 30 * (attempt + 1)
-            print(f"rate limited, waiting {wait}s")
+        if r.status_code in (429, 500, 502, 503, 504):
+            reason = "rate limited" if r.status_code == 429 else "model busy"
+            # Google's spikes are usually short; alternate between waiting it
+            # out and trying a less popular model.
+            if alternates and tried < len(alternates) and attempt % 2 == 1:
+                model = alternates[tried]
+                tried += 1
+                print(f"{reason} ({r.status_code}) — switching to {model}")
+                continue
+            wait = min(20 * 2 ** (attempt // 2), 120)
+            print(f"{reason} ({r.status_code}) — waiting {wait}s")
             time.sleep(wait)
             continue
         print(f"gemini error {r.status_code}: {r.text[:1000]}", file=sys.stderr)
         r.raise_for_status()
     else:
-        raise RuntimeError("gemini call failed after retries")
+        raise RuntimeError(f"gemini unavailable after 8 attempts (last: {model})")
 
     data = r.json()
     candidates = data.get("candidates") or []
