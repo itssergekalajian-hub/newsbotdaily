@@ -1,4 +1,4 @@
- #!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 MidWorld Daily — one full calendar-day news brief.
 
@@ -333,32 +333,73 @@ def to_voice_note(mp3_path: str, ogg_path: str) -> None:
          "-b:a", "48k", "-vbr", "on", "-ar", "48000", "-ac", "1", ogg_path])
 
 
+def audio_seconds(path: str) -> float:
+    out = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=nw=1:nk=1", path],
+        capture_output=True, text=True, check=True).stdout.strip()
+    return float(out)
+
+
 def to_video(mp3_path: str, srt_path: str, mp4_path: str) -> None:
-    """Build the presenter video, dropping captions if the subtitle file is bad."""
-    style = ("Fontsize=16,PrimaryColour=&H00FFFFFF,BackColour=&HB0000000,"
-             "BorderStyle=4,Outline=0,MarginV=40")
-    base = "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720"
-    tail = ["-r", "25", "-c:v", "libx264", "-tune", "stillimage",
+    """Render the presenter video: slow camera drift plus timed captions.
+
+    The motion is a Ken Burns move — the frame is upscaled, then a slowly
+    zooming, drifting window is cropped out of it. It is not a talking face:
+    lip-sync models need a GPU and these runners are CPU-only.
+
+    Both zoom and pan are expressed as a fraction of the bulletin's own length,
+    so the move takes exactly as long as the audio. A fixed per-frame rate
+    finishes its travel in about ninety seconds and then sits clamped against
+    the edge of the source for the rest of a five-minute brief. Writing the pan
+    as a fraction of the available slack also keeps it inside the frame at any
+    duration, with no bounds arithmetic to get wrong.
+    """
+    fps = 25
+    frames = max(int(audio_seconds(mp3_path) * fps), 2)
+    zoom_to = 1.12
+
+    motion = (
+        "scale=1600:900,"
+        f"zoompan=z='min(1+{zoom_to - 1:.4f}*on/{frames},{zoom_to})'"
+        f":x='(iw-iw/zoom)*(0.5+0.3*on/{frames})'"
+        f":y='(ih-ih/zoom)*(0.5-0.3*on/{frames})'"
+        f":d=1:s=1280x720:fps={fps}"
+    )
+    style = ("Fontsize=17,PrimaryColour=&H00FFFFFF,BackColour=&HC0000000,"
+             "BorderStyle=4,Outline=0,Shadow=0,MarginV=45")
+    still = "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720"
+
+    has_subs = os.path.exists(srt_path) and os.path.getsize(srt_path) > 50
+    subs = f",subtitles={srt_path}:force_style='{style}'" if has_subs else ""
+    if not has_subs:
+        print("no usable subtitles — video will have no captions")
+    print(f"rendering {frames / fps:.0f}s of video ({frames} frames)")
+
+    tail = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
             "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k",
             "-movflags", "+faststart", "-shortest", mp4_path]
 
-    has_subs = os.path.exists(srt_path) and os.path.getsize(srt_path) > 50
-    print(f"subtitles: {'yes' if has_subs else 'no'} "
-          f"({os.path.getsize(srt_path) if os.path.exists(srt_path) else 0} bytes)")
-
-    attempts = []
-    if has_subs:
-        attempts.append(f"{base},subtitles={srt_path}:force_style='{style}'")
-    attempts.append(base)          # plain still + audio, no captions
-
-    for i, vf in enumerate(attempts):
+    # each fallback drops one feature rather than losing the video entirely
+    attempts = [
+        ("motion + captions", motion + subs),
+        ("captions only", still + subs),
+        ("plain still", still),
+    ]
+    for label, chain in attempts:
         try:
-            run(["ffmpeg", "-y", "-loop", "1", "-i", PRESENTER, "-i", mp3_path,
-                 "-vf", vf, *tail])
+            run(["ffmpeg", "-y", "-loop", "1", "-framerate", "25",
+                 "-i", PRESENTER, "-i", mp3_path,
+                 "-filter_complex", f"[0:v]{chain}[v]",
+                 "-map", "[v]", "-map", "1:a", *tail])
+            size = os.path.getsize(mp4_path)
+            print(f"video: {label}, {size / 1e6:.1f} MB")
+            if size > 49 * 1024 * 1024:
+                raise RuntimeError(f"video is {size/1e6:.0f} MB, over Telegram's limit")
             return
         except RuntimeError as e:
-            print(f"video attempt {i + 1} failed:\n{e}", file=sys.stderr)
-    raise RuntimeError("could not build the video")
+            print(f"render '{label}' failed: {e}", file=sys.stderr)
+    raise RuntimeError("every video render attempt failed")
 
 
 # ----------------------------------------------------------------------------
@@ -405,24 +446,24 @@ def main() -> None:
     print(f"script: {len(script.split())} words")
 
     asyncio.run(synthesize(script, "brief.mp3", "brief.srt"))
-    to_voice_note("brief.mp3", "brief.ogg")
 
-    # Text and voice go out first — they're the point. The video is a bonus and
-    # must never be able to swallow a brief that was already built.
-    publish_text(script, day)
-    publish_voice(day, "brief.ogg")
-    print("published text + voice")
+    if not os.path.exists(PRESENTER):
+        raise RuntimeError(
+            f"{PRESENTER} is missing — the video needs a presenter image")
 
-    if MAKE_VIDEO and os.path.exists(PRESENTER):
-        try:
-            to_video("brief.mp3", "brief.srt", "brief.mp4")
-            publish_video(day, "brief.mp4")
-            print("published video")
-        except Exception as e:
-            print(f"video skipped: {e}", file=sys.stderr)
-    elif MAKE_VIDEO:
-        print(f"no {PRESENTER} in the repo — voice only")
+    try:
+        to_video("brief.mp3", "brief.srt", "brief.mp4")
+        publish_video(day, "brief.mp4")
+        print("published video")
+    except Exception as e:
+        # A finished brief should never be lost to a rendering problem, so fall
+        # back to the audio rather than publishing nothing at all.
+        print(f"video failed ({e}) — falling back to voice", file=sys.stderr)
+        to_voice_note("brief.mp3", "brief.ogg")
+        publish_voice(day, "brief.ogg")
+        print("published voice as fallback")
 
 
 if __name__ == "__main__":
     main()
+
