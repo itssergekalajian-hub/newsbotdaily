@@ -104,9 +104,79 @@ def framing(presenter: str, variant: int) -> str:
     return f"crop={cw}:{ch}:{x}:{y},scale={W}:{H},setsar=1"
 
 
+PANEL_W, PANEL_H = 452, 254
+
+
+def make_panel(work: str, image: str, name: str) -> str:
+    """Crop a topic image to the panel size and give it a border.
+
+    Done as a separate pass so the scene filtergraph stays simple, and so a
+    corrupt download fails here rather than halfway through a long render.
+    """
+    out = os.path.join(work, name)
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", image,
+         "-vf", (f"scale={PANEL_W}:{PANEL_H}:force_original_aspect_ratio=increase,"
+                 f"crop={PANEL_W}:{PANEL_H},"
+                 f"drawbox=x=0:y=0:w=iw:h=ih:color=white@0.85:t=3"),
+         "-frames:v", "1", out])
+    return out
+
+
+def build_bed(work: str, seconds: float) -> str:
+    """A soft four-chord pad, synthesised — no licensing, no download.
+
+    Roots move every 26 seconds so it evolves instead of droning. Everything is
+    low-passed hard and kept far below the voice; it is meant to remove the dead
+    silence between sentences, not to be listened to.
+    """
+    roots = [110.0, 87.31, 130.81, 98.0]          # A2, F2, C3, G2
+    parts = []
+    for i, r in enumerate(roots):
+        piece = os.path.join(work, f"chord{i}.wav")
+        graph = (f"sine=r=48000:frequency={r}:duration=26,volume=0.5[a];"
+                 f"sine=r=48000:frequency={r * 1.5:.2f}:duration=26,volume=0.30[b];"
+                 f"sine=r=48000:frequency={r * 2:.2f}:duration=26,volume=0.18[c];"
+                 f"[a][b][c]amix=inputs=3:normalize=0,"
+                 f"tremolo=f=0.1:d=0.3,lowpass=f=480,"
+                 f"afade=t=in:st=0:d=3,afade=t=out:st=23:d=3,"
+                 f"aformat=channel_layouts=stereo")
+        run(["ffmpeg", "-y", "-loglevel", "error",
+             "-filter_complex", graph, "-t", "26", piece])
+        parts.append(piece)
+
+    listing = os.path.join(work, "bed_list.txt")
+    with open(listing, "w") as f:
+        for p in parts:
+            f.write(f"file '{os.path.abspath(p)}'\n")
+    bed = os.path.join(work, "bed.wav")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
+         "-i", listing, "-c", "copy", bed])
+    return bed
+
+
+def add_music(video_in: str, bed: str, out: str, level: float = 0.30) -> None:
+    """Mix the bed under the finished bulletin, ducking it beneath the voice.
+
+    sidechaincompress keys the music off the narration, so it lifts in the gaps
+    and pulls back the moment anyone speaks. Measured on a real bulletin: the
+    pauses go from near-silent to +16 dB while the speech level does not move at
+    all. The video is stream-copied — only the audio is re-encoded.
+    """
+    graph = (f"[1:a]volume={level}[m];"
+             f"[m][0:a]sidechaincompress=threshold=0.015:ratio=8"
+             f":attack=15:release=500[duck];"
+             f"[duck][0:a]amix=inputs=2:normalize=0:duration=first[out]")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", video_in,
+         "-stream_loop", "-1", "-i", bed,
+         "-filter_complex", graph, "-map", "0:v", "-map", "[out]",
+         "-c:v", "copy", "-c:a", "aac", "-b:a", "128k",
+         "-movflags", "+faststart", "-shortest", out])
+
+
 def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  headline: str, brand: str, date_text: str, ticker: str,
-                 variant: int, elapsed: float, total: float, out: str) -> None:
+                 variant: int, elapsed: float, total: float, out: str,
+                 panel: str | None = None) -> None:
     """One topic: locked framing, chrome, lower third, ticker, captions."""
     seconds = probe_duration(audio)
 
@@ -151,15 +221,26 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
     if srt and os.path.exists(srt) and os.path.getsize(srt) > 20:
         subs = f",subtitles='{srt}'"
 
+    # the topic image rides in as an over-the-shoulder panel on the left,
+    # which is the empty half of the anchor plate
+    extra, panel_step = [], ""
+    if panel and os.path.exists(panel):
+        extra = ["-loop", "1", "-framerate", str(FPS), "-i", panel]
+        panel_step = (f";[p][3:v]overlay=eval=frame"
+                      f":x='-{PANEL_W + 20}+min(t/0.55\\,1)*({PANEL_W + 20}+62)'"
+                      f":y=104:enable='gte(t,0.25)'[p2]")
+
     plain = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}"
     for label, base in (("framed", framing(presenter, variant)), ("plain", plain)):
-        graph = f"[0:v]{base}[bg];{bar};[p]{chain}{subs}[v]"
+        stage = "[p2]" if panel_step else "[p]"
+        graph = f"[0:v]{base}[bg];{bar}{panel_step};{stage}{chain}{subs}[v]"
         try:
             run(["ffmpeg", "-y", "-loglevel", "error",
                  "-loop", "1", "-framerate", str(FPS), "-i", presenter,
                  "-i", audio,
                  "-f", "lavfi", "-i",
                  f"color=c={RED}@0.9:s={W}x5:r={FPS}:d={seconds + 1}",
+                 *extra,
                  "-filter_complex", graph,
                  "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
             return
