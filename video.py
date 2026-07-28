@@ -1,14 +1,24 @@
 """Broadcast-style video assembly for MidWorld Daily.
 
-Builds a title card, one animated scene per topic, and an outro, then joins
-them. Everything is ffmpeg — no GPU, no paid service.
+Builds a title card, one scene per topic, and an outro, then joins them.
+Everything is ffmpeg — no GPU, no paid service.
 
-One hard-won constraint shapes this module: `drawbox` evaluates its x/y/w/h
-expressions ONCE, at filter setup, so anything drawn with it is frozen for the
-whole clip. `drawtext` and `overlay` (with eval=frame) do re-evaluate per frame.
-So every moving element here is either a drawtext — using its own box= backing
-plate — or a colour source overlaid at an animated position. Static furniture
-still uses drawbox, which is cheaper.
+Two constraints shape this module.
+
+First: NO Ken Burns. `zoompan` rounds its window position to whole pixels, so a
+slow drift holds the frame still for ten-odd frames and then snaps a pixel
+sideways. Measured on a real bulletin, most consecutive frames differed by 0.00
+and then one by 1.07 — that reads as a shake, not a drift, and slowing it down
+only lengthens the freeze between jumps. Real bulletins use locked-off cameras
+anyway, so each scene holds a still framing and the movement comes from cutting
+between framings and from graphics that travel fast enough for whole-pixel
+steps to be invisible.
+
+Second: `drawbox` evaluates its geometry once, at filter setup, so anything
+drawn with it is frozen for the whole clip. Moving elements are therefore
+either `drawtext` (which re-evaluates per frame and carries its own box=
+backing plate) or a colour source overlaid with eval=frame. Static furniture
+stays on drawbox, which is cheaper.
 """
 
 from __future__ import annotations
@@ -26,8 +36,9 @@ NAVY = "0x0A1428"
 RED = "0xC8102E"
 PALE = "0x9FB6D4"
 
-SUB_STYLE = ("Fontname=DejaVu Sans,Fontsize=17,PrimaryColour=&H00FFFFFF,"
-             "BackColour=&HC0000000,BorderStyle=4,Outline=0,Shadow=0,MarginV=52")
+# Caption styling lives in the .ass file itself (see ASS_HEAD in daily_news.py),
+# which declares PlayResX/PlayResY so its numbers are real pixels. Overriding it
+# here with force_style would drag back the 384x288 scaling problem.
 
 ENC = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
        "-pix_fmt", "yuv420p", "-r", str(FPS),
@@ -61,66 +72,94 @@ def _textfile(work: str, name: str, text: str) -> str:
     return path.replace("\\", "/")
 
 
-def _motion(frames: int, variant: int) -> str:
-    """Ken Burns move sized to the clip, so it never freezes part-way through.
+def probe_size(path: str) -> tuple[int, int]:
+    out = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "v:0",
+         "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x", path],
+        capture_output=True, text=True, check=True).stdout.strip()
+    w, h = out.split("x")[:2]
+    return int(w), int(h)
 
-    Both zoom and pan are fractions of the clip's own length, and the pan is a
-    fraction of the available slack, so the window stays inside the source at
-    any duration without any bounds arithmetic.
+
+def framing(presenter: str, variant: int) -> str:
+    """A locked-off camera angle. Cutting between these supplies the movement.
+
+    Every crop is computed once and never animated, so there is nothing to
+    judder. The subject sits right of centre in the source, so tighter framings
+    bias that way rather than cropping the middle.
     """
-    f = max(frames, 2)
-    zin, zout = f"min(1+0.12*on/{f},1.12)", f"max(1.12-0.12*on/{f},1.0)"
-    presets = [
-        (zin,  f"(iw-iw/zoom)*(0.5+0.30*on/{f})", f"(ih-ih/zoom)*(0.5-0.25*on/{f})"),
-        (zout, f"(iw-iw/zoom)*(0.5-0.30*on/{f})", f"(ih-ih/zoom)*(0.5+0.25*on/{f})"),
-        (zin,  f"(iw-iw/zoom)*(0.5-0.28*on/{f})", f"(ih-ih/zoom)*(0.5+0.20*on/{f})"),
-        (zout, f"(iw-iw/zoom)*(0.5+0.28*on/{f})", f"(ih-ih/zoom)*(0.5-0.20*on/{f})"),
-    ]
-    z, x, y = presets[variant % len(presets)]
-    return (f"scale=1600:900,zoompan=z='{z}':x='{x}':y='{y}'"
-            f":d=1:s={W}x{H}:fps={FPS}")
+    sw, sh = probe_size(presenter)
+    ar = W / H
+    fw = min(sw, int(sh * ar))          # widest 16:9 crop the source allows
+    fh = int(fw / ar)
+
+    # (fraction of the full frame, horizontal bias 0..1): wide, medium, close
+    presets = [(1.00, 0.50), (0.82, 0.62), (0.68, 0.66), (0.88, 0.40)]
+    scale, bias = presets[variant % len(presets)]
+
+    cw = max(int(fw * scale) // 2 * 2, 320)
+    ch = max(int(cw / ar) // 2 * 2, 180)
+    x = max(0, min(int((sw - cw) * bias), sw - cw))
+    y = max(0, min(int((sh - ch) * 0.42), sh - ch))   # keeps heads high
+    return f"crop={cw}:{ch}:{x}:{y},scale={W}:{H},setsar=1"
 
 
 def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
-                 brand: str, date_text: str, variant: int,
-                 elapsed: float, total: float, out: str) -> None:
-    """One topic: moving anchor plate, chrome, lower third, captions."""
+                 headline: str, brand: str, date_text: str, ticker: str,
+                 variant: int, elapsed: float, total: float, out: str) -> None:
+    """One topic: locked framing, chrome, lower third, ticker, captions."""
     seconds = probe_duration(audio)
-    frames = max(int(seconds * FPS), 2)
 
     bf = _textfile(work, "brand.txt", brand)
     df = _textfile(work, "date.txt", date_text)
     tf = _textfile(work, f"topic{variant}.txt", topic.upper())
+    hf = _textfile(work, f"head{variant}.txt", headline) if headline else ""
+    kf = _textfile(work, "ticker.txt", ticker) if ticker else ""
 
-    # progress bar: a full-width strip slid in from the left, so the visible
-    # portion equals how far through the whole bulletin we are
+    # progress strip: a full-width bar slid in from the left, so the visible
+    # part equals how far through the whole bulletin we are
     bar = (f"[bg][2:v]overlay=x='W*(({elapsed}+t)/{max(total, 1)}-1)'"
-           f":y=H-6:eval=frame[p]")
+           f":y=H-5:eval=frame[p]")
 
-    chrome = ",".join([
-        f"drawbox=x=0:y=0:w=iw:h=54:color={NAVY}@0.92:t=fill",
-        f"drawbox=x=0:y=54:w=iw:h=3:color={RED}:t=fill",
-        f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=24:x=32:y=15",
-        f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=19:x=w-tw-32:y=18",
-        # lower third slides in over 0.6s; box= gives it its own backing plate
-        f"drawtext=fontfile={BOLD}:textfile={tf}:fontcolor=white:fontsize=28"
-        f":box=1:boxcolor={RED}@0.95:boxborderw=18"
-        f":x='-600+min(t/0.6\\,1)*640':y=566",
-    ])
+    chrome = [
+        f"drawbox=x=0:y=0:w=iw:h=52:color={NAVY}@0.94:t=fill",
+        f"drawbox=x=0:y=52:w=iw:h=3:color={RED}:t=fill",
+        f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=23:x=30:y=15",
+        f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=18:x=w-tw-30:y=17",
+        # scrim so captions stay readable over a bright frame
+        f"drawbox=x=0:y=ih-196:w=iw:h=196:color=black@0.42:t=fill",
+        # topic plate slides in over the first half second, then holds
+        f"drawtext=fontfile={BOLD}:textfile={tf}:fontcolor=white:fontsize=25"
+        f":box=1:boxcolor={RED}@0.96:boxborderw=15"
+        f":x='-560+min(t/0.5\\,1)*588':y=524",
+    ]
+    if hf:
+        chrome.append(
+            f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=26"
+            f":x=32:y=572:alpha='min(max((t-0.55)/0.4\\,0)\\,1)'")
+    if kf:
+        # ticker scrolls at ~95 px/s — fast enough that whole-pixel steps are
+        # invisible, which is exactly what a slow Ken Burns drift could not do
+        chrome.append(f"drawbox=x=0:y=ih-32:w=iw:h=27:color={NAVY}@0.96:t=fill")
+        chrome.append(
+            f"drawtext=fontfile={REGULAR}:textfile={kf}:fontcolor={PALE}"
+            f":fontsize=16:y=H-27:x='w-mod(t*95\\,w+tw)'")
+    chrome.append("fade=t=in:st=0:d=0.35")        # soft cut into every scene
 
+    chain = ",".join(chrome)
     subs = ""
     if srt and os.path.exists(srt) and os.path.getsize(srt) > 20:
-        subs = f",subtitles='{srt}':force_style='{SUB_STYLE}'"
+        subs = f",subtitles='{srt}'"
 
-    still = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}"
-    for label, bg in (("motion", _motion(frames, variant)), ("still", still)):
-        graph = f"[0:v]{bg}[bg];{bar};[p]{chrome}{subs}[v]"
+    plain = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}"
+    for label, base in (("framed", framing(presenter, variant)), ("plain", plain)):
+        graph = f"[0:v]{base}[bg];{bar};[p]{chain}{subs}[v]"
         try:
             run(["ffmpeg", "-y", "-loglevel", "error",
                  "-loop", "1", "-framerate", str(FPS), "-i", presenter,
                  "-i", audio,
                  "-f", "lavfi", "-i",
-                 f"color=c={RED}@0.9:s={W}x6:r={FPS}:d={seconds + 1}",
+                 f"color=c={RED}@0.9:s={W}x5:r={FPS}:d={seconds + 1}",
                  "-filter_complex", graph,
                  "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
             return
