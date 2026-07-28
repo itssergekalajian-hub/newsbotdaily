@@ -43,6 +43,9 @@ PRESENTER = os.getenv("PRESENTER_IMAGE", "presenter.png")
 BRAND = os.getenv("BRAND", "MIDWORLD DAILY")
 FORCE_DATE = os.getenv("TARGET_DATE", "").strip()
 
+# github.event.schedule, e.g. "0 21 * * *" — empty for manual runs
+CRON = os.getenv("CRON_SCHEDULE", "").strip()
+
 API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 UA = {"User-Agent": "Mozilla/5.0 (compatible; MidWorldDaily/1.0)"}
 DIGEST_MARK = "📅 MidWorld Daily"
@@ -53,24 +56,70 @@ _SKIP = ("embedding", "aqa", "image", "tts", "live", "vision", "learnlm", "gemma
 # ----------------------------------------------------------------------------
 # Which day are we covering?
 # ----------------------------------------------------------------------------
+CRON_HOURS = (21, 22)          # must match the schedule in the workflow
+
+
+def _midnight_cron(now: dt.datetime) -> int:
+    """Which scheduled hour is local midnight today.
+
+    Each candidate is converted to local time and scored by how long after the
+    local midnight it lands; the smallest wins. Deriving it from the UTC offset
+    instead leaves a hole on the spring-forward night: the clock changes between
+    the two crons, so the earlier one sees offset +2 and the later one +3, and
+    each concludes the other is the right one. Nothing publishes that day.
+    """
+    best, best_score = CRON_HOURS[0], 1e9
+    for hour in CRON_HOURS:
+        fired = dt.datetime.combine(now.astimezone(dt.timezone.utc).date(),
+                                    dt.time(hour), tzinfo=dt.timezone.utc)
+        local = fired.astimezone(TZ)
+        midnight = dt.datetime.combine(local.date(), dt.time(0), tzinfo=TZ)
+        score = ((local.astimezone(dt.timezone.utc)
+                  - midnight.astimezone(dt.timezone.utc)).total_seconds() / 3600)
+        if score < 0:
+            score += 24
+        if score < best_score:
+            best, best_score = hour, score
+    return best
+
+
 def resolve_day() -> dt.date | None:
     """The calendar day to cover, or None if this run should do nothing.
 
-    Two UTC crons are scheduled so that exactly one lands in the first hour of
-    the local day whether or not summer time is in effect. Measured from the
-    local day boundary rather than "hour == 0", because on the spring-forward
-    night 00:00 does not exist. Both sides are converted to UTC first: two
-    datetimes sharing a tzinfo subtract as wall-clock, not elapsed time.
+    Two UTC crons are scheduled so that one of them is local midnight whether or
+    not summer time is in effect, and GitHub tells us which fired via
+    github.event.schedule.
+
+    This deliberately does NOT check how close to midnight the job actually
+    started. Scheduled runs on GitHub are regularly delayed — often tens of
+    minutes, sometimes over an hour — and the previous version required the job
+    to begin within 60 minutes of midnight, so a delayed run started, decided it
+    was not the midnight run, and quietly published nothing. Matching on the
+    cron instead means a late run still delivers the right day, just late.
     """
     if FORCE_DATE:
         return dt.date.fromisoformat(FORCE_DATE)
+
     now = dt.datetime.now(TZ)
-    boundary = dt.datetime.combine(now.date(), dt.time(0), tzinfo=TZ)
-    since = (now.astimezone(dt.timezone.utc)
-             - boundary.astimezone(dt.timezone.utc)).total_seconds()
-    if not 0 <= since < 3600:
-        print(f"local time is {now:%H:%M %Z} — not the midnight run, exiting")
-        return None
+    if CRON:                                   # a scheduled run
+        wanted = _midnight_cron(now)
+        try:
+            fired = int(CRON.split()[1])
+        except (IndexError, ValueError):
+            fired = wanted                     # unparseable: assume it's ours
+        if fired != wanted:
+            print(f"cron {fired:02d}:00 UTC is the off-season one "
+                  f"({wanted:02d}:00 UTC is local midnight today) — exiting")
+            return None
+        print(f"scheduled run for local midnight, started {now:%H:%M %Z}")
+    else:
+        print(f"manual run at {now:%H:%M %Z}")
+
+    # The day that has just ended. A midnight run always sits in the early
+    # hours of the NEXT local day, so this is simply yesterday — and it stays
+    # correct however late GitHub actually started the job. (Subtracting an
+    # hour first, as an earlier version did, silently moved the target forward
+    # a day once the delay passed 60 minutes.)
     return now.date() - dt.timedelta(days=1)
 
 
@@ -154,13 +203,17 @@ Write the spoken bulletin as a series of topic segments.
 
 Return ONLY a JSON object, no markdown fences, in exactly this shape:
 {{"headline": "one sentence summing up the whole day",
-  "segments": [{{"topic": "Middle East", "script": "the spoken words..."}}]}}
+  "segments": [{{"topic": "Middle East",
+                "headline": "four to eight words naming this topic's main story",
+                "script": "the spoken words..."}}]}}
 
 Rules for the segments:
 - One segment per topic. Use topics that fit the day, for example: Middle East,
   Russia and Ukraine, China and Asia, Europe, United States, Markets, Football,
   MMA. Skip any topic with no news. Between 3 and 8 segments.
 - "topic" is a screen label: 1 to 3 words, no punctuation.
+- each segment's "headline" is an on-screen caption for that topic: 4 to 8
+  words, no final full stop. It is read by the viewer, not spoken.
 - "script" is what the anchor says out loud for that topic: 100 to 220 words.
 - Cover the whole day. Where a story developed over several hours, tell it in
   order — what was first reported, how it changed, where it stood by the end.
@@ -266,18 +319,43 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
     for s in segments:
         label = re.sub(r"[^\w &-]", "", s.get("topic", "News")).strip()
         s["topic"] = label[:22] or "News"
+        head = re.sub(r"\s+", " ", str(s.get("headline", ""))).strip(" .")
+        s["headline"] = head[:58]
     return {"headline": brief.get("headline", ""), "segments": segments}
 
 
 # ----------------------------------------------------------------------------
 # 3. Voice + captions
 # ----------------------------------------------------------------------------
-def _srt_time(seconds: float) -> str:
-    ms = max(int(round(seconds * 1000)), 0)
-    h, ms = divmod(ms, 3_600_000)
-    m, ms = divmod(ms, 60_000)
-    s, ms = divmod(ms, 1000)
-    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+def _ass_time(seconds: float) -> str:
+    cs = max(int(round(seconds * 100)), 0)
+    h, cs = divmod(cs, 360_000)
+    m, cs = divmod(cs, 6_000)
+    sec, cs = divmod(cs, 100)
+    return f"{h:d}:{m:02d}:{sec:02d}.{cs:02d}"
+
+
+# Captions are written as ASS rather than SRT on purpose. ffmpeg's SRT decoder
+# lays subtitles out in a fixed 384x288 space and scales the result to the
+# frame, so a Fontsize of 18 arrives at ~45px and MarginV=46 lifts the text
+# ~115px — which parked the captions on top of the lower third instead of below
+# it. An ASS file declares its own PlayResX/PlayResY, so every number here is
+# real pixels at 1280x720. (The subtitles filter's original_size option does not
+# fix this; it only corrects aspect ratio.)
+ASS_HEAD = """[Script Info]
+ScriptType: v4.00+
+PlayResX: 1280
+PlayResY: 720
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Main,DejaVu Sans,27,&H00FFFFFF,&H000000FF,&H00000000,&HB4000000,-1,0,0,0,100,100,0,0,4,0,0,2,70,70,34,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
 
 
 def _lines(text: str, width: int = 62) -> list[str]:
@@ -301,65 +379,105 @@ def _lines(text: str, width: int = 62) -> list[str]:
     return out
 
 
-def write_srt(text: str, words: list[dict], duration: float, path: str) -> int:
-    """Captions for one segment, timed from the voice where possible.
+def _sentences(text: str) -> list[str]:
+    """Split narration into sentences, keeping each short enough to caption.
 
-    edge-tts word boundaries have moved between releases and sometimes arrive
-    empty, which previously produced a zero-byte .srt and a video with no
-    captions at all. When they are missing, lines are spread across the known
-    audio duration by character count instead — not perfectly in sync, but
-    always present and close.
+    Very short fragments are folded into the previous line. On their own they
+    become cues that flash up for well under a second, which reads as flicker —
+    and each one is also a separate speech request, so merging is cheaper too.
     """
-    lines = _lines(text)
-    if not lines:
-        open(path, "w").close()
-        return 0
-
-    cues: list[tuple[float, float, str]] = []
-    if words:
-        cursor = 0
-        for line in lines:
-            chunk = words[cursor:cursor + len(line.split())]
-            cursor += len(line.split())
-            if not chunk:
+    out: list[str] = []
+    for sent in re.split(r"(?<=[.!?])\s+", " ".join(text.split())):
+        sent = sent.strip()
+        if not sent:
+            continue
+        # a very long sentence becomes several cues, split at commas first
+        while len(sent) > 96:
+            cut = sent.rfind(", ", 40, 96)
+            if cut == -1:
+                cut = sent.rfind(" ", 40, 96)
+            if cut == -1:
                 break
-            start = chunk[0]["offset"] / 1e7
-            end = (chunk[-1]["offset"] + chunk[-1]["duration"]) / 1e7
-            cues.append((start, max(end, start + 0.4), line))
-    if not cues:
-        total = sum(len(l) for l in lines) or 1
-        t = 0.0
-        for line in lines:
-            span = duration * len(line) / total
-            cues.append((t, t + span, line))
-            t += span
-
-    with open(path, "w", encoding="utf-8") as f:
-        for i, (start, end, line) in enumerate(cues, 1):
-            f.write(f"{i}\n{_srt_time(start)} --> {_srt_time(end)}\n{line}\n\n")
-    return len(cues)
+            out.append(sent[:cut + 1].strip())
+            sent = sent[cut + 1:].strip()
+        if not sent:
+            continue
+        if out and len(sent) < 28 and len(out[-1]) + len(sent) < 104:
+            out[-1] = f"{out[-1]} {sent}"
+        else:
+            out.append(sent)
+    return out
 
 
-async def _speak(text: str, mp3_path: str) -> list[dict]:
-    comm = edge_tts.Communicate(text, VOICE)
-    words: list[dict] = []
-    with open(mp3_path, "wb") as f:
-        async for chunk in comm.stream():
-            if chunk["type"] == "audio":
-                f.write(chunk["data"])
-            elif chunk["type"].endswith("Boundary"):
-                if {"offset", "duration", "text"} <= set(chunk.keys()):
-                    words.append(chunk)
-    return words
+async def _speak(text: str, mp3_path: str) -> None:
+    await edge_tts.Communicate(text, VOICE).save(mp3_path)
 
 
-def voice_segment(text: str, mp3_path: str, srt_path: str) -> float:
-    words = asyncio.run(_speak(text, mp3_path))
-    seconds = video.probe_duration(mp3_path)
-    cues = write_srt(text, words, seconds, srt_path)
-    print(f"    {seconds:5.1f}s audio, {len(words):4d} word timings, "
-          f"{cues} captions{'' if words else '  (estimated timing)'}")
-    return seconds
+def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
+                  tag: str) -> float:
+    """Narrate one segment and caption it from measured audio, not estimates.
+
+    edge-tts word-boundary events are unreliable — when they do not arrive the
+    old code spread captions across the segment by character count, which drifts
+    badly: a line would sit on screen for eight seconds while the voice moved
+    on. Instead each sentence is synthesised as its own file and measured with
+    ffprobe, so every caption's start time is the exact sum of the audio before
+    it. Sync is then a fact rather than a guess, whatever edge-tts reports.
+    """
+    sentences = _sentences(text)
+    if not sentences:
+        raise RuntimeError("nothing to narrate")
+
+    parts, cues, clock = [], [], 0.0
+    for i, sent in enumerate(sentences):
+        piece = os.path.join(work, f"{tag}_{i:03d}.mp3")
+        asyncio.run(_speak(sent, piece))
+        if not os.path.exists(piece) or os.path.getsize(piece) < 200:
+            continue                      # skip anything the voice refused
+        span = video.probe_duration(piece)
+        parts.append(piece)
+        cues.append((clock, clock + span, sent))
+        clock += span
+
+    if not parts:
+        raise RuntimeError("voice synthesis produced no audio")
+
+    listing = os.path.join(work, f"{tag}_list.txt")
+    with open(listing, "w") as f:
+        for piece in parts:
+            f.write(f"file '{os.path.abspath(piece)}'\n")
+    video.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat",
+               "-safe", "0", "-i", listing, "-c", "copy", mp3_path])
+
+    with open(srt_path, "w", encoding="utf-8") as f:
+        f.write(ASS_HEAD)
+        for start, end, line in cues:
+            # trim a hair off the end so cues never overlap the next one
+            stop = max(end - 0.05, start + 0.3)
+            text = _wrap(line).replace("\n", "\\N")
+            f.write(f"Dialogue: 0,{_ass_time(start)},{_ass_time(stop)},"
+                    f"Main,,0,0,0,,{text}\n")
+
+    total = video.probe_duration(mp3_path)
+    print(f"    {total:5.1f}s audio, {len(cues)} captions (measured)")
+    return total
+
+
+def _wrap(line: str, width: int = 52) -> str:
+    """Two short lines read better on a phone than one long one."""
+    if len(line) <= width:
+        return line
+    words, out, cur = line.split(), [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > width:
+            out.append(cur)
+            cur = w
+        else:
+            cur = f"{cur} {w}".strip()
+    if cur:
+        out.append(cur)
+    return "\n".join(out[:2]) if len(out) <= 2 else "\n".join(
+        [" ".join(out[:len(out)//2]), " ".join(out[len(out)//2:])])
 
 
 # ----------------------------------------------------------------------------
@@ -398,9 +516,9 @@ def build(brief: dict, day: dt.date, work: str) -> str:
     audio, srts, spans = [], [], []
     for i, seg in enumerate(segments):
         mp3 = os.path.join(work, f"seg{i}.mp3")
-        srt = os.path.join(work, f"seg{i}.srt")
+        srt = os.path.join(work, f"seg{i}.ass")
         print(f"  {i + 1}. {seg['topic']}")
-        spans.append(voice_segment(seg["script"], mp3, srt))
+        spans.append(voice_segment(seg["script"], mp3, srt, work, f"v{i}"))
         audio.append(mp3)
         srts.append(srt)
 
@@ -415,13 +533,20 @@ def build(brief: dict, day: dt.date, work: str) -> str:
                       intro)
     parts = [intro]
 
+    # the ticker carries the day's topics so the strip always has content
+    ticker = "     •     ".join(
+        f"{s['topic'].upper()}: {s.get('headline') or 'latest'}"
+        for s in segments)
+    ticker = f"{ticker}     •     "
+
     print("rendering scenes:")
     elapsed = 0.0
     for i, seg in enumerate(segments):
         out = os.path.join(work, f"scene{i}.mp4")
         print(f"  {i + 1}/{len(segments)} {seg['topic']} ({spans[i]:.0f}s)")
         video.render_scene(work, PRESENTER, audio[i], srts[i], seg["topic"],
-                           BRAND, date_text, i, elapsed, total, out)
+                           seg.get("headline", ""), BRAND, date_text, ticker,
+                           i, elapsed, total, out)
         elapsed += spans[i]
         parts.append(out)
 
