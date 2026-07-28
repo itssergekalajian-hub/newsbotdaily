@@ -205,6 +205,7 @@ Return ONLY a JSON object, no markdown fences, in exactly this shape:
 {{"headline": "one sentence summing up the whole day",
   "segments": [{{"topic": "Middle East",
                 "headline": "four to eight words naming this topic's main story",
+                "image": "a short visual description for a news backdrop",
                 "script": "the spoken words..."}}]}}
 
 Rules for the segments:
@@ -214,6 +215,11 @@ Rules for the segments:
 - "topic" is a screen label: 1 to 3 words, no punctuation.
 - each segment's "headline" is an on-screen caption for that topic: 4 to 8
   words, no final full stop. It is read by the viewer, not spoken.
+- each segment's "image" describes a still that could sit behind the anchor for
+  that topic: a place, a landscape, a skyline, a building, a generic scene. 5 to
+  12 words. Describe a SCENE, never a named person, never a logo, never text in
+  the picture, never graphic or violent imagery. Example: "night skyline of a
+  Middle Eastern city, distant lights".
 - "script" is what the anchor says out loud for that topic: 100 to 220 words.
 - Cover the whole day. Where a story developed over several hours, tell it in
   order — what was first reported, how it changed, where it stood by the end.
@@ -321,6 +327,7 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
         s["topic"] = label[:22] or "News"
         head = re.sub(r"\s+", " ", str(s.get("headline", ""))).strip(" .")
         s["headline"] = head[:58]
+        s["image"] = re.sub(r"\s+", " ", str(s.get("image", ""))).strip()[:120]
     return {"headline": brief.get("headline", ""), "segments": segments}
 
 
@@ -481,6 +488,52 @@ def _wrap(line: str, width: int = 52) -> str:
 
 
 # ----------------------------------------------------------------------------
+# Topic imagery
+# ----------------------------------------------------------------------------
+IMAGE_BASE = os.getenv("IMAGE_BASE", "https://image.pollinations.ai/prompt")
+WANT_IMAGES = os.getenv("TOPIC_IMAGES", "1") == "1"
+MUSIC = os.getenv("MUSIC_BED", "1") == "1"
+
+
+def fetch_topic_image(prompt: str, path: str) -> str | None:
+    """Fetch one backdrop still for a topic. Returns None if anything is off.
+
+    This is the only part of the pipeline that depends on a third-party service
+    staying up, so every failure is swallowed and the scene simply renders
+    without a panel. A bulletin with no side images is fine; a bulletin that
+    fails to build because an image host was slow is not.
+    """
+    if not (WANT_IMAGES and prompt):
+        return None
+    styled = f"{prompt}, editorial news photograph, muted colours, no text"
+    url = (f"{IMAGE_BASE}/{requests.utils.quote(styled)}"
+           f"?width=768&height=432&nologo=true&seed={abs(hash(prompt)) % 9999}")
+    try:
+        r = requests.get(url, timeout=60,
+                         headers={"User-Agent": "MidWorldDaily/1.0"})
+        if not r.ok or len(r.content) < 8000:
+            print(f"    image unavailable ({r.status_code}, "
+                  f"{len(r.content)} bytes)")
+            return None
+        if not r.headers.get("content-type", "").startswith("image/"):
+            print("    image response was not an image")
+            return None
+        with open(path, "wb") as f:
+            f.write(r.content)
+        # Make sure it actually decodes before it reaches a long render. ffprobe
+        # exits 0 on a non-image and simply reports 0x0, so the dimensions have
+        # to be checked rather than the exit status.
+        w, h = video.probe_size(path)
+        if w < 200 or h < 200:
+            print(f"    image did not decode ({w}x{h})")
+            return None
+        return path
+    except Exception as e:
+        print(f"    image fetch failed: {str(e)[:120]}")
+        return None
+
+
+# ----------------------------------------------------------------------------
 # 4. Publish
 # ----------------------------------------------------------------------------
 def send(method: str, data: dict, files: dict | None = None) -> None:
@@ -539,6 +592,20 @@ def build(brief: dict, day: dt.date, work: str) -> str:
         for s in segments)
     ticker = f"{ticker}     •     "
 
+    print("fetching topic imagery:")
+    panels: list[str | None] = []
+    for i, seg in enumerate(segments):
+        raw = os.path.join(work, f"img{i}.jpg")
+        got = fetch_topic_image(seg.get("image", ""), raw)
+        if got:
+            try:
+                panels.append(video.make_panel(work, got, f"panel{i}.png"))
+                print(f"  {i + 1}. {seg['topic']}: ok")
+                continue
+            except Exception as e:
+                print(f"  {i + 1}. {seg['topic']}: unusable ({str(e)[:60]})")
+        panels.append(None)
+
     print("rendering scenes:")
     elapsed = 0.0
     for i, seg in enumerate(segments):
@@ -546,7 +613,7 @@ def build(brief: dict, day: dt.date, work: str) -> str:
         print(f"  {i + 1}/{len(segments)} {seg['topic']} ({spans[i]:.0f}s)")
         video.render_scene(work, PRESENTER, audio[i], srts[i], seg["topic"],
                            seg.get("headline", ""), BRAND, date_text, ticker,
-                           i, elapsed, total, out)
+                           i, elapsed, total, out, panel=panels[i])
         elapsed += spans[i]
         parts.append(out)
 
@@ -557,8 +624,20 @@ def build(brief: dict, day: dt.date, work: str) -> str:
                       outro, wipe=False)
     parts.append(outro)
 
-    final = os.path.join(work, "brief.mp4")
-    video.concat(parts, final)
+    joined = os.path.join(work, "joined.mp4")
+    video.concat(parts, joined)
+
+    final = joined
+    if MUSIC:
+        try:
+            bed = video.build_bed(work, video.probe_duration(joined))
+            scored = os.path.join(work, "brief.mp4")
+            video.add_music(joined, bed, scored)
+            final = scored
+            print("music bed mixed under the narration")
+        except Exception as e:
+            # the bulletin is finished either way; music is the optional layer
+            print(f"music step skipped: {str(e)[:150]}", file=sys.stderr)
     size = os.path.getsize(final)
     print(f"final video: {size / 1e6:.1f} MB, {video.probe_duration(final):.0f}s")
     if size > 49 * 1024 * 1024:
