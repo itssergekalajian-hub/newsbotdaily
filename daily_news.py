@@ -39,6 +39,8 @@ GEMINI_KEY = os.environ["GEMINI_API_KEY"]
 TZ = ZoneInfo(os.getenv("TIMEZONE", "Asia/Beirut"))
 MODEL = os.getenv("GEMINI_MODEL", "").strip()      # empty = auto-detect
 VOICE = os.getenv("VOICE", "en-US-AndrewMultilingualNeural")
+# a touch quicker than default reads as a broadcaster rather than a reader
+RATE = os.getenv("VOICE_RATE", "+8%")
 PRESENTER = os.getenv("PRESENTER_IMAGE", "presenter.png")
 BRAND = os.getenv("BRAND", "MIDWORLD DAILY")
 FORCE_DATE = os.getenv("TARGET_DATE", "").strip()
@@ -205,7 +207,7 @@ Return ONLY a JSON object, no markdown fences, in exactly this shape:
 {{"headline": "one sentence summing up the whole day",
   "segments": [{{"topic": "Middle East",
                 "headline": "four to eight words naming this topic's main story",
-                "image": "a short visual description for a news backdrop",
+                "photo": "2 to 4 words naming a real place to photograph",
                 "script": "the spoken words..."}}]}}
 
 Rules for the segments:
@@ -215,12 +217,12 @@ Rules for the segments:
 - "topic" is a screen label: 1 to 3 words, no punctuation.
 - each segment's "headline" is an on-screen caption for that topic: 4 to 8
   words, no final full stop. It is read by the viewer, not spoken.
-- each segment's "image" describes a still that could sit behind the anchor for
-  that topic: a place, a landscape, a skyline, a building, a generic scene. 5 to
-  12 words. Describe a SCENE, never a named person, never a logo, never text in
-  the picture, never graphic or violent imagery. Example: "night skyline of a
-  Middle Eastern city, distant lights".
-- "script" is what the anchor says out loud for that topic: 100 to 220 words.
+- each segment's "photo" names a REAL, PHOTOGRAPHABLE PLACE connected to the
+  story, which will be looked up in a photo archive. Use a city, country,
+  landmark, building or institution: "Beirut", "Kyiv Ukraine", "Tokyo Stock
+  Exchange", "Santiago Bernabeu stadium". Never a person's name, never an event,
+  never a description of a scene, never anything violent or distressing.
+- "script" is what the anchor says out loud for that topic: 90 to 170 words.
 - Cover the whole day. Where a story developed over several hours, tell it in
   order — what was first reported, how it changed, where it stood by the end.
 - Explain what happened and why it matters. Do not just read headlines.
@@ -230,8 +232,26 @@ Rules for the segments:
   say it was widely reported.
 - The source labels single-source or unverified claims. Keep that hedging —
   say "according to a single report" rather than stating it as confirmed.
-- Plain spoken language, short sentences. Every character is read aloud, so no
-  markdown, no emojis, no asterisks, no hashtags, no bullets, no links.
+- Write for the EAR, not the page. This is the difference between a bulletin
+  people finish and one they close:
+  * Vary sentence length. Follow a long sentence with a very short one. A
+    run of same-length sentences is what makes a read sound robotic.
+  * Use contractions — "isn't", "they've", "that's". Written-out forms sound
+    stiff when spoken.
+  * Lead each item with the thing that happened, not with scene-setting.
+    "Israel struck three villages overnight" beats "In a development that
+    came late in the day, it was reported that...".
+  * Link items with spoken connectives — "meanwhile", "elsewhere", "that
+    matters because", "the other side of this" — so topics flow into each
+    other instead of stopping dead.
+  * Cut throat-clearing: "it is worth noting", "in terms of", "as far as X is
+    concerned", "there were reports suggesting that". Say the thing.
+  * Prefer active voice and concrete subjects. Name who did what.
+  * Never begin consecutive sentences with the same word.
+- Plain spoken language. Every character is read aloud, so no markdown, no
+  emojis, no asterisks, no hashtags, no bullets, no links, and no numbers
+  written as digits where a reader would say them differently — write "twenty
+  thousand", not "20,000".
 - The first segment's script should open by greeting the audience and giving
   the headline. The last should end with a short sign-off.
 
@@ -327,7 +347,7 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
         s["topic"] = label[:22] or "News"
         head = re.sub(r"\s+", " ", str(s.get("headline", ""))).strip(" .")
         s["headline"] = head[:58]
-        s["image"] = re.sub(r"\s+", " ", str(s.get("image", ""))).strip()[:120]
+        s["photo"] = re.sub(r"[^\w\s-]", " ", str(s.get("photo", ""))).strip()[:60]
     return {"headline": brief.get("headline", ""), "segments": segments}
 
 
@@ -387,86 +407,134 @@ def _lines(text: str, width: int = 62) -> list[str]:
 
 
 def _sentences(text: str) -> list[str]:
-    """Split narration into sentences, keeping each short enough to caption.
+    """Split narration into whole sentences — never mid-sentence.
 
-    Very short fragments are folded into the previous line. On their own they
-    become cues that flash up for well under a second, which reads as flicker —
-    and each one is also a separate speech request, so merging is cheaper too.
+    An earlier version also broke long sentences at commas so captions would fit.
+    Each fragment was synthesised separately, and every speech clip carries its
+    own leading and trailing silence, so each comma became an audible stop where
+    a speaker would have run straight through. Measured on a real bulletin: 21
+    pauses in 40 seconds, one every 1.9 seconds. Long sentences now stay whole
+    and it is the caption that gets divided, in _cues_for.
     """
     out: list[str] = []
     for sent in re.split(r"(?<=[.!?])\s+", " ".join(text.split())):
         sent = sent.strip()
         if not sent:
             continue
-        # a very long sentence becomes several cues, split at commas first
-        while len(sent) > 96:
-            cut = sent.rfind(", ", 40, 96)
-            if cut == -1:
-                cut = sent.rfind(" ", 40, 96)
-            if cut == -1:
-                break
-            out.append(sent[:cut + 1].strip())
-            sent = sent[cut + 1:].strip()
-        if not sent:
-            continue
-        if out and len(sent) < 28 and len(out[-1]) + len(sent) < 104:
+        # a fragment on its own becomes a caption that flashes past, and a
+        # separate speech request; fold it into the sentence before it
+        if out and len(sent) < 30:
             out[-1] = f"{out[-1]} {sent}"
         else:
             out.append(sent)
     return out
 
 
+def _cues_for(sentence: str, start: float, span: float) -> list[tuple]:
+    """Caption cues for one spoken sentence, divided if it is long.
+
+    The audio is never cut, so the split is a proportional estimate — but inside
+    a single sentence that is accurate to a fraction of a second, because the
+    speaking rate barely varies across a few seconds of continuous delivery.
+    """
+    limit = 104                       # two caption lines of ~52 characters
+    if len(sentence) <= limit:
+        return [(start, start + span, sentence)]
+
+    words, chunks, cur = sentence.split(), [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > limit:
+            chunks.append(cur)
+            cur = w
+        else:
+            cur = f"{cur} {w}".strip()
+    if cur:
+        if len(cur) < 25 and chunks:   # avoid a stray tail cue
+            chunks[-1] = f"{chunks[-1]} {cur}"
+        else:
+            chunks.append(cur)
+
+    total = sum(len(c) for c in chunks) or 1
+    cues, clock = [], start
+    for c in chunks:
+        share = span * len(c) / total
+        cues.append((clock, clock + share, c))
+        clock += share
+    return cues
+
+
 async def _speak(text: str, mp3_path: str) -> None:
-    await edge_tts.Communicate(text, VOICE).save(mp3_path)
+    await edge_tts.Communicate(text, VOICE, rate=RATE).save(mp3_path)
+
+
+# Silence trimmed from the head and tail of every clip, then one deliberate gap
+# inserted between sentences. Left alone, each clip's own padding stacks with
+# the next one's and the delivery turns stop-start.
+GAP = float(os.getenv("SENTENCE_GAP", "0.20"))
+TRIM = ("silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0"
+        ":detection=peak,areverse,"
+        "silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0"
+        ":detection=peak,areverse")
 
 
 def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
                   tag: str) -> float:
     """Narrate one segment and caption it from measured audio, not estimates.
 
-    edge-tts word-boundary events are unreliable — when they do not arrive the
-    old code spread captions across the segment by character count, which drifts
-    badly: a line would sit on screen for eight seconds while the voice moved
-    on. Instead each sentence is synthesised as its own file and measured with
-    ffprobe, so every caption's start time is the exact sum of the audio before
-    it. Sync is then a fact rather than a guess, whatever edge-tts reports.
+    Two things are going on here.
+
+    Sync: edge-tts word-boundary events are unreliable, and estimating caption
+    times by character count drifts badly. Each sentence is synthesised on its
+    own and measured, so every caption start is the exact sum of the audio
+    before it.
+
+    Delivery: synthesising separately means each clip arrives padded with
+    silence at both ends, and those pads stack at every join — about 0.63s per
+    sentence, which is what makes the read sound stop-start. So each clip is
+    trimmed hard and a deliberate gap is inserted instead: a short breath after
+    a clause, a slightly longer one after a full stop. The result runs
+    continuously at a news pace rather than pausing everywhere.
     """
     sentences = _sentences(text)
     if not sentences:
         raise RuntimeError("nothing to narrate")
 
-    parts, cues, clock = [], [], 0.0
+    pieces, cues, clock = [], [], 0.0
     for i, sent in enumerate(sentences):
-        piece = os.path.join(work, f"{tag}_{i:03d}.mp3")
-        asyncio.run(_speak(sent, piece))
-        if not os.path.exists(piece) or os.path.getsize(piece) < 200:
-            continue                      # skip anything the voice refused
-        span = video.probe_duration(piece)
-        parts.append(piece)
+        raw = os.path.join(work, f"{tag}_{i:03d}_raw.mp3")
+        asyncio.run(_speak(sent, raw))
+        if not os.path.exists(raw) or os.path.getsize(raw) < 200:
+            continue                          # skip anything the voice refused
+        clip = os.path.join(work, f"{tag}_{i:03d}.wav")
+        span = video.trim_silence(raw, clip)
+        if span < 0.15:                       # trimmed to nothing
+            continue
+
+        pieces.append(clip)
         cues.append((clock, clock + span, sent))
         clock += span
 
-    if not parts:
+        if i < len(sentences) - 1:
+            # a clause continues the thought, a sentence closes one
+            gap = 0.17 if sent.rstrip().endswith(",") else 0.30
+            pieces.append(video.silence(work, gap, f"{tag}_{i:03d}_gap.wav"))
+            clock += gap
+
+    if not pieces:
         raise RuntimeError("voice synthesis produced no audio")
 
-    listing = os.path.join(work, f"{tag}_list.txt")
-    with open(listing, "w") as f:
-        for piece in parts:
-            f.write(f"file '{os.path.abspath(piece)}'\n")
-    video.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat",
-               "-safe", "0", "-i", listing, "-c", "copy", mp3_path])
+    video.join_audio(work, pieces, mp3_path)
 
     with open(srt_path, "w", encoding="utf-8") as f:
         f.write(ASS_HEAD)
         for start, end, line in cues:
-            # trim a hair off the end so cues never overlap the next one
-            stop = max(end - 0.05, start + 0.3)
-            text = _wrap(line).replace("\n", "\\N")
+            stop = max(end - 0.04, start + 0.3)
+            text_line = _wrap(line).replace("\n", "\\N")
             f.write(f"Dialogue: 0,{_ass_time(start)},{_ass_time(stop)},"
-                    f"Main,,0,0,0,,{text}\n")
+                    f"Main,,0,0,0,,{text_line}\n")
 
     total = video.probe_duration(mp3_path)
-    print(f"    {total:5.1f}s audio, {len(cues)} captions (measured)")
+    print(f"    {total:5.1f}s audio, {len(cues)} captions (measured, trimmed)")
     return total
 
 
@@ -490,47 +558,116 @@ def _wrap(line: str, width: int = 52) -> str:
 # ----------------------------------------------------------------------------
 # Topic imagery
 # ----------------------------------------------------------------------------
+COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 IMAGE_BASE = os.getenv("IMAGE_BASE", "https://image.pollinations.ai/prompt")
 WANT_IMAGES = os.getenv("TOPIC_IMAGES", "1") == "1"
+# real photographs only by default; set to 1 to allow a generated image when
+# the archive has nothing usable
+ALLOW_GENERATED = os.getenv("ALLOW_GENERATED_IMAGES", "0") == "1"
 MUSIC = os.getenv("MUSIC_BED", "1") == "1"
 
+UA_HEADERS = {"User-Agent": "MidWorldDaily/1.0 (Telegram news digest bot)"}
+_BAD_FILE = ("logo", "icon", "map of", "flag of", "coat of arms", "diagram",
+             "chart", "seal of", "emblem", ".svg")
 
-def fetch_topic_image(prompt: str, path: str) -> str | None:
-    """Fetch one backdrop still for a topic. Returns None if anything is off.
 
-    This is the only part of the pipeline that depends on a third-party service
-    staying up, so every failure is swallowed and the scene simply renders
-    without a panel. A bulletin with no side images is fine; a bulletin that
-    fails to build because an image host was slow is not.
+def _commons_search(query: str) -> tuple[str, str] | None:
+    """Find a real photograph on Wikimedia Commons. Returns (url, credit).
+
+    Commons is used rather than an image generator because generated pictures of
+    news events are invented — they show a plausible-looking place that does not
+    correspond to anything that happened. A real photograph of the actual city
+    or building is both honest and better looking. The licences require credit,
+    so the photographer and licence are carried through and printed on screen.
     """
-    if not (WANT_IMAGES and prompt):
+    params = {
+        "action": "query", "format": "json", "generator": "search",
+        "gsrsearch": f"filetype:bitmap {query}", "gsrnamespace": "6",
+        "gsrlimit": "20", "prop": "imageinfo",
+        "iiprop": "url|size|extmetadata", "iiurlwidth": "1024",
+    }
+    r = requests.get(COMMONS_API, params=params, headers=UA_HEADERS, timeout=45)
+    r.raise_for_status()
+    pages = (r.json().get("query") or {}).get("pages") or {}
+
+    best = None
+    for page in pages.values():
+        info = (page.get("imageinfo") or [{}])[0]
+        title = page.get("title", "").lower()
+        url = info.get("thumburl") or info.get("url")
+        if not url or any(bad in title for bad in _BAD_FILE):
+            continue
+        width, height = info.get("width", 0), info.get("height", 0)
+        if width < 800 or height < 500:
+            continue
+        if width / max(height, 1) < 1.15:        # portraits crop badly to a panel
+            continue
+        meta = info.get("extmetadata") or {}
+        artist = re.sub(r"<[^>]+>", "", str(meta.get("Artist", {}).get("value", "")))
+        licence = str(meta.get("LicenseShortName", {}).get("value", "")).strip()
+        credit = " / ".join(x for x in
+                            (re.sub(r"\s+", " ", artist).strip()[:40], licence) if x)
+        score = width * height
+        if best is None or score > best[0]:
+            best = (score, url, f"{credit} — Wikimedia Commons" if credit
+                    else "Wikimedia Commons")
+    return (best[1], best[2]) if best else None
+
+
+def _download(url: str, path: str, headers: dict) -> bool:
+    r = requests.get(url, timeout=60, headers=headers)
+    if not r.ok or len(r.content) < 8000:
+        print(f"    image unavailable ({r.status_code}, {len(r.content)} bytes)")
+        return False
+    if not r.headers.get("content-type", "").startswith("image/"):
+        print("    response was not an image")
+        return False
+    with open(path, "wb") as f:
+        f.write(r.content)
+    # ffprobe exits 0 on a non-image and reports 0x0, so check the dimensions
+    w, h = video.probe_size(path)
+    if w < 200 or h < 200:
+        print(f"    image did not decode ({w}x{h})")
+        return False
+    return True
+
+
+def fetch_topic_image(subject: str, query: str,
+                      path: str) -> tuple[str, str] | None:
+    """Get one real photograph for a topic. Returns (path, credit) or None.
+
+    Commons first, because a real photograph of the actual place is both honest
+    and better looking than an invented one. A generated image is only used if
+    ALLOW_GENERATED_IMAGES is switched on, and it is credited as an illustration
+    so it is never mistaken for documentary footage.
+
+    Every failure path returns None and the scene simply renders without a
+    panel. This is the only step that depends on an outside service, and a
+    bulletin missing a side image beats a bulletin that failed to build.
+    """
+    if not (WANT_IMAGES and (subject or query)):
         return None
-    styled = f"{prompt}, editorial news photograph, muted colours, no text"
-    url = (f"{IMAGE_BASE}/{requests.utils.quote(styled)}"
-           f"?width=768&height=432&nologo=true&seed={abs(hash(prompt)) % 9999}")
+
     try:
-        r = requests.get(url, timeout=60,
-                         headers={"User-Agent": "MidWorldDaily/1.0"})
-        if not r.ok or len(r.content) < 8000:
-            print(f"    image unavailable ({r.status_code}, "
-                  f"{len(r.content)} bytes)")
-            return None
-        if not r.headers.get("content-type", "").startswith("image/"):
-            print("    image response was not an image")
-            return None
-        with open(path, "wb") as f:
-            f.write(r.content)
-        # Make sure it actually decodes before it reaches a long render. ffprobe
-        # exits 0 on a non-image and simply reports 0x0, so the dimensions have
-        # to be checked rather than the exit status.
-        w, h = video.probe_size(path)
-        if w < 200 or h < 200:
-            print(f"    image did not decode ({w}x{h})")
-            return None
-        return path
+        hit = _commons_search(query or subject)
+        if hit and _download(hit[0], path, UA_HEADERS):
+            return path, hit[1]
     except Exception as e:
-        print(f"    image fetch failed: {str(e)[:120]}")
-        return None
+        print(f"    commons lookup failed: {str(e)[:100]}")
+
+    if ALLOW_GENERATED and subject:
+        styled = f"{subject}, editorial news photograph, muted colours, no text"
+        url = (f"{IMAGE_BASE}/{requests.utils.quote(styled)}"
+               f"?width=768&height=432&nologo=true"
+               f"&seed={abs(hash(subject)) % 9999}")
+        try:
+            if _download(url, path, UA_HEADERS):
+                return path, "illustration"
+        except Exception as e:
+            print(f"    generated image failed: {str(e)[:100]}")
+
+    print("    no usable photograph")
+    return None
 
 
 # ----------------------------------------------------------------------------
@@ -592,19 +729,22 @@ def build(brief: dict, day: dt.date, work: str) -> str:
         for s in segments)
     ticker = f"{ticker}     •     "
 
-    print("fetching topic imagery:")
+    print("finding photographs:")
     panels: list[str | None] = []
+    credits: list[str] = []
     for i, seg in enumerate(segments):
         raw = os.path.join(work, f"img{i}.jpg")
-        got = fetch_topic_image(seg.get("image", ""), raw)
+        got = fetch_topic_image(seg.get("photo", ""), seg.get("photo", ""), raw)
         if got:
             try:
-                panels.append(video.make_panel(work, got, f"panel{i}.png"))
-                print(f"  {i + 1}. {seg['topic']}: ok")
+                panels.append(video.make_panel(work, got[0], f"panel{i}.png"))
+                credits.append(got[1])
+                print(f"  {i + 1}. {seg['topic']} <- {seg.get('photo', '')}")
                 continue
             except Exception as e:
                 print(f"  {i + 1}. {seg['topic']}: unusable ({str(e)[:60]})")
         panels.append(None)
+        credits.append("")
 
     print("rendering scenes:")
     elapsed = 0.0
@@ -613,7 +753,8 @@ def build(brief: dict, day: dt.date, work: str) -> str:
         print(f"  {i + 1}/{len(segments)} {seg['topic']} ({spans[i]:.0f}s)")
         video.render_scene(work, PRESENTER, audio[i], srts[i], seg["topic"],
                            seg.get("headline", ""), BRAND, date_text, ticker,
-                           i, elapsed, total, out, panel=panels[i])
+                           i, elapsed, total, out, panel=panels[i],
+                           credit=credits[i])
         elapsed += spans[i]
         parts.append(out)
 
