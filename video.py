@@ -104,6 +104,41 @@ def framing(presenter: str, variant: int) -> str:
     return f"crop={cw}:{ch}:{x}:{y},scale={W}:{H},setsar=1"
 
 
+# Trimming both ends of every synthesised sentence. edge-tts pads each clip with
+# roughly a quarter-second of silence at the front and a third at the back, and
+# because the bulletin is built one sentence at a time those pads stack at every
+# join — measured at ~0.63s per sentence, close to a minute of dead air across a
+# six-minute read. Trimming them and inserting a deliberate, much shorter gap is
+# what makes the delivery sound continuous rather than stop-start.
+TRIM = ("silenceremove=start_periods=1:start_silence=0:start_threshold=-50dB"
+        ":detection=peak,areverse,"
+        "silenceremove=start_periods=1:start_silence=0:start_threshold=-50dB"
+        ":detection=peak,areverse")
+
+
+def trim_silence(src: str, dst: str) -> float:
+    """Strip leading/trailing silence, return the trimmed duration."""
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", src,
+         "-af", TRIM, "-ar", "48000", "-ac", "1", dst])
+    return probe_duration(dst)
+
+
+def silence(work: str, seconds: float, name: str) -> str:
+    path = os.path.join(work, name)
+    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi",
+         "-i", "anullsrc=r=48000:cl=mono", "-t", f"{seconds:.3f}", path])
+    return path
+
+
+def join_audio(work: str, pieces: list[str], out: str) -> None:
+    listing = os.path.join(work, os.path.basename(out) + ".txt")
+    with open(listing, "w") as f:
+        for p in pieces:
+            f.write(f"file '{os.path.abspath(p)}'\n")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
+         "-i", listing, "-c:a", "libmp3lame", "-q:a", "3", out])
+
+
 PANEL_W, PANEL_H = 452, 254
 
 
@@ -176,7 +211,7 @@ def add_music(video_in: str, bed: str, out: str, level: float = 0.30) -> None:
 def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  headline: str, brand: str, date_text: str, ticker: str,
                  variant: int, elapsed: float, total: float, out: str,
-                 panel: str | None = None) -> None:
+                 panel: str | None = None, credit: str = "") -> None:
     """One topic: locked framing, chrome, lower third, ticker, captions."""
     seconds = probe_duration(audio)
 
@@ -207,6 +242,13 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
         chrome.append(
             f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=26"
             f":x=32:y=572:alpha='min(max((t-0.55)/0.4\\,0)\\,1)'")
+    if panel and credit:
+        # Commons licences require attribution, so it is printed under the photo
+        cf = _textfile(work, f"credit{variant}.txt", credit)
+        chrome.append(
+            f"drawtext=fontfile={REGULAR}:textfile={cf}:fontcolor=white@0.72"
+            f":fontsize=13:box=1:boxcolor=black@0.45:boxborderw=5:x=64:y=364"
+            f":alpha='min(max((t-0.8)/0.5\\,0)\\,1)'")
     if kf:
         # ticker scrolls at ~95 px/s — fast enough that whole-pixel steps are
         # invisible, which is exactly what a slow Ken Burns drift could not do
