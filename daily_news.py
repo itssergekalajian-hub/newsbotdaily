@@ -11,11 +11,13 @@ All free: Gemini Flash free tier, edge-tts (no key), GitHub Actions.
 """
 
 import asyncio
+import base64
 import datetime as dt
 import functools
 import json
 import os
 import re
+import subprocess
 import shutil
 import sys
 import tempfile
@@ -41,6 +43,11 @@ MODEL = os.getenv("GEMINI_MODEL", "").strip()      # empty = auto-detect
 VOICE = os.getenv("VOICE", "en-US-AndrewMultilingualNeural")
 # a touch quicker than default reads as a broadcaster rather than a reader
 RATE = os.getenv("VOICE_RATE", "+8%")
+# "gemini" sounds markedly more human but is capped near ten requests a day on
+# the free tier; "edge" is unlimited. Gemini failures fall back to edge.
+ENGINE = os.getenv("VOICE_ENGINE", "edge").strip().lower()
+TTS_MODEL = os.getenv("TTS_MODEL", "").strip()
+TTS_VOICE = os.getenv("TTS_VOICE", "Charon")
 PRESENTER = os.getenv("PRESENTER_IMAGE", "presenter.png")
 BRAND = os.getenv("BRAND", "MIDWORLD DAILY")
 FORCE_DATE = os.getenv("TARGET_DATE", "").strip()
@@ -128,6 +135,25 @@ def resolve_day() -> dt.date | None:
 # ----------------------------------------------------------------------------
 # 1. Collect one calendar day from the public channel preview
 # ----------------------------------------------------------------------------
+def _post_images(block) -> list[str]:
+    """Pull the photo URLs out of one rendered post.
+
+    The web preview puts the picture in a CSS background-image rather than an
+    <img>, for photos and for video thumbnails alike, so the URL has to be
+    lifted out of the style attribute.
+    """
+    urls = []
+    for node in block.select(
+            ".tgme_widget_message_photo_wrap, .tgme_widget_message_video_thumb,"
+            " .tgme_widget_message_roundvideo_thumb, i.link_preview_image,"
+            " i.link_preview_right_image"):
+        style = node.get("style", "")
+        m = re.search(r"background-image\s*:\s*url\(['\"]?(.*?)['\"]?\)", style)
+        if m and m.group(1).startswith("http"):
+            urls.append(m.group(1))
+    return urls
+
+
 def fetch_posts(username: str, day: dt.date, max_pages: int = 12) -> list[dict]:
     posts: dict[int, dict] = {}
     before = None
@@ -159,13 +185,18 @@ def fetch_posts(username: str, day: dt.date, max_pages: int = 12) -> list[dict]:
             body = b.select_one("div.tgme_widget_message_text")
             text = body.get_text("\n").strip() if body else ""
             if len(text) > 20 and DIGEST_MARK not in text:
-                posts[mid] = {"time": when.strftime("%H:%M"), "text": text}
+                posts[mid] = {"time": when.strftime("%H:%M"), "text": text,
+                              "images": _post_images(b)}
 
         if oldest_day is None or oldest_day < day or oldest_id <= 1:
             break
         before = oldest_id
 
-    return [posts[k] for k in sorted(posts)]
+    ordered = [posts[k] for k in sorted(posts)]
+    with_pics = sum(1 for p in ordered if p["images"])
+    print(f"{day}: collected {len(ordered)} posts from @{username} "
+          f"({with_pics} with photographs)")
+    return ordered
 
 
 # ----------------------------------------------------------------------------
@@ -207,6 +238,7 @@ Return ONLY a JSON object, no markdown fences, in exactly this shape:
 {{"headline": "one sentence summing up the whole day",
   "segments": [{{"topic": "Middle East",
                 "headline": "four to eight words naming this topic's main story",
+                "sources": [3, 17, 42],
                 "photo": "2 to 4 words naming a real place to photograph",
                 "script": "the spoken words..."}}]}}
 
@@ -217,7 +249,12 @@ Rules for the segments:
 - "topic" is a screen label: 1 to 3 words, no punctuation.
 - each segment's "headline" is an on-screen caption for that topic: 4 to 8
   words, no final full stop. It is read by the viewer, not spoken.
-- each segment's "photo" names a REAL, PHOTOGRAPHABLE PLACE connected to the
+- "sources" lists the numbers of the posts this segment is built from, most
+  important first. Every post is numbered below. This is how the channel's own
+  photograph of the event gets attached to the right topic, so put the post
+  that best represents the story first. Between 1 and 6 numbers.
+- each segment's "photo" is only a FALLBACK, used when none of the source posts
+  carried a picture. It names a REAL, PHOTOGRAPHABLE PLACE connected to the
   story, which will be looked up in a photo archive. Use a city, country,
   landmark, building or institution: "Beirut", "Kyiv Ukraine", "Tokyo Stock
   Exchange", "Santiago Bernabeu stadium". Never a person's name, never an event,
@@ -273,7 +310,10 @@ def _extract_json(raw: str) -> dict:
 
 
 def summarize(posts: list[dict], day: dt.date) -> dict:
-    items = "\n\n---\n\n".join(f"[{p['time']}] {p['text']}" for p in posts)
+    items = "\n\n---\n\n".join(
+        f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
+        f"{p['text']}"
+        for i, p in enumerate(posts, 1))
     prompt = PROMPT.format(date=f"{day:%A, %d %B %Y}", items=items[:600_000])
     model = MODEL or candidate_models()[0]
     print(f"using model: {model}  |  prompt: {len(prompt):,} chars")
@@ -345,6 +385,10 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
     for s in segments:
         label = re.sub(r"[^\w &-]", "", s.get("topic", "News")).strip()
         s["topic"] = label[:22] or "News"
+        src = s.get("sources") or []
+        s["sources"] = [int(n) for n in src
+                        if isinstance(n, (int, float, str))
+                        and str(n).strip().lstrip("-").isdigit()][:6]
         head = re.sub(r"\s+", " ", str(s.get("headline", ""))).strip(" .")
         s["headline"] = head[:58]
         s["photo"] = re.sub(r"[^\w\s-]", " ", str(s.get("photo", ""))).strip()[:60]
@@ -477,6 +521,80 @@ TRIM = ("silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0"
         ":detection=peak,areverse")
 
 
+def _silence_splits(wav: str, want: int) -> list[float] | None:
+    """Find `want` sentence boundaries in a clip by locating its longest pauses.
+
+    Used when a whole segment is synthesised in one request, so there are no
+    per-sentence durations to add up. A newsreader pauses between sentences, so
+    the longest silences are the boundaries; taking the `want` longest and
+    putting them back in time order recovers the timings. Returns None when the
+    audio does not contain enough distinct pauses to be confident.
+    """
+    out = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-i", wav, "-af",
+         "silencedetect=noise=-38dB:d=0.16", "-f", "null", "-"],
+        capture_output=True, text=True).stderr
+
+    starts = [float(m) for m in re.findall(r"silence_start: ([0-9.]+)", out)]
+    ends = [float(m) for m in re.findall(r"silence_end: ([0-9.]+)", out)]
+    spans = [(b - a, (a + b) / 2) for a, b in zip(starts, ends) if b > a]
+    if len(spans) < want:
+        return None
+    chosen = sorted(spans, reverse=True)[:want]
+    return sorted(mid for _, mid in chosen)
+
+
+def gemini_voice(text: str, wav_path: str) -> bool:
+    """Speak a whole segment with Gemini TTS. False if it is not usable.
+
+    Noticeably more natural than edge-tts, and it takes a direction for tone,
+    which is the part that makes it sound like a person reading the news rather
+    than a machine reading a page. The catch is the free tier: about ten
+    requests a day, so this runs once per topic rather than once per sentence,
+    and any failure falls straight back to edge-tts.
+    """
+    model = TTS_MODEL or next((m for m in candidate_models() if "tts" in m), "")
+    if not model:
+        return False
+
+    direction = ("Read this as a professional television news anchor: warm, "
+                 "measured, engaged. Vary your pace and emphasis naturally, "
+                 "lift slightly at the start of each new story, and let the "
+                 "important words land. Do not sound flat or rushed.\n\n")
+    body = {
+        "contents": [{"parts": [{"text": direction + text}]}],
+        "generationConfig": {
+            "responseModalities": ["AUDIO"],
+            "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig":
+                                             {"voiceName": TTS_VOICE}}},
+        },
+    }
+    try:
+        r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
+                          headers={"x-goog-api-key": GEMINI_KEY,
+                                   "Content-Type": "application/json"},
+                          json=body, timeout=300)
+        if not r.ok:
+            print(f"    gemini tts {r.status_code}: {r.text[:160]}")
+            return False
+        parts = r.json()["candidates"][0]["content"]["parts"]
+        blob = next((p["inlineData"]["data"] for p in parts if "inlineData" in p), None)
+        if not blob:
+            return False
+        pcm = base64.b64decode(blob)
+        raw = wav_path + ".pcm"
+        with open(raw, "wb") as f:
+            f.write(pcm)
+        # the API returns headerless signed 16-bit little-endian PCM at 24 kHz
+        video.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "s16le",
+                   "-ar", "24000", "-ac", "1", "-i", raw,
+                   "-ar", "48000", wav_path])
+        return os.path.getsize(wav_path) > 4000
+    except Exception as e:
+        print(f"    gemini tts failed: {str(e)[:120]}")
+        return False
+
+
 def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
                   tag: str) -> float:
     """Narrate one segment and caption it from measured audio, not estimates.
@@ -498,6 +616,39 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
     sentences = _sentences(text)
     if not sentences:
         raise RuntimeError("nothing to narrate")
+
+    # One Gemini request for the whole segment, when enabled. Captions are then
+    # recovered from the pauses in the audio rather than from per-sentence
+    # durations, because synthesising sentence by sentence would exhaust the
+    # daily quota in a single bulletin.
+    if ENGINE == "gemini":
+        whole = os.path.join(work, f"{tag}_whole.wav")
+        if gemini_voice(" ".join(sentences), whole):
+            span = video.probe_duration(whole)
+            splits = _silence_splits(whole, len(sentences) - 1)
+            if splits is None:
+                # no clear pauses: fall back to splitting by text length, which
+                # is rough but stays inside one segment so it cannot drift far
+                total_chars = sum(len(x) for x in sentences) or 1
+                acc, splits = 0, []
+                for sent in sentences[:-1]:
+                    acc += len(sent)
+                    splits.append(span * acc / total_chars)
+                print("    (no clear pauses — captions spaced by length)")
+            video.run(["ffmpeg", "-y", "-loglevel", "error", "-i", whole,
+                       "-c:a", "libmp3lame", "-q:a", "3", mp3_path])
+            bounds = [0.0] + splits + [span]
+            with open(srt_path, "w", encoding="utf-8") as f:
+                f.write(ASS_HEAD)
+                for i, sent in enumerate(sentences):
+                    start, end = bounds[i], bounds[i + 1]
+                    line = _wrap(sent).replace("\n", "\\N")
+                    f.write(f"Dialogue: 0,{_ass_time(start)},"
+                            f"{_ass_time(max(end - 0.04, start + 0.3))},"
+                            f"Main,,0,0,0,,{line}\n")
+            print(f"    {span:5.1f}s audio, {len(sentences)} captions (gemini)")
+            return span
+        print("    gemini tts unavailable, using edge-tts")
 
     pieces, cues, clock = [], [], 0.0
     for i, sent in enumerate(sentences):
@@ -632,41 +783,55 @@ def _download(url: str, path: str, headers: dict) -> bool:
     return True
 
 
-def fetch_topic_image(subject: str, query: str,
-                      path: str) -> tuple[str, str] | None:
-    """Get one real photograph for a topic. Returns (path, credit) or None.
+def segment_image(seg: dict, posts: list[dict], path: str) -> tuple[str, str] | None:
+    """The picture for one topic, preferring the source channel's own photo.
 
-    Commons first, because a real photograph of the actual place is both honest
-    and better looking than an invented one. A generated image is only used if
-    ALLOW_GENERATED_IMAGES is switched on, and it is credited as an illustration
-    so it is never mistaken for documentary footage.
+    Order of preference:
+      1. a photograph attached to one of the posts this segment was written
+         from — the actual picture the newsroom published with that story
+      2. a real photograph of the named place from Wikimedia Commons
+      3. a generated illustration, only if explicitly enabled
 
-    Every failure path returns None and the scene simply renders without a
-    panel. This is the only step that depends on an outside service, and a
-    bulletin missing a side image beats a bulletin that failed to build.
+    The first is what makes the video feel like it belongs to the channel
+    instead of being decorated with stock imagery. Everything degrades quietly:
+    a scene with no picture is fine, a build that dies over a missing picture is
+    not.
     """
-    if not (WANT_IMAGES and (subject or query)):
+    if not WANT_IMAGES:
         return None
 
-    try:
-        hit = _commons_search(query or subject)
-        if hit and _download(hit[0], path, UA_HEADERS):
-            return path, hit[1]
-    except Exception as e:
-        print(f"    commons lookup failed: {str(e)[:100]}")
+    # 1. the channel's own photographs, in the order Gemini ranked the posts
+    for n in seg.get("sources", []):
+        if not 1 <= n <= len(posts):
+            continue
+        for url in posts[n - 1].get("images", []):
+            try:
+                if _download(url, path, UA):
+                    return path, f"@{SOURCE}"
+            except Exception as e:
+                print(f"    post {n} image failed: {str(e)[:70]}")
 
-    if ALLOW_GENERATED and subject:
-        styled = f"{subject}, editorial news photograph, muted colours, no text"
+    # 2. a real photograph of the place
+    query = seg.get("photo", "")
+    if query:
+        try:
+            hit = _commons_search(query)
+            if hit and _download(hit[0], path, UA_HEADERS):
+                return path, hit[1]
+        except Exception as e:
+            print(f"    commons lookup failed: {str(e)[:80]}")
+
+    # 3. generated, off by default and always labelled as an illustration
+    if ALLOW_GENERATED and query:
+        styled = f"{query}, editorial news photograph, muted colours, no text"
         url = (f"{IMAGE_BASE}/{requests.utils.quote(styled)}"
-               f"?width=768&height=432&nologo=true"
-               f"&seed={abs(hash(subject)) % 9999}")
+               f"?width=768&height=432&nologo=true&seed={abs(hash(query)) % 9999}")
         try:
             if _download(url, path, UA_HEADERS):
                 return path, "illustration"
         except Exception as e:
-            print(f"    generated image failed: {str(e)[:100]}")
+            print(f"    generated image failed: {str(e)[:80]}")
 
-    print("    no usable photograph")
     return None
 
 
@@ -697,7 +862,8 @@ def publish_voice(day: dt.date, ogg_path: str) -> None:
 
 
 # ----------------------------------------------------------------------------
-def build(brief: dict, day: dt.date, work: str) -> str:
+def build(brief: dict, day: dt.date, work: str,
+          posts: list[dict]) -> str:
     """Narrate every segment, render a scene for each, join them up."""
     segments = brief["segments"]
     date_text = f"{day:%d %B %Y}"
@@ -734,12 +900,12 @@ def build(brief: dict, day: dt.date, work: str) -> str:
     credits: list[str] = []
     for i, seg in enumerate(segments):
         raw = os.path.join(work, f"img{i}.jpg")
-        got = fetch_topic_image(seg.get("photo", ""), seg.get("photo", ""), raw)
+        got = segment_image(seg, posts, raw)
         if got:
             try:
                 panels.append(video.make_panel(work, got[0], f"panel{i}.png"))
                 credits.append(got[1])
-                print(f"  {i + 1}. {seg['topic']} <- {seg.get('photo', '')}")
+                print(f"  {i + 1}. {seg['topic']} <- {got[1]}")
                 continue
             except Exception as e:
                 print(f"  {i + 1}. {seg['topic']}: unusable ({str(e)[:60]})")
@@ -806,7 +972,7 @@ def main() -> None:
 
     work = tempfile.mkdtemp(prefix="midworld-")
     try:
-        final = build(brief, day, work)
+        final = build(brief, day, work, posts)
         publish_video(day, brief.get("headline", ""), final)
         print("published video")
     except Exception as e:
@@ -833,4 +999,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main() 11 1 1
