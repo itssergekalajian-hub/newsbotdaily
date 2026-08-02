@@ -157,6 +157,27 @@ def make_panel(work: str, image: str, name: str) -> str:
     return out
 
 
+def make_video_panel(work: str, clip: str, name: str, seconds: float) -> str:
+    """Turn a source clip into a silent, looping panel that fills the scene.
+
+    The real footage the newsroom posted, cropped to the panel and muted (the
+    bulletin has its own narration and music). Looped and hard-cut to the scene
+    length so a ten-second clip still covers a forty-second topic. Muting and
+    re-timing here rather than in the scene graph keeps that graph simple and
+    means a broken clip fails in this short pass, not mid-render.
+    """
+    out = os.path.join(work, name)
+    run(["ffmpeg", "-y", "-loglevel", "error",
+         "-stream_loop", "-1", "-t", f"{seconds:.2f}", "-i", clip,
+         "-an", "-vf",
+         (f"scale={PANEL_W}:{PANEL_H}:force_original_aspect_ratio=increase,"
+          f"crop={PANEL_W}:{PANEL_H},setsar=1,"
+          f"drawbox=x=0:y=0:w=iw:h=ih:color=white@0.85:t=3"),
+         "-r", str(FPS), "-c:v", "libx264", "-preset", "veryfast",
+         "-pix_fmt", "yuv420p", "-t", f"{seconds:.2f}", out])
+    return out
+
+
 def build_bed(work: str, seconds: float) -> str:
     """A soft four-chord pad, synthesised — no licensing, no download.
 
@@ -211,7 +232,8 @@ def add_music(video_in: str, bed: str, out: str, level: float = 0.30) -> None:
 def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  headline: str, brand: str, date_text: str, ticker: str,
                  variant: int, elapsed: float, total: float, out: str,
-                 panel: str | None = None, credit: str = "") -> None:
+                 panel: str | None = None, credit: str = "",
+                 panel_is_video: bool = False) -> None:
     """One topic: locked framing, chrome, lower third, ticker, captions."""
     seconds = probe_duration(audio)
 
@@ -267,7 +289,9 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
     # which is the empty half of the anchor plate
     extra, panel_step = [], ""
     if panel and os.path.exists(panel):
-        extra = ["-loop", "1", "-framerate", str(FPS), "-i", panel]
+        # a still is looped to fill the scene; a clip is already scene-length
+        extra = (["-i", panel] if panel_is_video
+                 else ["-loop", "1", "-framerate", str(FPS), "-i", panel])
         panel_step = (f";[p][3:v]overlay=eval=frame"
                       f":x='-{PANEL_W + 20}+min(t/0.55\\,1)*({PANEL_W + 20}+62)'"
                       f":y=104:enable='gte(t,0.25)'[p2]")
