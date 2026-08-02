@@ -135,23 +135,28 @@ def resolve_day() -> dt.date | None:
 # ----------------------------------------------------------------------------
 # 1. Collect one calendar day from the public channel preview
 # ----------------------------------------------------------------------------
-def _post_images(block) -> list[str]:
-    """Pull the photo URLs out of one rendered post.
+def _post_media(block) -> dict:
+    """Pull both photos and playable video clips out of one rendered post.
 
-    The web preview puts the picture in a CSS background-image rather than an
-    <img>, for photos and for video thumbnails alike, so the URL has to be
-    lifted out of the style attribute.
+    Photos and video thumbnails live in a CSS background-image. Actual playable
+    clips are in a <video src> — those are the gold: a few seconds of the real
+    footage the newsroom posted beats any still. Returns both, kept apart so the
+    builder can prefer a clip and fall back to a photo.
     """
-    urls = []
+    photos, videos = [], []
     for node in block.select(
             ".tgme_widget_message_photo_wrap, .tgme_widget_message_video_thumb,"
             " .tgme_widget_message_roundvideo_thumb, i.link_preview_image,"
             " i.link_preview_right_image"):
-        style = node.get("style", "")
-        m = re.search(r"background-image\s*:\s*url\(['\"]?(.*?)['\"]?\)", style)
+        m = re.search(r"background-image\s*:\s*url\(['\"]?(.*?)['\"]?\)",
+                      node.get("style", ""))
         if m and m.group(1).startswith("http"):
-            urls.append(m.group(1))
-    return urls
+            photos.append(m.group(1))
+    for vid in block.select("video.tgme_widget_message_video"):
+        src = vid.get("src", "")
+        if src.startswith("http"):
+            videos.append(src)
+    return {"photos": photos, "videos": videos}
 
 
 def fetch_posts(username: str, day: dt.date, max_pages: int = 12) -> list[dict]:
@@ -185,17 +190,19 @@ def fetch_posts(username: str, day: dt.date, max_pages: int = 12) -> list[dict]:
             body = b.select_one("div.tgme_widget_message_text")
             text = body.get_text("\n").strip() if body else ""
             if len(text) > 20 and DIGEST_MARK not in text:
+                media = _post_media(b)
                 posts[mid] = {"time": when.strftime("%H:%M"), "text": text,
-                              "images": _post_images(b)}
+                              "images": media["photos"], "videos": media["videos"]}
 
         if oldest_day is None or oldest_day < day or oldest_id <= 1:
             break
         before = oldest_id
 
     ordered = [posts[k] for k in sorted(posts)]
-    with_pics = sum(1 for p in ordered if p["images"])
+    pics = sum(1 for p in ordered if p["images"])
+    clips = sum(1 for p in ordered if p["videos"])
     print(f"{day}: collected {len(ordered)} posts from @{username} "
-          f"({with_pics} with photographs)")
+          f"({pics} with photos, {clips} with video)")
     return ordered
 
 
@@ -715,6 +722,7 @@ WANT_IMAGES = os.getenv("TOPIC_IMAGES", "1") == "1"
 # real photographs only by default; set to 1 to allow a generated image when
 # the archive has nothing usable
 ALLOW_GENERATED = os.getenv("ALLOW_GENERATED_IMAGES", "0") == "1"
+CLIPS = os.getenv("SOURCE_CLIPS", "1") == "1"
 MUSIC = os.getenv("MUSIC_BED", "1") == "1"
 
 UA_HEADERS = {"User-Agent": "MidWorldDaily/1.0 (Telegram news digest bot)"}
@@ -781,6 +789,49 @@ def _download(url: str, path: str, headers: dict) -> bool:
         print(f"    image did not decode ({w}x{h})")
         return False
     return True
+
+
+def segment_media(seg: dict, posts: list[dict], work: str,
+                  tag: str, seconds: float) -> tuple[str, str, bool] | None:
+    """The panel for one topic. Returns (path, credit, is_video) or None.
+
+    Order of preference:
+      1. a VIDEO clip from one of the posts this segment came from — the actual
+         footage the newsroom published, which is far more alive than a still
+      2. a photograph attached to one of those posts
+      3. a real photograph of the named place from Wikimedia Commons
+      4. a generated illustration, only if explicitly enabled
+
+    Everything degrades quietly: a scene with no panel is fine; a build that
+    dies over one missing clip is not.
+    """
+    if not WANT_IMAGES:
+        return None
+
+    # 1. the channel's own video footage, in Gemini's ranked post order
+    if CLIPS:
+        for n in seg.get("sources", []):
+            if not 1 <= n <= len(posts):
+                continue
+            for url in posts[n - 1].get("videos", []):
+                raw = os.path.join(work, f"{tag}_clip.mp4")
+                try:
+                    if _download(url, raw, UA) and video.probe_duration(raw) >= 1.0:
+                        panel = video.make_video_panel(
+                            work, raw, f"{tag}_vpanel.mp4", seconds)
+                        return panel, f"@{SOURCE}", True
+                except Exception as e:
+                    print(f"    post {n} clip failed: {str(e)[:70]}")
+
+    # 2-4. fall back to a still image
+    raw = os.path.join(work, f"{tag}.jpg")
+    hit = segment_image(seg, posts, raw)
+    if hit:
+        try:
+            return video.make_panel(work, hit[0], f"{tag}_panel.png"), hit[1], False
+        except Exception as e:
+            print(f"    still panel failed: {str(e)[:70]}")
+    return None
 
 
 def segment_image(seg: dict, posts: list[dict], path: str) -> tuple[str, str] | None:
@@ -895,22 +946,22 @@ def build(brief: dict, day: dt.date, work: str,
         for s in segments)
     ticker = f"{ticker}     •     "
 
-    print("finding photographs:")
+    print("finding footage:")
     panels: list[str | None] = []
     credits: list[str] = []
+    is_video: list[bool] = []
     for i, seg in enumerate(segments):
-        raw = os.path.join(work, f"img{i}.jpg")
-        got = segment_image(seg, posts, raw)
+        got = segment_media(seg, posts, work, f"m{i}", spans[i])
         if got:
-            try:
-                panels.append(video.make_panel(work, got[0], f"panel{i}.png"))
-                credits.append(got[1])
-                print(f"  {i + 1}. {seg['topic']} <- {got[1]}")
-                continue
-            except Exception as e:
-                print(f"  {i + 1}. {seg['topic']}: unusable ({str(e)[:60]})")
-        panels.append(None)
-        credits.append("")
+            panels.append(got[0])
+            credits.append(got[1])
+            is_video.append(got[2])
+            kind = "video" if got[2] else "photo"
+            print(f"  {i + 1}. {seg['topic']} <- {got[1]} ({kind})")
+        else:
+            panels.append(None)
+            credits.append("")
+            is_video.append(False)
 
     print("rendering scenes:")
     elapsed = 0.0
@@ -920,7 +971,7 @@ def build(brief: dict, day: dt.date, work: str,
         video.render_scene(work, PRESENTER, audio[i], srts[i], seg["topic"],
                            seg.get("headline", ""), BRAND, date_text, ticker,
                            i, elapsed, total, out, panel=panels[i],
-                           credit=credits[i])
+                           credit=credits[i], panel_is_video=is_video[i])
         elapsed += spans[i]
         parts.append(out)
 
@@ -946,9 +997,26 @@ def build(brief: dict, day: dt.date, work: str,
             # the bulletin is finished either way; music is the optional layer
             print(f"music step skipped: {str(e)[:150]}", file=sys.stderr)
     size = os.path.getsize(final)
-    print(f"final video: {size / 1e6:.1f} MB, {video.probe_duration(final):.0f}s")
-    if size > 49 * 1024 * 1024:
-        raise RuntimeError(f"{size / 1e6:.0f} MB is over Telegram's bot limit")
+    dur = video.probe_duration(final)
+    print(f"final video: {size / 1e6:.1f} MB, {dur:.0f}s")
+
+    # Telegram bots may send up to 50 MB per file. A bulletin is always one
+    # video, never split across messages — if it is too big it is re-encoded to
+    # a target bitrate that fits, which for a talking-head-style still is
+    # visually lossless. This is why the day comes as a single post.
+    limit = 49 * 1024 * 1024
+    if size > limit:
+        target_kbps = int((limit * 8 / dur) / 1000 * 0.92) - 128   # leave room for audio
+        target_kbps = max(target_kbps, 300)
+        shrunk = os.path.join(work, "brief_fit.mp4")
+        print(f"over 50 MB — re-encoding to ~{target_kbps} kbps video")
+        video.run(["ffmpeg", "-y", "-loglevel", "error", "-i", final,
+                   "-c:v", "libx264", "-preset", "medium",
+                   "-b:v", f"{target_kbps}k", "-maxrate", f"{int(target_kbps * 1.3)}k",
+                   "-bufsize", f"{target_kbps * 2}k", "-pix_fmt", "yuv420p",
+                   "-c:a", "aac", "-b:a", "112k", "-movflags", "+faststart", shrunk])
+        final = shrunk
+        print(f"re-encoded to {os.path.getsize(final) / 1e6:.1f} MB")
     return final
 
 
