@@ -316,6 +316,83 @@ def _extract_json(raw: str) -> dict:
         raise
 
 
+def _unescape(s: str) -> str:
+    """Undo the JSON string escapes we care about when salvaging by regex."""
+    return (s.replace('\\"', '"').replace("\\n", " ").replace("\\t", " ")
+             .replace("\\r", " ").replace("\\/", "/").replace("\\\\", "\\")).strip()
+
+
+def _salvage_segments(raw: str) -> list[dict]:
+    """Recover whole segment objects from a reply whose JSON is truncated.
+
+    When the top-level parse fails — a reply cut off mid-object — walk the
+    "segments" array and keep every {...} object that IS complete and json-loads
+    cleanly, matching braces while respecting strings. Far better than narrating
+    the raw reply: the viewer hears finished topics, not half a JSON document.
+    """
+    out: list[dict] = []
+    i = raw.find('"segments"')
+    if i < 0:
+        return out
+    i = raw.find("[", i)
+    if i < 0:
+        return out
+
+    depth, start, in_str, esc = 0, None, False, False
+    for j in range(i, len(raw)):
+        c = raw[j]
+        if in_str:
+            if esc:
+                esc = False
+            elif c == "\\":
+                esc = True
+            elif c == '"':
+                in_str = False
+            continue
+        if c == '"':
+            in_str = True
+        elif c == "{":
+            if depth == 0:
+                start = j
+            depth += 1
+        elif c == "}":
+            if depth > 0:
+                depth -= 1
+                if depth == 0 and start is not None:
+                    try:
+                        obj = json.loads(raw[start:j + 1])
+                    except json.JSONDecodeError:
+                        obj = None
+                    if isinstance(obj, dict) and str(obj.get("script", "")).strip():
+                        out.append(obj)
+                    start = None
+        elif c == "]" and depth == 0:
+            break
+    return out
+
+
+def _prose_from_json(raw: str) -> str:
+    """Lift only the spoken text out of a reply we could not parse.
+
+    The last line of defence, so a broken reply never gets read out as JSON.
+    The "script" fields carry the actual bulletin; pull them with a regex —
+    including a final one that was cut off mid-sentence, which has no closing
+    quote — and speak only those. Everything else (keys, brackets, the source
+    numbers) is left on the floor.
+    """
+    parts = re.findall(r'"script"\s*:\s*"((?:[^"\\]|\\.)*)', raw)
+    return " ".join(_unescape(p) for p in parts if _unescape(p)).strip()
+
+
+def _plain_text(raw: str) -> str:
+    """Strip anything that reads as code, for a reply that was not our JSON."""
+    text = re.sub(r'"(?:headline|topic|sources|photo|script|segments)"\s*:',
+                  " ", raw)
+    text = re.sub(r"[\{\}\[\]\"]", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
 def summarize(posts: list[dict], day: dt.date) -> dict:
     items = "\n\n---\n\n".join(
         f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
@@ -325,12 +402,19 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
     model = MODEL or candidate_models()[0]
     print(f"using model: {model}  |  prompt: {len(prompt):,} chars")
 
-    # No thinkingConfig: the parameter differs between model generations and a
-    # rejected field returns a generic INVALID_ARGUMENT naming nothing.
+    # thinkingBudget=0 is the important line here. Gemini 2.5 Flash turns
+    # "thinking" on by default, and those tokens count against maxOutputTokens.
+    # Left on, the model can spend almost the whole budget reasoning and return
+    # JSON that is cut off mid-segment; that fails to parse and the bulletin
+    # falls back to reading the raw reply — keys, braces and source numbers —
+    # out loud. Disabling it keeps the budget for the actual script. Older
+    # generations (2.0 Flash) reject the field with a generic INVALID_ARGUMENT;
+    # the retry loop below drops it, then the cap, on a 400.
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 8192,
-                             "responseMimeType": "application/json"},
+        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 16384,
+                             "responseMimeType": "application/json",
+                             "thinkingConfig": {"thinkingBudget": 0}},
     }
     headers = {"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"}
     alternates = [m for m in candidate_models() if m != model]
@@ -345,10 +429,23 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
             model = candidate_models()[0]
             print(f"model not found, falling back to: {model}")
             continue
-        if r.status_code == 400 and "generationConfig" in body:
-            print("400 — retrying with default generation settings")
-            body.pop("generationConfig")
-            continue
+        if r.status_code == 400:
+            # Degrade one field at a time rather than dropping the whole config
+            # (which would also lose responseMimeType JSON). Thinking config and
+            # an over-large token cap are the two fields older models reject.
+            gc = body.get("generationConfig")
+            if gc and "thinkingConfig" in gc:
+                gc.pop("thinkingConfig")
+                print("400 — model rejects thinkingConfig, dropping it")
+                continue
+            if gc and gc.get("maxOutputTokens", 0) > 8192:
+                gc["maxOutputTokens"] = 8192
+                print("400 — capping maxOutputTokens at 8192")
+                continue
+            if "generationConfig" in body:
+                print("400 — retrying with default generation settings")
+                body.pop("generationConfig")
+                continue
         if r.status_code in (429, 500, 502, 503, 504):
             reason = "rate limited" if r.status_code == 429 else "model busy"
             # Newer generations carry the most traffic; an older Flash is often
@@ -377,17 +474,36 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
         raise RuntimeError(
             f"empty response, finishReason={cands[0].get('finishReason')}")
 
+    headline, segments = "", []
     try:
         brief = _extract_json(raw)
+        headline = brief.get("headline", "") or ""
         segments = [s for s in brief.get("segments", [])
-                    if s.get("script", "").strip()]
-        if not segments:
-            raise ValueError("no segments in the reply")
+                    if isinstance(s, dict) and str(s.get("script", "")).strip()]
     except Exception as e:
-        # A bulletin in one piece still beats no bulletin at all.
-        print(f"could not parse segments ({e}) — using the whole reply",
+        print(f"reply was not clean JSON ({e})", file=sys.stderr)
+
+    # A truncated reply (a busy day, or thinking tokens eating the budget) leaves
+    # the top-level JSON unparseable. Recover whatever whole segments did arrive
+    # rather than narrating the raw reply — braces, keys and source numbers and
+    # all, which is exactly the "reading out the JSON" failure this guards.
+    if not segments:
+        segments = _salvage_segments(raw)
+        if segments:
+            print(f"recovered {len(segments)} segment(s) from a truncated reply",
+                  file=sys.stderr)
+        if not headline:
+            m = re.search(r'"headline"\s*:\s*"((?:[^"\\]|\\.)*)"', raw)
+            if m:
+                headline = _unescape(m.group(1))
+
+    # Absolute last resort: speak only the script text, never the JSON scaffolding.
+    if not segments:
+        prose = _prose_from_json(raw) or _plain_text(raw)
+        print("no segments recoverable — narrating cleaned text only",
               file=sys.stderr)
-        return {"headline": "", "segments": [{"topic": "Today", "script": raw}]}
+        return {"headline": headline,
+                "segments": [{"topic": "Today", "script": prose}]}
 
     for s in segments:
         label = re.sub(r"[^\w &-]", "", s.get("topic", "News")).strip()
@@ -399,7 +515,7 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
         head = re.sub(r"\s+", " ", str(s.get("headline", ""))).strip(" .")
         s["headline"] = head[:58]
         s["photo"] = re.sub(r"[^\w\s-]", " ", str(s.get("photo", ""))).strip()[:60]
-    return {"headline": brief.get("headline", ""), "segments": segments}
+    return {"headline": headline, "segments": segments}
 
 
 # ----------------------------------------------------------------------------
