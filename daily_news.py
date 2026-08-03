@@ -840,6 +840,10 @@ WANT_IMAGES = os.getenv("TOPIC_IMAGES", "1") == "1"
 ALLOW_GENERATED = os.getenv("ALLOW_GENERATED_IMAGES", "0") == "1"
 CLIPS = os.getenv("SOURCE_CLIPS", "1") == "1"
 MUSIC = os.getenv("MUSIC_BED", "1") == "1"
+# a held beat after each topic and a dissolve into the next, so the bulletin
+# moves between stories the way a broadcast does rather than snapping across
+TOPIC_PAUSE = float(os.getenv("TOPIC_PAUSE", "0.8"))
+SCENE_XFADE = float(os.getenv("SCENE_XFADE", "0.5"))
 
 UA_HEADERS = {"User-Agent": "MidWorldDaily/1.0 (Telegram news digest bot)"}
 _BAD_FILE = ("logo", "icon", "map of", "flag of", "coat of arms", "diagram",
@@ -1022,12 +1026,6 @@ def publish_video(day: dt.date, headline: str, mp4_path: str) -> None:
                            "height": video.H}, {"video": f})
 
 
-def publish_voice(day: dt.date, ogg_path: str) -> None:
-    with open(ogg_path, "rb") as f:
-        send("sendVoice", {"chat_id": TARGET,
-                           "caption": f"🎧 {day:%d %B %Y}"}, {"voice": f})
-
-
 # ----------------------------------------------------------------------------
 def build(brief: dict, day: dt.date, work: str,
           posts: list[dict]) -> str:
@@ -1038,10 +1036,18 @@ def build(brief: dict, day: dt.date, work: str,
     print("narrating:")
     audio, srts, spans = [], [], []
     for i, seg in enumerate(segments):
-        mp3 = os.path.join(work, f"seg{i}.mp3")
+        raw_mp3 = os.path.join(work, f"seg{i}.mp3")
         srt = os.path.join(work, f"seg{i}.ass")
         print(f"  {i + 1}. {seg['topic']}")
-        spans.append(voice_segment(seg["script"], mp3, srt, work, f"v{i}"))
+        span = voice_segment(seg["script"], raw_mp3, srt, work, f"v{i}")
+        # hold the anchor for a beat after each story; captions end before the
+        # pad, so their timing is untouched
+        mp3 = raw_mp3
+        if TOPIC_PAUSE > 0:
+            mp3 = os.path.join(work, f"seg{i}_held.mp3")
+            video.pad_audio_tail(raw_mp3, mp3, TOPIC_PAUSE)
+            span += TOPIC_PAUSE
+        spans.append(span)
         audio.append(mp3)
         srts.append(srt)
 
@@ -1099,7 +1105,7 @@ def build(brief: dict, day: dt.date, work: str,
     parts.append(outro)
 
     joined = os.path.join(work, "joined.mp4")
-    video.concat(parts, joined)
+    video.crossfade_concat(parts, joined, SCENE_XFADE)
 
     final = joined
     if MUSIC:
@@ -1156,28 +1162,12 @@ def main() -> None:
 
     work = tempfile.mkdtemp(prefix="midworld-")
     try:
+        # Video only, by request. If the render fails the run fails loudly (and
+        # can be re-run) rather than quietly sending a separate voice note —
+        # the channel gets the video bulletin or nothing.
         final = build(brief, day, work, posts)
         publish_video(day, brief.get("headline", ""), final)
         print("published video")
-    except Exception as e:
-        # A finished bulletin should never be lost to a rendering problem.
-        print(f"video failed ({e}) — falling back to voice", file=sys.stderr)
-        joined = os.path.join(work, "all.mp3")
-        with open(joined, "wb") as out:
-            for i in range(len(brief["segments"])):
-                p = os.path.join(work, f"seg{i}.mp3")
-                if os.path.exists(p):
-                    with open(p, "rb") as chunk:
-                        out.write(chunk.read())
-        if os.path.exists(joined) and os.path.getsize(joined) > 1000:
-            ogg = os.path.join(work, "brief.ogg")
-            video.run(["ffmpeg", "-y", "-loglevel", "error", "-i", joined,
-                       "-c:a", "libopus", "-b:a", "48k", "-vbr", "on",
-                       "-ar", "48000", "-ac", "1", ogg])
-            publish_voice(day, ogg)
-            print("published voice as fallback")
-        else:
-            raise
     finally:
         shutil.rmtree(work, ignore_errors=True)
 

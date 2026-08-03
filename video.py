@@ -130,6 +130,21 @@ def silence(work: str, seconds: float, name: str) -> str:
     return path
 
 
+def pad_audio_tail(src: str, dst: str, seconds: float) -> str:
+    """Add a beat of silence to the end of a narration clip.
+
+    A newsreader finishes a story and holds for a moment before moving on.
+    Segments joined back to back drop that beat and the bulletin feels rushed;
+    a short trailing pause on each topic restores it. It also gives the scene
+    crossfade clean silence to dissolve over, so no spoken word gets blended
+    into the next story.
+    """
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", src,
+         "-af", f"apad=pad_dur={seconds:.3f}",
+         "-c:a", "libmp3lame", "-q:a", "3", dst])
+    return dst
+
+
 def join_audio(work: str, pieces: list[str], out: str) -> None:
     listing = os.path.join(work, os.path.basename(out) + ".txt")
     with open(listing, "w") as f:
@@ -358,3 +373,53 @@ def concat(parts: list[str], out: str) -> None:
         print("  concat copy failed, re-encoding", file=sys.stderr)
         run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
              "-i", listing, *ENC, "-movflags", "+faststart", out])
+
+
+def crossfade_concat(parts: list[str], out: str, fade: float = 0.5) -> None:
+    """Join the parts, dissolving each one into the next instead of hard-cutting.
+
+    A hard cut between topics reads as abrupt — the picture and voice of one
+    story snap straight into the next. A short crossfade (xfade for the picture,
+    acrossfade for the sound) dissolves them, which is how a broadcast bulletin
+    moves between stories. Paired with the trailing pause on each segment, the
+    dissolve happens over silence and the incoming topic eases in.
+
+    Every clip is re-encoded, and the whole thing degrades to a plain hard-cut
+    join if the filter graph fails on any input — a finished bulletin matters
+    more than the dissolve.
+    """
+    if len(parts) < 2 or fade <= 0:
+        concat(parts, out)
+        return
+    try:
+        durs = [probe_duration(p) for p in parts]
+    except Exception as e:
+        print(f"  crossfade: could not probe parts ({e}) — hard cut",
+              file=sys.stderr)
+        concat(parts, out)
+        return
+
+    inputs: list[str] = []
+    for p in parts:
+        inputs += ["-i", p]
+
+    vf, af, acc, vp, ap = [], [], durs[0], "0:v", "0:a"
+    for i in range(1, len(parts)):
+        # a clip shorter than the fade cannot dissolve cleanly; clamp so the
+        # offset never runs past the accumulated timeline
+        d = min(fade, durs[i], acc)
+        off = max(acc - d, 0.0)
+        vf.append(f"[{vp}][{i}:v]xfade=transition=fade:duration={d:.3f}"
+                  f":offset={off:.3f}[v{i}]")
+        af.append(f"[{ap}][{i}:a]acrossfade=d={d:.3f}[a{i}]")
+        acc = off + durs[i]
+        vp, ap = f"v{i}", f"a{i}"
+
+    graph = ";".join(vf + af)
+    try:
+        run(["ffmpeg", "-y", "-loglevel", "error", *inputs,
+             "-filter_complex", graph, "-map", f"[{vp}]", "-map", f"[{ap}]",
+             *ENC, "-movflags", "+faststart", out])
+    except RuntimeError as e:
+        print(f"  crossfade failed ({str(e)[:150]}) — hard cut", file=sys.stderr)
+        concat(parts, out)
