@@ -41,4 +41,8 @@ jobs:
           VOICE: en-US-AndrewMultilingualNeural
           MAKE_VIDEO: "1"
           TARGET_DATE: ${{ github.event.inputs.target_date }}
+          # Which of the two crons fired, so resolve_day() can let the
+          # off-season one exit instead of publishing a second video. Empty on
+          # manual (workflow_dispatch) runs, which then always publish.
+          CRON_SCHEDULE: ${{ github.event.schedule }}
         run: python daily_news.py
