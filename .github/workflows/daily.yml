@@ -14,6 +14,10 @@ on:
         description: "Rebuild one specific day (YYYY-MM-DD). Leave empty for a normal run."
         required: false
         default: ""
+      dry_run:
+        description: "Set to 1 to render a preview artifact WITHOUT posting to Telegram."
+        required: false
+        default: ""
 
 jobs:
   brief:
@@ -39,10 +43,22 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TIMEZONE: Asia/Beirut
           VOICE: en-US-AndrewMultilingualNeural
+          # Gemini TTS reads far more like a real anchor than edge-tts; it falls
+          # back to the edge VOICE above per-segment if the daily free-tier quota
+          # is hit or no TTS model is available. Set to "edge" to force edge.
+          VOICE_ENGINE: gemini
           MAKE_VIDEO: "1"
           TARGET_DATE: ${{ github.event.inputs.target_date }}
           # Which of the two crons fired, so resolve_day() can let the
           # off-season one exit instead of publishing a second video. Empty on
           # manual (workflow_dispatch) runs, which then always publish.
           CRON_SCHEDULE: ${{ github.event.schedule }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
         run: python daily_news.py
+
+      - name: Upload preview (dry run only)
+        if: ${{ always() && hashFiles('preview.mp4') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: brief-preview
+          path: preview.mp4

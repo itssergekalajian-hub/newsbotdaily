@@ -269,16 +269,18 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
         f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=23:x=30:y=15",
         f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=18:x=w-tw-30:y=17",
         # scrim so captions stay readable over a bright frame
-        f"drawbox=x=0:y=ih-196:w=iw:h=196:color=black@0.42:t=fill",
+        f"drawbox=x=0:y=ih-215:w=iw:h=215:color=black@0.45:t=fill",
         # topic plate slides in over the first half second, then holds
         f"drawtext=fontfile={BOLD}:textfile={tf}:fontcolor=white:fontsize=25"
         f":box=1:boxcolor={RED}@0.96:boxborderw=15"
-        f":x='-560+min(t/0.5\\,1)*588':y=524",
+        f":x='-560+min(t/0.5\\,1)*588':y=514",
     ]
     if hf:
+        # the story headline sits just under the topic plate; captions get the
+        # clear band below it (see the ASS MarginV) so the two never overlap
         chrome.append(
-            f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=26"
-            f":x=32:y=572:alpha='min(max((t-0.55)/0.4\\,0)\\,1)'")
+            f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=24"
+            f":x=32:y=556:alpha='min(max((t-0.55)/0.4\\,0)\\,1)'")
     if panel and credit:
         # Commons licences require attribution, so it is printed under the photo
         cf = _textfile(work, f"credit{variant}.txt", credit)

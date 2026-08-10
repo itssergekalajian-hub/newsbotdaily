@@ -51,6 +51,9 @@ TTS_VOICE = os.getenv("TTS_VOICE", "Charon")
 PRESENTER = os.getenv("PRESENTER_IMAGE", "presenter.png")
 BRAND = os.getenv("BRAND", "MIDWORLD DAILY")
 FORCE_DATE = os.getenv("TARGET_DATE", "").strip()
+# preview a full render without posting to Telegram (the workflow uploads the
+# resulting preview.mp4 as an artifact instead)
+DRY_RUN = os.getenv("DRY_RUN", "").strip() not in ("", "0", "false", "False", "no")
 
 # github.event.schedule, e.g. "0 21 * * *" — empty for manual runs
 CRON = os.getenv("CRON_SCHEDULE", "").strip()
@@ -233,6 +236,34 @@ def candidate_models() -> tuple[str, ...]:
     return tuple(sorted(flash, key=rank))
 
 
+@functools.lru_cache(maxsize=1)
+def tts_models() -> tuple[str, ...]:
+    """Text-to-speech models this key can use, newest first.
+
+    candidate_models() deliberately filters TTS models out (they cannot write
+    the script), so the human-voice path needs its own lookup. Without this the
+    "gemini" engine could never find a voice model and silently fell back to the
+    robotic edge voice every time.
+    """
+    try:
+        r = requests.get(f"{GEMINI_ROOT}/models",
+                         headers={"x-goog-api-key": GEMINI_KEY}, timeout=60)
+        r.raise_for_status()
+    except Exception as e:
+        print(f"    could not list TTS models: {str(e)[:100]}")
+        return ()
+    names = [m["name"].removeprefix("models/") for m in r.json().get("models", [])
+             if "tts" in m["name"].lower()
+             and "generateContent" in m.get("supportedGenerationMethods", [])]
+
+    def rank(n: str) -> tuple:
+        m = re.search(r"gemini-(\d+(?:\.\d+)?)", n)
+        return ("preview" in n or "exp" in n,
+                -(float(m.group(1)) if m else 0.0), len(n))
+
+    return tuple(sorted(names, key=rank))
+
+
 PROMPT = """You are the writer and anchor of a daily news bulletin called
 MidWorld Daily.
 
@@ -252,7 +283,9 @@ Return ONLY a JSON object, no markdown fences, in exactly this shape:
 Rules for the segments:
 - One segment per topic. Use topics that fit the day, for example: Middle East,
   Russia and Ukraine, China and Asia, Europe, United States, Markets, Football,
-  MMA. Skip any topic with no news. Between 3 and 8 segments.
+  MMA. Skip a topic only if it genuinely had no news. Cover EVERY distinct
+  region or subject that saw real reporting today — the viewer should feel they
+  got the whole channel, not a hand-picked few. Between 4 and 9 segments.
 - "topic" is a screen label: 1 to 3 words, no punctuation.
 - each segment's "headline" is an on-screen caption for that topic: 4 to 8
   words, no final full stop. It is read by the viewer, not spoken.
@@ -292,12 +325,23 @@ Rules for the segments:
     concerned", "there were reports suggesting that". Say the thing.
   * Prefer active voice and concrete subjects. Name who did what.
   * Never begin consecutive sentences with the same word.
+- Make it engaging, not just correct. A flat, even read is what makes news
+  forgettable:
+  * Bring warmth and energy, like a real anchor who finds this genuinely
+    interesting. The personality is in the phrasing and rhythm — never in
+    exaggeration, hype or opinion. Report it straight, but make it alive.
+  * Give each story a shape: what happened, why it matters, what to watch next.
+    Land the final line of each topic so it resolves instead of trailing off.
+  * Use a vivid, exact verb over a vague one; a concrete detail over a generic
+    phrase — but only details that are actually in the posts.
 - Plain spoken language. Every character is read aloud, so no markdown, no
   emojis, no asterisks, no hashtags, no bullets, no links, and no numbers
   written as digits where a reader would say them differently — write "twenty
   thousand", not "20,000".
-- The first segment's script should open by greeting the audience and giving
-  the headline. The last should end with a short sign-off.
+- Open the whole bulletin with a genuine hook — one crisp line on the single
+  most striking thing that happened today — then a brief warm greeting and the
+  day's headline. Do not open with a bare "welcome to the news". End the last
+  segment with a short, warm sign-off that invites the viewer back tomorrow.
 
 POSTS FROM {date}:
 {items}
@@ -545,7 +589,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Main,DejaVu Sans,27,&H00FFFFFF,&H000000FF,&H00000000,&HB4000000,-1,0,0,0,100,100,0,0,4,0,0,2,70,70,34,1
+Style: Main,DejaVu Sans,22,&H00FFFFFF,&H000000FF,&H00000000,&HB4000000,-1,0,0,0,100,100,0,0,4,1,0,2,80,80,46,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -604,7 +648,7 @@ def _cues_for(sentence: str, start: float, span: float) -> list[tuple]:
     a single sentence that is accurate to a fraction of a second, because the
     speaking rate barely varies across a few seconds of continuous delivery.
     """
-    limit = 104                       # two caption lines of ~52 characters
+    limit = 84                        # two caption lines of ~42 characters
     if len(sentence) <= limit:
         return [(start, start + span, sentence)]
 
@@ -676,7 +720,7 @@ def gemini_voice(text: str, wav_path: str) -> bool:
     requests a day, so this runs once per topic rather than once per sentence,
     and any failure falls straight back to edge-tts.
     """
-    model = TTS_MODEL or next((m for m in candidate_models() if "tts" in m), "")
+    model = TTS_MODEL or next(iter(tts_models()), "")
     if not model:
         return False
 
@@ -764,11 +808,14 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
             with open(srt_path, "w", encoding="utf-8") as f:
                 f.write(ASS_HEAD)
                 for i, sent in enumerate(sentences):
-                    start, end = bounds[i], bounds[i + 1]
-                    line = _wrap(sent).replace("\n", "\\N")
-                    f.write(f"Dialogue: 0,{_ass_time(start)},"
-                            f"{_ass_time(max(end - 0.04, start + 0.3))},"
-                            f"Main,,0,0,0,,{line}\n")
+                    # long sentences become several short captions rather than
+                    # one that overflows into four lines and swamps the screen
+                    for start, end, chunk in _cues_for(sent, bounds[i],
+                                                        bounds[i + 1] - bounds[i]):
+                        line = _wrap(chunk).replace("\n", "\\N")
+                        f.write(f"Dialogue: 0,{_ass_time(start)},"
+                                f"{_ass_time(max(end - 0.04, start + 0.3))},"
+                                f"Main,,0,0,0,,{line}\n")
             print(f"    {span:5.1f}s audio, {len(sentences)} captions (gemini)")
             return span
         print("    gemini tts unavailable, using edge-tts")
@@ -785,7 +832,9 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
             continue
 
         pieces.append(clip)
-        cues.append((clock, clock + span, sent))
+        # split a long sentence into short caption cues over its own span, so
+        # no single caption balloons past two lines
+        cues.extend(_cues_for(sent, clock, span))
         clock += span
 
         if i < len(sentences) - 1:
@@ -812,7 +861,7 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
     return total
 
 
-def _wrap(line: str, width: int = 52) -> str:
+def _wrap(line: str, width: int = 42) -> str:
     """Two short lines read better on a phone than one long one."""
     if len(line) <= width:
         return line
@@ -1166,6 +1215,14 @@ def main() -> None:
         # can be re-run) rather than quietly sending a separate voice note —
         # the channel gets the video bulletin or nothing.
         final = build(brief, day, work, posts)
+        if DRY_RUN:
+            # preview mode: keep the finished file for inspection (the workflow
+            # uploads it as an artifact) and do NOT post anything to Telegram
+            preview = os.path.join(os.getcwd(), "preview.mp4")
+            shutil.copyfile(final, preview)
+            print(f"dry run — wrote {preview} ({os.path.getsize(preview)/1e6:.1f} MB), "
+                  f"nothing published")
+            return
         publish_video(day, brief.get("headline", ""), final)
         print("published video")
     finally:
