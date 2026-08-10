@@ -763,8 +763,12 @@ def gemini_voice(text: str, wav_path: str) -> bool:
 
 
 def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
-                  tag: str) -> float:
-    """Narrate one segment and caption it from measured audio, not estimates.
+                  tag: str, engine: str | None = None) -> tuple[float, str]:
+    """Narrate one segment; return (duration, voice actually used).
+
+    The caller passes an explicit engine so the whole bulletin can be held to a
+    single voice — the returned voice name lets it notice a mid-bulletin
+    fallback and re-read everything consistently.
 
     Two things are going on here.
 
@@ -780,6 +784,7 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
     a clause, a slightly longer one after a full stop. The result runs
     continuously at a news pace rather than pausing everywhere.
     """
+    engine = engine or ENGINE
     sentences = _sentences(text)
     if not sentences:
         raise RuntimeError("nothing to narrate")
@@ -788,7 +793,7 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
     # recovered from the pauses in the audio rather than from per-sentence
     # durations, because synthesising sentence by sentence would exhaust the
     # daily quota in a single bulletin.
-    if ENGINE == "gemini":
+    if engine == "gemini":
         whole = os.path.join(work, f"{tag}_whole.wav")
         if gemini_voice(" ".join(sentences), whole):
             span = video.probe_duration(whole)
@@ -817,7 +822,7 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
                                 f"{_ass_time(max(end - 0.04, start + 0.3))},"
                                 f"Main,,0,0,0,,{line}\n")
             print(f"    {span:5.1f}s audio, {len(sentences)} captions (gemini)")
-            return span
+            return span, "gemini"
         print("    gemini tts unavailable, using edge-tts")
 
     pieces, cues, clock = [], [], 0.0
@@ -858,7 +863,7 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
 
     total = video.probe_duration(mp3_path)
     print(f"    {total:5.1f}s audio, {len(cues)} captions (measured, trimmed)")
-    return total
+    return total, "edge"
 
 
 def _wrap(line: str, width: int = 42) -> str:
@@ -1082,23 +1087,34 @@ def build(brief: dict, day: dt.date, work: str,
     segments = brief["segments"]
     date_text = f"{day:%d %B %Y}"
 
+    def narrate(engine: str):
+        audio, srts, spans, used = [], [], [], []
+        for i, seg in enumerate(segments):
+            raw_mp3 = os.path.join(work, f"seg{i}.mp3")
+            srt = os.path.join(work, f"seg{i}.ass")
+            print(f"  {i + 1}. {seg['topic']}")
+            span, eng = voice_segment(seg["script"], raw_mp3, srt, work, f"v{i}",
+                                      engine=engine)
+            # hold the anchor for a beat after each story; captions end before
+            # the pad, so their timing is untouched
+            mp3 = raw_mp3
+            if TOPIC_PAUSE > 0:
+                mp3 = os.path.join(work, f"seg{i}_held.mp3")
+                video.pad_audio_tail(raw_mp3, mp3, TOPIC_PAUSE)
+                span += TOPIC_PAUSE
+            spans.append(span); audio.append(mp3); srts.append(srt); used.append(eng)
+        return audio, srts, spans, used
+
     print("narrating:")
-    audio, srts, spans = [], [], []
-    for i, seg in enumerate(segments):
-        raw_mp3 = os.path.join(work, f"seg{i}.mp3")
-        srt = os.path.join(work, f"seg{i}.ass")
-        print(f"  {i + 1}. {seg['topic']}")
-        span = voice_segment(seg["script"], raw_mp3, srt, work, f"v{i}")
-        # hold the anchor for a beat after each story; captions end before the
-        # pad, so their timing is untouched
-        mp3 = raw_mp3
-        if TOPIC_PAUSE > 0:
-            mp3 = os.path.join(work, f"seg{i}_held.mp3")
-            video.pad_audio_tail(raw_mp3, mp3, TOPIC_PAUSE)
-            span += TOPIC_PAUSE
-        spans.append(span)
-        audio.append(mp3)
-        srts.append(srt)
+    audio, srts, spans, used = narrate(ENGINE)
+    # One voice for the whole bulletin. The Gemini free tier often runs out of
+    # TTS quota partway through, which would leave the first topics in the human
+    # voice and the rest in the robotic one — more jarring than either alone. If
+    # that happens, re-read everything in the fallback voice so it stays uniform.
+    if ENGINE == "gemini" and "gemini" in used and "edge" in used:
+        print("gemini quota ran out mid-bulletin — re-narrating in one voice (edge)",
+              file=sys.stderr)
+        audio, srts, spans, used = narrate("edge")
 
     total = sum(spans)
     print(f"bulletin: {len(segments)} segments, {total / 60:.1f} minutes")
