@@ -43,10 +43,12 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TIMEZONE: Asia/Beirut
           VOICE: en-US-AndrewMultilingualNeural
-          # Gemini TTS reads far more like a real anchor than edge-tts; it falls
-          # back to the edge VOICE above per-segment if the daily free-tier quota
-          # is hit or no TTS model is available. Set to "edge" to force edge.
-          VOICE_ENGINE: gemini
+          # "edge" gives one consistent, free, reliable voice every day. Gemini
+          # TTS sounds more human but its free-tier quota can't cover a full
+          # bulletin, so set "gemini" only once the key has billing enabled (the
+          # bulletin then uses one voice throughout, falling back to edge if the
+          # quota is ever short).
+          VOICE_ENGINE: edge
           MAKE_VIDEO: "1"
           TARGET_DATE: ${{ github.event.inputs.target_date }}
           # Which of the two crons fired, so resolve_day() can let the
