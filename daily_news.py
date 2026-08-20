@@ -43,6 +43,9 @@ MODEL = os.getenv("GEMINI_MODEL", "").strip()      # empty = auto-detect
 VOICE = os.getenv("VOICE", "en-US-AndrewMultilingualNeural")
 # a touch quicker than default reads as a broadcaster rather than a reader
 RATE = os.getenv("VOICE_RATE", "+8%")
+# a hair below the voice's default centre reads warmer and less synthetic; edge
+# takes a signed Hz offset like "-2Hz". Neutral is "+0Hz".
+PITCH = os.getenv("VOICE_PITCH", "-2Hz")
 # "gemini" sounds markedly more human but is capped near ten requests a day on
 # the free tier; "edge" is unlimited. Gemini failures fall back to edge.
 ENGINE = os.getenv("VOICE_ENGINE", "edge").strip().lower()
@@ -309,6 +312,23 @@ Rules for the segments:
   say it was widely reported.
 - The source labels single-source or unverified claims. Keep that hedging —
   say "according to a single report" rather than stating it as confirmed.
+- RUNNING ORDER matters as much as the words. Order the segments as a real
+  broadcast producer would, to build a bulletin people stay with:
+  * Lead with the single biggest story of the day — the most consequential or
+    most gripping. The opening hook is a promise; the first segment must pay it
+    off. Never bury the lead behind a minor item.
+  * After the lead, move in a deliberate arc, not a random list. Group stories
+    that belong together (all the Middle East beats, then Ukraine, then the
+    rest) so the viewer isn't ping-ponged around the map. Ride momentum:
+    follow a heavy story with one that carries the energy forward, and break up
+    two intense stories with a lighter beat so the bulletin breathes.
+  * Put markets in the middle, where it reads as a pause for breath, not as the
+    finale.
+  * End on the most human or uplifting note available — sport, a lighter
+    story, a hopeful turn — so the viewer leaves on a lift, then the sign-off.
+    Do not end on the grimmest item of the day.
+  * The through-line is a producer's judgement of what the viewer most wants to
+    hear next, told at a pace that keeps building.
 - Write for the EAR, not the page. This is the difference between a bulletin
   people finish and one they close:
   * Vary sentence length. Follow a long sentence with a very short one. A
@@ -334,14 +354,29 @@ Rules for the segments:
     Land the final line of each topic so it resolves instead of trailing off.
   * Use a vivid, exact verb over a vague one; a concrete detail over a generic
     phrase — but only details that are actually in the posts.
+  * Hand the viewer from one story to the next like a person, not a list. Open
+    a new topic with a spoken turn a real anchor uses — "Now, to...", "Staying
+    in the region...", "Overseas...", "To the markets...", "And finally
+    tonight..." — so segments feel handed over, never abruptly cut.
+  * Vary how stories begin. Some open cold on the fact, some on a short framing
+    line, some on a number that surprises. If every topic opens the same way,
+    the read flattens no matter how good the voice is.
+  * Write in the anchor's real speaking voice: the occasional direct aside to
+    the viewer ("here's why that matters", "and this is the part to watch") is
+    welcome where it earns its place. It must stay report, never opinion.
 - Plain spoken language. Every character is read aloud, so no markdown, no
   emojis, no asterisks, no hashtags, no bullets, no links, and no numbers
   written as digits where a reader would say them differently — write "twenty
   thousand", not "20,000".
 - Open the whole bulletin with a genuine hook — one crisp line on the single
-  most striking thing that happened today — then a brief warm greeting and the
-  day's headline. Do not open with a bare "welcome to the news". End the last
-  segment with a short, warm sign-off that invites the viewer back tomorrow.
+  most striking thing that happened today, the story you are about to lead
+  with. Make it land in one breath: concrete, specific, impossible to scroll
+  past. Then a brief warm greeting and the day's headline, and go straight into
+  that lead story. Do not open with a bare "welcome to the news", and do not
+  tease a story you then make the viewer wait for.
+- End the last segment with a short, warm sign-off in the anchor's own voice —
+  a genuine goodbye that lands the day and invites the viewer back tomorrow,
+  not a formulaic "that's all for today".
 
 POSTS FROM {date}:
 {items}
@@ -456,7 +491,7 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
     # the retry loop below drops it, then the cap, on a 400.
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 16384,
+        "generationConfig": {"temperature": 0.6, "maxOutputTokens": 16384,
                              "responseMimeType": "application/json",
                              "thinkingConfig": {"thinkingBudget": 0}},
     }
@@ -675,7 +710,33 @@ def _cues_for(sentence: str, start: float, span: float) -> list[tuple]:
 
 
 async def _speak(text: str, mp3_path: str) -> None:
-    await edge_tts.Communicate(text, VOICE, rate=RATE).save(mp3_path)
+    await edge_tts.Communicate(text, VOICE, rate=RATE, pitch=PITCH).save(mp3_path)
+
+
+def _gap_after(sentence: str) -> float:
+    """A human-length breath after a sentence, from how it ends and how long
+    it is.
+
+    Uniform gaps are the robotic tell in a sentence-by-sentence read: a real
+    anchor barely pauses at a comma, holds a beat after a question or a short
+    punchy line, and takes a fuller breath at a full stop. The length term adds
+    organic variation without randomness — a short landed sentence gets a touch
+    more air, a long one a touch less — so no two pauses in a row come out
+    mechanically identical.
+    """
+    s = sentence.rstrip()
+    end = s[-1:]
+    if end == ",":
+        base = 0.16                       # clause continues — barely a breath
+    elif end in "?!":
+        base = 0.36                       # let the line land
+    elif end in ":;—-":
+        base = 0.24                       # a held beat, thought still open
+    else:
+        base = 0.30                       # full stop
+    words = len(s.split())
+    nudge = 0.05 if words <= 8 else (-0.04 if words >= 22 else 0.0)
+    return round(base + nudge, 3)
 
 
 # Silence trimmed from the head and tail of every clip, then one deliberate gap
@@ -843,8 +904,7 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
         clock += span
 
         if i < len(sentences) - 1:
-            # a clause continues the thought, a sentence closes one
-            gap = 0.17 if sent.rstrip().endswith(",") else 0.30
+            gap = _gap_after(sent)
             pieces.append(video.silence(work, gap, f"{tag}_{i:03d}_gap.wav"))
             clock += gap
 
