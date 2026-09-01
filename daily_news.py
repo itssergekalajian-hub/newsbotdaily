@@ -280,6 +280,7 @@ Return ONLY a JSON object, no markdown fences, in exactly this shape:
   "segments": [{{"topic": "Middle East",
                 "headline": "four to eight words naming this topic's main story",
                 "sources": [3, 17, 42],
+                "images": [17, 3],
                 "photo": "2 to 4 words naming a real place to photograph",
                 "script": "the spoken words..."}}]}}
 
@@ -296,8 +297,16 @@ Rules for the segments:
   important first. Every post is numbered below. This is how the channel's own
   photograph of the event gets attached to the right topic, so put the post
   that best represents the story first. Between 1 and 6 numbers.
-- each segment's "photo" is only a FALLBACK, used when none of the source posts
-  carried a picture. It names a REAL, PHOTOGRAPHABLE PLACE connected to the
+- "images" lists posts marked [has photo] whose photograph actually SHOWS a
+  story this segment tells — in the order the script reaches those stories, up
+  to three. These pictures appear FULL SCREEN behind the narration, so a wrong
+  picture is worse than no picture: include a post ONLY when its photo depicts
+  the specific event, place or people the script is describing at that moment.
+  Never pad the list with a photo of some other story just because it exists.
+  If no post's photo genuinely fits, return an empty list [] and the "photo"
+  place fallback is used instead.
+- each segment's "photo" is only a FALLBACK, used when "images" is empty. It
+  names a REAL, PHOTOGRAPHABLE PLACE connected to the
   story, which will be looked up in a photo archive. Use a city, country,
   landmark, building or institution: "Beirut", "Kyiv Ukraine", "Tokyo Stock
   Exchange", "Santiago Bernabeu stadium". Never a person's name, never an event,
@@ -591,6 +600,14 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
         s["sources"] = [int(n) for n in src
                         if isinstance(n, (int, float, str))
                         and str(n).strip().lstrip("-").isdigit()][:6]
+        # "images" absent (a salvaged reply) is different from present-but-empty
+        # (the model judged that no photo fits): the first falls back to any
+        # source photo, the second deliberately skips them
+        if "images" in s:
+            imgs = s.get("images") if isinstance(s.get("images"), list) else []
+            s["images"] = [int(n) for n in imgs
+                           if isinstance(n, (int, float, str))
+                           and str(n).strip().lstrip("-").isdigit()][:3]
         head = re.sub(r"\s+", " ", str(s.get("headline", ""))).strip(" .")
         s["headline"] = head[:58]
         s["photo"] = re.sub(r"[^\w\s-]", " ", str(s.get("photo", ""))).strip()[:60]
@@ -1026,17 +1043,22 @@ def _download(url: str, path: str, headers: dict) -> bool:
 
 
 def segment_media(seg: dict, posts: list[dict], work: str,
-                  tag: str, seconds: float) -> tuple[str, str, bool] | None:
-    """The picture for one topic. Returns (raw_path, credit, is_video) or None.
+                  tag: str, seconds: float) -> tuple[list[str], str, bool] | None:
+    """The pictures for one topic. Returns (raw_paths, credit, is_video) or None.
 
-    Returns the RAW asset — a full-resolution photo or an untrimmed clip — so
-    the renderer can fill the whole frame with it and give it motion. Order of
+    Returns RAW assets — full-resolution photos or an untrimmed clip — so the
+    renderer can fill the whole frame with them and give them motion. Order of
     preference:
       1. a VIDEO clip from one of the posts this segment came from — the actual
          footage the newsroom published, which is far more alive than a still
-      2. a photograph attached to one of those posts
-      3. a real photograph of the named place from Wikimedia Commons
-      4. a generated illustration, only if explicitly enabled
+      2. the photos the writer PICKED for this segment ("images") — the posts
+         whose pictures actually show the stories being told, in story order,
+         so what is on screen follows what is being said
+      3. only when the writer made no pick at all (a salvaged reply): any photo
+         from the source posts. A deliberate empty pick means no source photo
+         fits, so that step is skipped rather than attaching a wrong picture.
+      4. a real photograph of the named place from Wikimedia Commons
+      5. a generated illustration, only if explicitly enabled
 
     Everything degrades quietly: a scene with no picture is fine (the anchor
     holds the frame); a build that dies over one missing clip is not.
@@ -1053,45 +1075,65 @@ def segment_media(seg: dict, posts: list[dict], work: str,
                 raw = os.path.join(work, f"{tag}_clip.mp4")
                 try:
                     if _download(url, raw, UA) and video.probe_duration(raw) >= 1.0:
-                        return raw, f"@{SOURCE}", True
+                        return [raw], f"@{SOURCE}", True
                 except Exception as e:
                     print(f"    post {n} clip failed: {str(e)[:70]}")
 
-    # 2-4. fall back to a still image
+    # 2. the writer's own picks, in the order the script tells those stories
+    picked = seg.get("images")          # None = no pick made; [] = "none fit"
+    if picked:
+        paths: list[str] = []
+        for n in picked:
+            if not 1 <= n <= len(posts):
+                continue
+            for url in posts[n - 1].get("images", []):
+                p = os.path.join(work, f"{tag}_p{n}.jpg")
+                try:
+                    if _download(url, p, UA):
+                        paths.append(p)
+                        break
+                except Exception as e:
+                    print(f"    post {n} image failed: {str(e)[:70]}")
+        if paths:
+            return paths, f"@{SOURCE}", False
+
+    # 3-5. fall back to a single still
     raw = os.path.join(work, f"{tag}.jpg")
-    hit = segment_image(seg, posts, raw)
+    hit = segment_image(seg, posts, raw, use_post_photos=picked is None)
     if hit:
-        return hit[0], hit[1], False
+        return [hit[0]], hit[1], False
     return None
 
 
-def segment_image(seg: dict, posts: list[dict], path: str) -> tuple[str, str] | None:
-    """The picture for one topic, preferring the source channel's own photo.
+def segment_image(seg: dict, posts: list[dict], path: str,
+                  use_post_photos: bool = True) -> tuple[str, str] | None:
+    """A single fallback picture for one topic.
 
     Order of preference:
       1. a photograph attached to one of the posts this segment was written
-         from — the actual picture the newsroom published with that story
+         from — skipped when the writer deliberately judged that none of them
+         shows the story (use_post_photos=False), because a full-screen wrong
+         picture is worse than a generic one of the right place
       2. a real photograph of the named place from Wikimedia Commons
       3. a generated illustration, only if explicitly enabled
 
-    The first is what makes the video feel like it belongs to the channel
-    instead of being decorated with stock imagery. Everything degrades quietly:
-    a scene with no picture is fine, a build that dies over a missing picture is
-    not.
+    Everything degrades quietly: a scene with no picture is fine, a build that
+    dies over a missing picture is not.
     """
     if not WANT_IMAGES:
         return None
 
     # 1. the channel's own photographs, in the order Gemini ranked the posts
-    for n in seg.get("sources", []):
-        if not 1 <= n <= len(posts):
-            continue
-        for url in posts[n - 1].get("images", []):
-            try:
-                if _download(url, path, UA):
-                    return path, f"@{SOURCE}"
-            except Exception as e:
-                print(f"    post {n} image failed: {str(e)[:70]}")
+    if use_post_photos:
+        for n in seg.get("sources", []):
+            if not 1 <= n <= len(posts):
+                continue
+            for url in posts[n - 1].get("images", []):
+                try:
+                    if _download(url, path, UA):
+                        return path, f"@{SOURCE}"
+                except Exception as e:
+                    print(f"    post {n} image failed: {str(e)[:70]}")
 
     # 2. a real photograph of the place
     query = seg.get("photo", "")
@@ -1197,19 +1239,21 @@ def build(brief: dict, day: dt.date, work: str,
         got = segment_media(seg, posts, work, f"m{i}", spans[i])
         backdrop = None
         if got:
-            raw, credit, isvid = got
-            # Turn the raw asset into a full-frame backdrop: real footage filled
-            # to the frame, a still given a slow judder-free move. A failure here
-            # (a corrupt image, an odd codec) just drops back to the anchor frame
-            # for this one topic rather than losing the whole build.
+            raws, credit, isvid = got
+            # Turn the raw assets into a full-frame backdrop: real footage filled
+            # to the frame, stills given a slow judder-free move — dissolving
+            # through them in story order when the writer picked several. A
+            # failure here (a corrupt image, an odd codec) just drops back to the
+            # anchor frame for this one topic rather than losing the whole build.
             try:
                 if isvid:
                     backdrop = video.make_video_backdrop(
-                        work, raw, f"bd{i}.mp4", spans[i])
+                        work, raws[0], f"bd{i}.mp4", spans[i])
+                    kind = "video"
                 else:
-                    backdrop = video.make_backdrop(
-                        work, raw, f"bd{i}.mp4", spans[i], i)
-                kind = "video" if isvid else "photo"
+                    backdrop = video.make_backdrop_multi(
+                        work, raws, f"bd{i}.mp4", spans[i], i)
+                    kind = "photo" if len(raws) == 1 else f"{len(raws)} photos"
                 print(f"  {i + 1}. {seg['topic']} <- {credit} ({kind})")
             except Exception as e:
                 credit = ""

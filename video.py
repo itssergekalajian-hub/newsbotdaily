@@ -198,6 +198,52 @@ def make_backdrop(work: str, image: str, name: str, seconds: float,
     return out
 
 
+def _xfade_join(parts: list[str], out: str, fade: float = 0.6) -> None:
+    """Join silent video clips, dissolving each into the next (no audio legs)."""
+    durs = [probe_duration(p) for p in parts]
+    inputs: list[str] = []
+    for p in parts:
+        inputs += ["-i", p]
+    vf, acc, vp = [], durs[0], "0:v"
+    for i in range(1, len(parts)):
+        d = min(fade, durs[i], acc)
+        off = max(acc - d, 0.0)
+        vf.append(f"[{vp}][{i}:v]xfade=transition=fade:duration={d:.3f}"
+                  f":offset={off:.3f}[v{i}]")
+        acc = off + durs[i]
+        vp = f"v{i}"
+    run(["ffmpeg", "-y", "-loglevel", "error", *inputs,
+         "-filter_complex", ";".join(vf), "-map", f"[{vp}]",
+         "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
+         "-pix_fmt", "yuv420p", "-r", str(FPS), out])
+
+
+def make_backdrop_multi(work: str, images: list[str], name: str,
+                        seconds: float, variant: int = 0) -> str:
+    """A full-frame background that moves through SEVERAL stills in turn.
+
+    A topic often tells two or three stories; holding one photograph for a
+    minute both bores the eye and mislabels the later stories. Each image gets
+    an equal share of the scene with its own slow move, dissolving into the
+    next as the narration advances. Falls back to the first image alone if the
+    join fails — a moving single still is still a working scene.
+    """
+    if len(images) == 1:
+        return make_backdrop(work, images[0], name, seconds, variant)
+    fade = 0.6
+    share = (seconds + fade * (len(images) - 1)) / len(images)
+    parts = [make_backdrop(work, img, f"{name}.{j}.mp4", share, variant + j)
+             for j, img in enumerate(images)]
+    out = os.path.join(work, name)
+    try:
+        _xfade_join(parts, out, fade)
+        return out
+    except RuntimeError as e:
+        print(f"  multi-photo join failed ({str(e)[:80]}) — single photo",
+              file=sys.stderr)
+        return make_backdrop(work, images[0], f"solo_{name}", seconds, variant)
+
+
 def make_video_backdrop(work: str, clip: str, name: str, seconds: float) -> str:
     """A full-frame background from the newsroom's own footage, looped to length.
 
@@ -268,7 +314,7 @@ def add_music(video_in: str, bed: str, out: str, level: float = 0.30) -> None:
 
 # The anchor's corner-cam box, top-right below the chrome bar — the one large
 # zone the lower-third (topic plate, headline, captions) never reaches.
-CAM_W, CAM_H = 384, 216
+CAM_W, CAM_H = 448, 252
 
 
 def _anchor_inset(presenter: str) -> str:
