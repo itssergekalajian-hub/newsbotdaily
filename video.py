@@ -154,42 +154,64 @@ def join_audio(work: str, pieces: list[str], out: str) -> None:
          "-i", listing, "-c:a", "libmp3lame", "-q:a", "3", out])
 
 
-PANEL_W, PANEL_H = 452, 254
+def make_backdrop(work: str, image: str, name: str, seconds: float,
+                  variant: int = 0) -> str:
+    """A full-frame background from a still, with smooth, judder-free motion.
 
+    The story's own photograph fills the whole screen instead of sitting in a
+    little over-the-shoulder panel — the single biggest change that makes the
+    bulletin read as a real broadcast rather than a captioned slideshow. The
+    catch is the motion: zoompan snaps its window to whole pixels, so a slow
+    drift freezes for several frames and then jumps, which reads as a shake.
+    The fix is to run the move at double size and scale it back down — the
+    downscale turns each one-pixel jump into a half-pixel one and interpolates
+    it away. Measured against the naive version: the naive move froze for whole
+    frames and then snapped; this one moves a little on every single frame.
 
-def make_panel(work: str, image: str, name: str) -> str:
-    """Crop a topic image to the panel size and give it a border.
-
-    Done as a separate pass so the scene filtergraph stays simple, and so a
-    corrupt download fails here rather than halfway through a long render.
+    A different framing per topic (push in, pan across, pull out, tilt down)
+    keeps consecutive stories from moving the same way.
     """
     out = os.path.join(work, name)
-    run(["ffmpeg", "-y", "-loglevel", "error", "-i", image,
-         "-vf", (f"scale={PANEL_W}:{PANEL_H}:force_original_aspect_ratio=increase,"
-                 f"crop={PANEL_W}:{PANEL_H},"
-                 f"drawbox=x=0:y=0:w=iw:h=ih:color=white@0.85:t=3"),
-         "-frames:v", "1", out])
+    frames = int(round(seconds * FPS)) + 2
+    src_w, src_h = int(W * 2.5), int(H * 2.5)     # 3200x1800 working canvas
+    bw, bh = W * 2, H * 2                          # 2560x1440 supersampled move
+    # Every variant zooms IN — the window shrinks a little on every frame, which
+    # guarantees continuous sub-pixel motion once downscaled (a fixed-zoom pan or
+    # a pull-out can land two frames on the same rounded pixel and stutter). The
+    # variants differ only in where the frame drifts while it pushes in.
+    zin = "min(zoom+0.00045,1.13)"
+    ctr_x, ctr_y = "iw/2-(iw/zoom/2)", "ih/2-(ih/zoom/2)"
+    moves = [
+        (zin, ctr_x, ctr_y),                              # push in, centred
+        (zin, ctr_x, f"(ih-ih/zoom)*(on/{frames})"),      # push in, tilt down
+        (zin, ctr_x, f"(ih-ih/zoom)*(1-on/{frames})"),    # push in, tilt up
+        (zin, f"(iw-iw/zoom)*(on/{frames})", ctr_y),      # push in, drift right
+    ]
+    z, x, y = moves[variant % len(moves)]
+    vf = (f"scale={src_w}:{src_h}:force_original_aspect_ratio=increase,"
+          f"crop={src_w}:{src_h},"
+          f"zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={bw}x{bh}:fps={FPS},"
+          f"scale={W}:{H}:flags=bicubic,setsar=1")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-loop", "1", "-i", image,
+         "-vf", vf, "-t", f"{seconds + 0.3:.2f}", "-r", str(FPS),
+         "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", out])
     return out
 
 
-def make_video_panel(work: str, clip: str, name: str, seconds: float) -> str:
-    """Turn a source clip into a silent, looping panel that fills the scene.
+def make_video_backdrop(work: str, clip: str, name: str, seconds: float) -> str:
+    """A full-frame background from the newsroom's own footage, looped to length.
 
-    The real footage the newsroom posted, cropped to the panel and muted (the
-    bulletin has its own narration and music). Looped and hard-cut to the scene
-    length so a ten-second clip still covers a forty-second topic. Muting and
-    re-timing here rather than in the scene graph keeps that graph simple and
-    means a broken clip fails in this short pass, not mid-render.
+    Real moving footage needs no synthetic drift, so it is simply filled to the
+    frame and hard-cut to the scene length (a ten-second clip still covers a
+    forty-second topic). Muted here — the bulletin has its own narration.
     """
     out = os.path.join(work, name)
     run(["ffmpeg", "-y", "-loglevel", "error",
-         "-stream_loop", "-1", "-t", f"{seconds:.2f}", "-i", clip,
-         "-an", "-vf",
-         (f"scale={PANEL_W}:{PANEL_H}:force_original_aspect_ratio=increase,"
-          f"crop={PANEL_W}:{PANEL_H},setsar=1,"
-          f"drawbox=x=0:y=0:w=iw:h=ih:color=white@0.85:t=3"),
+         "-stream_loop", "-1", "-t", f"{seconds + 0.3:.2f}", "-i", clip, "-an",
+         "-vf", (f"scale={W}:{H}:force_original_aspect_ratio=increase,"
+                 f"crop={W}:{H},setsar=1"),
          "-r", str(FPS), "-c:v", "libx264", "-preset", "veryfast",
-         "-pix_fmt", "yuv420p", "-t", f"{seconds:.2f}", out])
+         "-pix_fmt", "yuv420p", "-t", f"{seconds + 0.3:.2f}", out])
     return out
 
 
@@ -244,12 +266,42 @@ def add_music(video_in: str, bed: str, out: str, level: float = 0.30) -> None:
          "-movflags", "+faststart", "-shortest", out])
 
 
+# The anchor's corner-cam box, top-right below the chrome bar — the one large
+# zone the lower-third (topic plate, headline, captions) never reaches.
+CAM_W, CAM_H = 384, 216
+
+
+def _anchor_inset(presenter: str) -> str:
+    """A head-high crop of the still anchor, scaled to the corner-cam box.
+
+    The source frames the subject a little right of centre, so the crop biases
+    that way and keeps heads high rather than cropping the middle.
+    """
+    sw, sh = probe_size(presenter)
+    cw = min(sw, int(sh * CAM_W / CAM_H))
+    cw = max(int(cw * 0.86) // 2 * 2, 320)
+    ch = max(int(cw * CAM_H / CAM_W) // 2 * 2, 180)
+    x = max(0, min(int((sw - cw) * 0.52), sw - cw))
+    y = max(0, min(int((sh - ch) * 0.24), sh - ch))       # heads high
+    return (f"[2:v]crop={cw}:{ch}:{x}:{y},scale={CAM_W}:{CAM_H},setsar=1,"
+            f"drawbox=x=0:y=0:w=iw:h=ih:color=white@0.9:t=3[ins]")
+
+
 def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  headline: str, brand: str, date_text: str, ticker: str,
                  variant: int, elapsed: float, total: float, out: str,
-                 panel: str | None = None, credit: str = "",
-                 panel_is_video: bool = False) -> None:
-    """One topic: locked framing, chrome, lower third, ticker, captions."""
+                 backdrop: str | None = None, credit: str = "") -> None:
+    """One topic.
+
+    When the story has its own footage or photograph, that fills the screen
+    with a slow move and the anchor rides along in a corner cam — the immersive
+    layout. With no picture, the anchor holds the full frame instead (the
+    fallback), so a topic with no usable image still renders cleanly.
+
+    Over either base sit the same broadcast furniture: the top brand bar, a
+    topic plate that slides in, the story headline, a scrolling ticker, the
+    bulletin progress bar and the spoken captions.
+    """
     seconds = probe_duration(audio)
 
     bf = _textfile(work, "brand.txt", brand)
@@ -257,73 +309,85 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
     tf = _textfile(work, f"topic{variant}.txt", topic.upper())
     hf = _textfile(work, f"head{variant}.txt", headline) if headline else ""
     kf = _textfile(work, "ticker.txt", ticker) if ticker else ""
+    cf = _textfile(work, f"credit{variant}.txt", credit) if credit else ""
 
-    # progress strip: a full-width bar slid in from the left, so the visible
-    # part equals how far through the whole bulletin we are
-    bar = (f"[bg][2:v]overlay=x='W*(({elapsed}+t)/{max(total, 1)}-1)'"
-           f":y=H-5:eval=frame[p]")
-
-    chrome = [
-        f"drawbox=x=0:y=0:w=iw:h=52:color={NAVY}@0.94:t=fill",
-        f"drawbox=x=0:y=52:w=iw:h=3:color={RED}:t=fill",
-        f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=23:x=30:y=15",
-        f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=18:x=w-tw-30:y=17",
-        # scrim so captions stay readable over a bright frame
-        f"drawbox=x=0:y=ih-215:w=iw:h=215:color=black@0.45:t=fill",
-        # topic plate slides in over the first half second, then holds
-        f"drawtext=fontfile={BOLD}:textfile={tf}:fontcolor=white:fontsize=25"
-        f":box=1:boxcolor={RED}@0.96:boxborderw=15"
-        f":x='-560+min(t/0.5\\,1)*588':y=514",
-    ]
-    if hf:
-        # the story headline sits just under the topic plate; captions get the
-        # clear band below it (see the ASS MarginV) so the two never overlap
-        chrome.append(
-            f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=24"
-            f":x=32:y=556:alpha='min(max((t-0.55)/0.4\\,0)\\,1)'")
-    if panel and credit:
-        # Commons licences require attribution, so it is printed under the photo
-        cf = _textfile(work, f"credit{variant}.txt", credit)
-        chrome.append(
-            f"drawtext=fontfile={REGULAR}:textfile={cf}:fontcolor=white@0.72"
-            f":fontsize=13:box=1:boxcolor=black@0.45:boxborderw=5:x=64:y=364"
-            f":alpha='min(max((t-0.8)/0.5\\,0)\\,1)'")
-    if kf:
-        # ticker scrolls at ~95 px/s — fast enough that whole-pixel steps are
-        # invisible, which is exactly what a slow Ken Burns drift could not do
-        chrome.append(f"drawbox=x=0:y=ih-32:w=iw:h=27:color={NAVY}@0.96:t=fill")
-        chrome.append(
-            f"drawtext=fontfile={REGULAR}:textfile={kf}:fontcolor={PALE}"
-            f":fontsize=16:y=H-27:x='w-mod(t*95\\,w+tw)'")
-    chrome.append("fade=t=in:st=0:d=0.35")        # soft cut into every scene
-
-    chain = ",".join(chrome)
     subs = ""
     if srt and os.path.exists(srt) and os.path.getsize(srt) > 20:
         subs = f",subtitles='{srt}'"
 
-    # the topic image rides in as an over-the-shoulder panel on the left,
-    # which is the empty half of the anchor plate
-    extra, panel_step = [], ""
-    if panel and os.path.exists(panel):
-        # a still is looped to fill the scene; a clip is already scene-length
-        extra = (["-i", panel] if panel_is_video
-                 else ["-loop", "1", "-framerate", str(FPS), "-i", panel])
-        panel_step = (f";[p][3:v]overlay=eval=frame"
-                      f":x='-{PANEL_W + 20}+min(t/0.55\\,1)*({PANEL_W + 20}+62)'"
-                      f":y=104:enable='gte(t,0.25)'[p2]")
+    def chrome(show_credit: bool) -> str:
+        c = [
+            f"drawbox=x=0:y=0:w=iw:h=52:color={NAVY}@0.94:t=fill",
+            f"drawbox=x=0:y=52:w=iw:h=3:color={RED}:t=fill",
+            f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=23:x=30:y=15",
+            f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=18:x=w-tw-30:y=17",
+            # scrim so the lower third and captions stay readable over a bright frame
+            f"drawbox=x=0:y=ih-215:w=iw:h=215:color=black@0.45:t=fill",
+            # topic plate slides in over the first half second, then holds
+            f"drawtext=fontfile={BOLD}:textfile={tf}:fontcolor=white:fontsize=25"
+            f":box=1:boxcolor={RED}@0.96:boxborderw=15"
+            f":x='-560+min(t/0.5\\,1)*588':y=514",
+        ]
+        if hf:
+            # the story headline sits just under the topic plate; captions get
+            # the clear band below it (see the ASS MarginV) so they never overlap
+            c.append(
+                f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=24"
+                f":x=32:y=556:alpha='min(max((t-0.55)/0.4\\,0)\\,1)'")
+        if show_credit and cf:
+            # Commons licences require attribution, printed top-left under the bar
+            c.append(
+                f"drawtext=fontfile={REGULAR}:textfile={cf}:fontcolor=white@0.72"
+                f":fontsize=13:box=1:boxcolor=black@0.42:boxborderw=5:x=30:y=64"
+                f":alpha='min(max((t-0.8)/0.5\\,0)\\,1)'")
+        if kf:
+            # ticker scrolls at ~95 px/s — fast enough that whole-pixel steps are
+            # invisible
+            c.append(f"drawbox=x=0:y=ih-32:w=iw:h=27:color={NAVY}@0.96:t=fill")
+            c.append(
+                f"drawtext=fontfile={REGULAR}:textfile={kf}:fontcolor={PALE}"
+                f":fontsize=16:y=H-27:x='w-mod(t*95\\,w+tw)'")
+        c.append("fade=t=in:st=0:d=0.35")          # soft cut into every scene
+        return ",".join(c)
 
+    prog = f"color=c={RED}@0.9:s={W}x5:r={FPS}:d={seconds + 1}"
+
+    # 1. Immersive: full-frame story footage + anchor corner cam.
+    if backdrop and os.path.exists(backdrop):
+        ins = _anchor_inset(presenter)
+        # a touch of shade under the bar gives the credit line contrast; the
+        # lower-third scrim is drawn in chrome()
+        bg = f"[0:v]drawbox=x=0:y=0:w=iw:h=120:color=black@0.28:t=fill[bg]"
+        bar = (f"[bg][3:v]overlay=x='W*(({elapsed}+t)/{max(total, 1)}-1)'"
+               f":y=H-5:eval=frame[bgp]")
+        # the cam slides in from the right and parks top-right below the bar
+        cam = (f"[bgp][ins]overlay=eval=frame"
+               f":x='W-min(t/0.5\\,1)*(w+24)':y=70[cam]")
+        graph = f"{ins};{bg};{bar};{cam};[cam]{chrome(True)}{subs}[v]"
+        try:
+            run(["ffmpeg", "-y", "-loglevel", "error",
+                 "-i", backdrop,
+                 "-i", audio,
+                 "-loop", "1", "-framerate", str(FPS), "-i", presenter,
+                 "-f", "lavfi", "-i", prog,
+                 "-filter_complex", graph,
+                 "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
+            return
+        except RuntimeError as e:
+            print(f"  scene '{topic}' immersive render failed: {e}",
+                  file=sys.stderr)
+
+    # 2. Fallback: the anchor holds the full frame (no usable picture).
+    bar = (f"[bg][2:v]overlay=x='W*(({elapsed}+t)/{max(total, 1)}-1)'"
+           f":y=H-5:eval=frame[p]")
     plain = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}"
     for label, base in (("framed", framing(presenter, variant)), ("plain", plain)):
-        stage = "[p2]" if panel_step else "[p]"
-        graph = f"[0:v]{base}[bg];{bar}{panel_step};{stage}{chain}{subs}[v]"
+        graph = f"[0:v]{base}[bg];{bar};[p]{chrome(False)}{subs}[v]"
         try:
             run(["ffmpeg", "-y", "-loglevel", "error",
                  "-loop", "1", "-framerate", str(FPS), "-i", presenter,
                  "-i", audio,
-                 "-f", "lavfi", "-i",
-                 f"color=c={RED}@0.9:s={W}x5:r={FPS}:d={seconds + 1}",
-                 *extra,
+                 "-f", "lavfi", "-i", prog,
                  "-filter_complex", graph,
                  "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
             return

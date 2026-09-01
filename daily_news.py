@@ -1027,17 +1027,19 @@ def _download(url: str, path: str, headers: dict) -> bool:
 
 def segment_media(seg: dict, posts: list[dict], work: str,
                   tag: str, seconds: float) -> tuple[str, str, bool] | None:
-    """The panel for one topic. Returns (path, credit, is_video) or None.
+    """The picture for one topic. Returns (raw_path, credit, is_video) or None.
 
-    Order of preference:
+    Returns the RAW asset — a full-resolution photo or an untrimmed clip — so
+    the renderer can fill the whole frame with it and give it motion. Order of
+    preference:
       1. a VIDEO clip from one of the posts this segment came from — the actual
          footage the newsroom published, which is far more alive than a still
       2. a photograph attached to one of those posts
       3. a real photograph of the named place from Wikimedia Commons
       4. a generated illustration, only if explicitly enabled
 
-    Everything degrades quietly: a scene with no panel is fine; a build that
-    dies over one missing clip is not.
+    Everything degrades quietly: a scene with no picture is fine (the anchor
+    holds the frame); a build that dies over one missing clip is not.
     """
     if not WANT_IMAGES:
         return None
@@ -1051,9 +1053,7 @@ def segment_media(seg: dict, posts: list[dict], work: str,
                 raw = os.path.join(work, f"{tag}_clip.mp4")
                 try:
                     if _download(url, raw, UA) and video.probe_duration(raw) >= 1.0:
-                        panel = video.make_video_panel(
-                            work, raw, f"{tag}_vpanel.mp4", seconds)
-                        return panel, f"@{SOURCE}", True
+                        return raw, f"@{SOURCE}", True
                 except Exception as e:
                     print(f"    post {n} clip failed: {str(e)[:70]}")
 
@@ -1061,10 +1061,7 @@ def segment_media(seg: dict, posts: list[dict], work: str,
     raw = os.path.join(work, f"{tag}.jpg")
     hit = segment_image(seg, posts, raw)
     if hit:
-        try:
-            return video.make_panel(work, hit[0], f"{tag}_panel.png"), hit[1], False
-        except Exception as e:
-            print(f"    still panel failed: {str(e)[:70]}")
+        return hit[0], hit[1], False
     return None
 
 
@@ -1194,21 +1191,34 @@ def build(brief: dict, day: dt.date, work: str,
     ticker = f"{ticker}     •     "
 
     print("finding footage:")
-    panels: list[str | None] = []
+    backdrops: list[str | None] = []
     credits: list[str] = []
-    is_video: list[bool] = []
     for i, seg in enumerate(segments):
         got = segment_media(seg, posts, work, f"m{i}", spans[i])
+        backdrop = None
         if got:
-            panels.append(got[0])
-            credits.append(got[1])
-            is_video.append(got[2])
-            kind = "video" if got[2] else "photo"
-            print(f"  {i + 1}. {seg['topic']} <- {got[1]} ({kind})")
+            raw, credit, isvid = got
+            # Turn the raw asset into a full-frame backdrop: real footage filled
+            # to the frame, a still given a slow judder-free move. A failure here
+            # (a corrupt image, an odd codec) just drops back to the anchor frame
+            # for this one topic rather than losing the whole build.
+            try:
+                if isvid:
+                    backdrop = video.make_video_backdrop(
+                        work, raw, f"bd{i}.mp4", spans[i])
+                else:
+                    backdrop = video.make_backdrop(
+                        work, raw, f"bd{i}.mp4", spans[i], i)
+                kind = "video" if isvid else "photo"
+                print(f"  {i + 1}. {seg['topic']} <- {credit} ({kind})")
+            except Exception as e:
+                credit = ""
+                print(f"  {i + 1}. {seg['topic']} <- backdrop failed "
+                      f"({str(e)[:70]}), anchor frame")
         else:
-            panels.append(None)
-            credits.append("")
-            is_video.append(False)
+            credit = ""
+        backdrops.append(backdrop)
+        credits.append(credit)
 
     print("rendering scenes:")
     elapsed = 0.0
@@ -1217,8 +1227,8 @@ def build(brief: dict, day: dt.date, work: str,
         print(f"  {i + 1}/{len(segments)} {seg['topic']} ({spans[i]:.0f}s)")
         video.render_scene(work, PRESENTER, audio[i], srts[i], seg["topic"],
                            seg.get("headline", ""), BRAND, date_text, ticker,
-                           i, elapsed, total, out, panel=panels[i],
-                           credit=credits[i], panel_is_video=is_video[i])
+                           i, elapsed, total, out, backdrop=backdrops[i],
+                           credit=credits[i])
         elapsed += spans[i]
         parts.append(out)
 
