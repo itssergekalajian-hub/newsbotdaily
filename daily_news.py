@@ -906,7 +906,20 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
     pieces, cues, clock = [], [], 0.0
     for i, sent in enumerate(sentences):
         raw = os.path.join(work, f"{tag}_{i:03d}_raw.mp3")
-        asyncio.run(_speak(sent, raw))
+        # edge-tts drops a request now and then (NoAudioReceived, a websocket
+        # reset). One flaky sentence must never kill the whole nightly build:
+        # retry with a short pause, and as a last resort skip the sentence —
+        # a bulletin missing one line beats no bulletin at all.
+        for attempt in range(3):
+            try:
+                asyncio.run(_speak(sent, raw))
+                break
+            except Exception as e:
+                if attempt == 2:
+                    print(f"    tts failed on one sentence after 3 tries "
+                          f"({str(e)[:60]}) — skipped")
+                else:
+                    time.sleep(2 * (attempt + 1))
         if not os.path.exists(raw) or os.path.getsize(raw) < 200:
             continue                          # skip anything the voice refused
         clip = os.path.join(work, f"{tag}_{i:03d}.wav")
