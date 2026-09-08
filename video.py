@@ -317,26 +317,57 @@ def add_music(video_in: str, bed: str, out: str, level: float = 0.30) -> None:
 CAM_W, CAM_H = 448, 252
 
 
-def _anchor_inset(presenter: str) -> str:
-    """A head-high crop of the still anchor, scaled to the corner-cam box.
+def _inset_crop(src: str) -> str:
+    """A head-high crop of the anchor (still or video), sized for the cam box.
 
     The source frames the subject a little right of centre, so the crop biases
     that way and keeps heads high rather than cropping the middle.
     """
-    sw, sh = probe_size(presenter)
+    sw, sh = probe_size(src)
     cw = min(sw, int(sh * CAM_W / CAM_H))
     cw = max(int(cw * 0.86) // 2 * 2, 320)
     ch = max(int(cw * CAM_H / CAM_W) // 2 * 2, 180)
     x = max(0, min(int((sw - cw) * 0.52), sw - cw))
     y = max(0, min(int((sh - ch) * 0.24), sh - ch))       # heads high
-    return (f"[2:v]crop={cw}:{ch}:{x}:{y},scale={CAM_W}:{CAM_H},setsar=1,"
+    return f"crop={cw}:{ch}:{x}:{y},scale={CAM_W}:{CAM_H},setsar=1"
+
+
+def _anchor_inset(presenter: str) -> str:
+    return (f"[2:v]{_inset_crop(presenter)},"
             f"drawbox=x=0:y=0:w=iw:h=ih:color=white@0.9:t=3[ins]")
+
+
+def anchor_loop(work: str, anchor: str, seconds: float, vf: str,
+                name: str) -> str:
+    """The animated anchor, framed by `vf` and looped to the scene length.
+
+    The generated anchor clip runs about ten seconds; a scene runs far longer,
+    and a hard loop jumps at the seam because the pose at the end never matches
+    the start. Playing the clip forward and then in reverse makes the join
+    continuous by construction, and motion this subtle (blinks, small head
+    moves) reads naturally in either direction. The framing is applied BEFORE
+    the reverse so only small frames are buffered.
+    """
+    pp = os.path.join(work, f"pp_{name}")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", anchor,
+         "-filter_complex",
+         f"[0:v]{vf},split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1[v]",
+         "-map", "[v]", "-an", "-c:v", "libx264", "-preset", "veryfast",
+         "-crf", "20", "-pix_fmt", "yuv420p", "-r", str(FPS), pp])
+    out = os.path.join(work, name)
+    run(["ffmpeg", "-y", "-loglevel", "error",
+         "-stream_loop", "-1", "-t", f"{seconds + 0.3:.2f}", "-i", pp,
+         "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
+         "-pix_fmt", "yuv420p", "-r", str(FPS),
+         "-t", f"{seconds + 0.3:.2f}", out])
+    return out
 
 
 def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  headline: str, brand: str, date_text: str, ticker: str,
                  variant: int, elapsed: float, total: float, out: str,
-                 backdrop: str | None = None, credit: str = "") -> None:
+                 backdrop: str | None = None, credit: str = "",
+                 anchor_video: str | None = None) -> None:
     """One topic.
 
     When the story has its own footage or photograph, that fills the screen
@@ -398,9 +429,23 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
 
     prog = f"color=c={RED}@0.9:s={W}x5:r={FPS}:d={seconds + 1}"
 
-    # 1. Immersive: full-frame story footage + anchor corner cam.
+    # 1. Immersive: full-frame story footage + anchor corner cam. The cam is
+    # the LIVING anchor when an animated anchor clip exists — a looping video
+    # framed exactly like the still would have been — and the still otherwise.
     if backdrop and os.path.exists(backdrop):
+        cam_in = ["-loop", "1", "-framerate", str(FPS), "-i", presenter]
         ins = _anchor_inset(presenter)
+        if anchor_video and os.path.exists(anchor_video):
+            try:
+                loop = anchor_loop(work, anchor_video, seconds,
+                                   _inset_crop(anchor_video),
+                                   f"cam{variant}.mp4")
+                cam_in = ["-i", loop]
+                ins = (f"[2:v]drawbox=x=0:y=0:w=iw:h=ih"
+                       f":color=white@0.9:t=3[ins]")
+            except RuntimeError as e:
+                print(f"  anchor loop failed ({str(e)[:80]}) — still cam",
+                      file=sys.stderr)
         # a touch of shade under the bar gives the credit line contrast; the
         # lower-third scrim is drawn in chrome()
         bg = f"[0:v]drawbox=x=0:y=0:w=iw:h=120:color=black@0.28:t=fill[bg]"
@@ -414,7 +459,7 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
             run(["ffmpeg", "-y", "-loglevel", "error",
                  "-i", backdrop,
                  "-i", audio,
-                 "-loop", "1", "-framerate", str(FPS), "-i", presenter,
+                 *cam_in,
                  "-f", "lavfi", "-i", prog,
                  "-filter_complex", graph,
                  "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
@@ -423,10 +468,27 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
             print(f"  scene '{topic}' immersive render failed: {e}",
                   file=sys.stderr)
 
-    # 2. Fallback: the anchor holds the full frame (no usable picture).
+    # 2. Fallback: the anchor holds the full frame (no usable picture) — the
+    # animated anchor looped and framed when available, the still otherwise.
     bar = (f"[bg][2:v]overlay=x='W*(({elapsed}+t)/{max(total, 1)}-1)'"
            f":y=H-5:eval=frame[p]")
     plain = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}"
+    if anchor_video and os.path.exists(anchor_video):
+        try:
+            loop = anchor_loop(work, anchor_video, seconds,
+                               framing(anchor_video, variant),
+                               f"full{variant}.mp4")
+            graph = f"[0:v]null[bg];{bar};[p]{chrome(False)}{subs}[v]"
+            run(["ffmpeg", "-y", "-loglevel", "error",
+                 "-i", loop,
+                 "-i", audio,
+                 "-f", "lavfi", "-i", prog,
+                 "-filter_complex", graph,
+                 "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
+            return
+        except RuntimeError as e:
+            print(f"  scene '{topic}' animated-anchor render failed "
+                  f"({str(e)[:100]}) — still anchor", file=sys.stderr)
     for label, base in (("framed", framing(presenter, variant)), ("plain", plain)):
         graph = f"[0:v]{base}[bg];{bar};[p]{chrome(False)}{subs}[v]"
         try:
