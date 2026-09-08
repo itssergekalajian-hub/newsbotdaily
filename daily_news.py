@@ -1001,7 +1001,12 @@ SCENE_XFADE = float(os.getenv("SCENE_XFADE", "0.5"))
 
 UA_HEADERS = {"User-Agent": "MidWorldDaily/1.0 (Telegram news digest bot)"}
 _BAD_FILE = ("logo", "icon", "map of", "flag of", "coat of arms", "diagram",
-             "chart", "seal of", "emblem", ".svg")
+             "chart", "seal of", "emblem", ".svg",
+             # archival scans read as engravings, not press photographs
+             "book", "plate", "engraving", "lithograph", "woodcut", "drawing",
+             "illustration", "painting", "stamp")
+# uploaders whose collections are scans of old printed matter, not photographs
+_BAD_ARTIST = ("internet archive", "british library")
 
 
 def _commons_search(query: str) -> tuple[str, str] | None:
@@ -1037,6 +1042,8 @@ def _commons_search(query: str) -> tuple[str, str] | None:
             continue
         meta = info.get("extmetadata") or {}
         artist = re.sub(r"<[^>]+>", "", str(meta.get("Artist", {}).get("value", "")))
+        if any(bad in artist.lower() for bad in _BAD_ARTIST):
+            continue
         licence = str(meta.get("LicenseShortName", {}).get("value", "")).strip()
         credit = " / ".join(x for x in
                             (re.sub(r"\s+", " ", artist).strip()[:40], licence) if x)
