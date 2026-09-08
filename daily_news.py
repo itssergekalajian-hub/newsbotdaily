@@ -55,6 +55,9 @@ PRESENTER = os.getenv("PRESENTER_IMAGE", "presenter.png")
 # an AI-animated clip of the same presenter (blinks, subtle movement); when the
 # file exists the anchor is alive in every scene instead of a frozen still
 ANCHOR_VIDEO = os.getenv("ANCHOR_VIDEO", "anchor.mp4")
+# a branded animated opener; when the file exists the title and sign-off cards
+# play over it instead of a flat navy plate
+INTRO_VIDEO = os.getenv("INTRO_VIDEO", "intro_sting.mp4")
 BRAND = os.getenv("BRAND", "MIDWORLD DAILY")
 FORCE_DATE = os.getenv("TARGET_DATE", "").strip()
 # preview a full render without posting to Telegram (the workflow uploads the
@@ -1291,12 +1294,15 @@ def build(brief: dict, day: dt.date, work: str,
     total = sum(spans)
     print(f"bulletin: {len(segments)} segments, {total / 60:.1f} minutes")
 
+    sting = INTRO_VIDEO if os.path.exists(INTRO_VIDEO) else None
+    if sting:
+        print("animated intro sting in use")
     intro = os.path.join(work, "intro.mp4")
     video.render_card(work, 4.5,
                       [(BRAND, 54, "white"),
                        (f"{day:%A, %d %B %Y}", 26, video.PALE),
                        ("The full day in review", 22, video.PALE)],
-                      intro)
+                      intro, bg_video=sting)
     parts = [intro]
 
     # the ticker carries the day's topics so the strip always has content
@@ -1357,7 +1363,7 @@ def build(brief: dict, day: dt.date, work: str,
     video.render_card(work, 3.5,
                       [(BRAND, 44, "white"),
                        (f"@{TARGET.lstrip('@')}", 24, video.PALE)],
-                      outro, wipe=False)
+                      outro, wipe=False, bg_video=sting)
     parts.append(outro)
 
     joined = os.path.join(work, "joined.mp4")

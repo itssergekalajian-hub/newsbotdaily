@@ -505,8 +505,15 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
 
 
 def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
-                out: str, wipe: bool = True) -> None:
-    """Title or outro card: flat navy, a rule that slides in, stacked text."""
+                out: str, wipe: bool = True, bg_video: str | None = None) -> None:
+    """Title or outro card: stacked text over a background.
+
+    The background is the branded animated sting when one exists (looped to
+    length and shaded so the lockup stays crisp — the text itself is always
+    drawn here, never baked into generated footage, so it renders pin-sharp
+    and never garbles), and the flat navy card otherwise. A sting that fails
+    to decode degrades to the flat card rather than losing the bulletin.
+    """
     y_title, y_rule = 240, 330
     parts = []
     for i, (text, size, color) in enumerate(lines):
@@ -519,13 +526,36 @@ def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
     parts.append(f"fade=t=out:st={max(seconds - 0.5, 0.1):.2f}:d=0.5")
     chain = ",".join(parts)
 
+    rule = f"color=c={RED}:s=520x4:r={FPS}:d={seconds}"
+    slide = (f"overlay=x='min(t/0.5\\,1)*((W-520)/2+520)-520'"
+             f":y={y_rule}:eval=frame")
+
+    if bg_video and os.path.exists(bg_video):
+        # sting background: fill the frame, shade it under the text
+        base = (f"scale={W}:{H}:force_original_aspect_ratio=increase,"
+                f"crop={W}:{H},setsar=1,"
+                f"drawbox=x=0:y=0:w=iw:h=ih:color={NAVY}@0.35:t=fill")
+        inputs = ["-stream_loop", "-1", "-t", str(seconds), "-i", bg_video,
+                  "-f", "lavfi", "-i", f"anullsrc=r=48000:cl=stereo:d={seconds}"]
+        if wipe:
+            inputs += ["-f", "lavfi", "-i", rule]
+            graph = f"[0:v]{base}[b0];[b0][2:v]{slide}[b];[b]{chain}[v]"
+        else:
+            graph = f"[0:v]{base},{chain}[v]"
+        try:
+            run(["ffmpeg", "-y", "-loglevel", "error", *inputs,
+                 "-filter_complex", graph,
+                 "-map", "[v]", "-map", "1:a", *ENC, "-t", str(seconds), out])
+            return
+        except RuntimeError as e:
+            print(f"  sting card failed ({str(e)[:80]}) — flat card",
+                  file=sys.stderr)
+
     inputs = ["-f", "lavfi", "-i", f"color=c={NAVY}:s={W}x{H}:r={FPS}:d={seconds}",
               "-f", "lavfi", "-i", f"anullsrc=r=48000:cl=stereo:d={seconds}"]
     if wipe:
-        inputs += ["-f", "lavfi", "-i",
-                   f"color=c={RED}:s=520x4:r={FPS}:d={seconds}"]
-        graph = (f"[0:v][2:v]overlay=x='min(t/0.5\\,1)*((W-520)/2+520)-520'"
-                 f":y={y_rule}:eval=frame[b];[b]{chain}[v]")
+        inputs += ["-f", "lavfi", "-i", rule]
+        graph = f"[0:v][2:v]{slide}[b];[b]{chain}[v]"
     else:
         graph = f"[0:v]{chain}[v]"
 
