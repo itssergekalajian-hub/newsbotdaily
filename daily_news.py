@@ -323,7 +323,10 @@ Rules for the segments:
   "images" is empty: 3 to 6 concrete words naming what a real press photograph
   of this story would show — a named institution, place or event type
   ("Kremlin press conference", "Gaza aid convoy", "European Central Bank
-  headquarters"). Name things that get photographed, not abstract concepts.
+  headquarters"). Every word should be one you would expect IN THE FILENAME of
+  the right photograph: distinctive proper nouns and photographable objects,
+  never abstract concepts ("tensions", "diplomacy", "economy") and never
+  generic filler ("news", "report", "situation").
 - each segment's "photo" is a LAST-RESORT fallback behind "search". It
   names a REAL, PHOTOGRAPHABLE PLACE connected to the
   story, which will be looked up in a photo archive. Use a city, country,
@@ -1025,16 +1028,24 @@ def _commons_search(query: str) -> tuple[str, str] | None:
     correspond to anything that happened. A real photograph of the actual city
     or building is both honest and better looking. The licences require credit,
     so the photographer and licence are carried through and printed on screen.
+
+    Relevance beats resolution. An earlier version kept the LARGEST acceptable
+    image, which routinely surfaced a huge but barely-related file from page
+    twenty of the results — the "random pictures" failure. Now a result must
+    share at least one significant word with the query, results are ranked by
+    how many query words their filename shares, and pixel count only breaks
+    ties.
     """
     params = {
         "action": "query", "format": "json", "generator": "search",
         "gsrsearch": f"filetype:bitmap {query}", "gsrnamespace": "6",
         "gsrlimit": "20", "prop": "imageinfo",
-        "iiprop": "url|size|extmetadata", "iiurlwidth": "1024",
+        "iiprop": "url|size|extmetadata", "iiurlwidth": "1600",
     }
     r = requests.get(COMMONS_API, params=params, headers=UA_HEADERS, timeout=45)
     r.raise_for_status()
     pages = (r.json().get("query") or {}).get("pages") or {}
+    words = {w for w in re.findall(r"[a-z]{4,}", query.lower())}
 
     best = None
     for page in pages.values():
@@ -1052,10 +1063,13 @@ def _commons_search(query: str) -> tuple[str, str] | None:
         artist = re.sub(r"<[^>]+>", "", str(meta.get("Artist", {}).get("value", "")))
         if any(bad in artist.lower() for bad in _BAD_ARTIST):
             continue
+        overlap = sum(1 for w in words if w in title)
+        if words and overlap == 0:
+            continue                             # shares nothing with the story
         licence = str(meta.get("LicenseShortName", {}).get("value", "")).strip()
         credit = " / ".join(x for x in
                             (re.sub(r"\s+", " ", artist).strip()[:40], licence) if x)
-        score = width * height
+        score = (overlap, width * height)
         if best is None or score > best[0]:
             best = (score, url, f"{credit} — Wikimedia Commons" if credit
                     else "Wikimedia Commons")
@@ -1072,13 +1086,16 @@ def _openverse_search(query: str) -> tuple[str, str] | None:
     others), so it often has a genuine press-style photograph of a story that
     Wikimedia Commons lacks. Same honesty rule as Commons: real photographs
     only, with the photographer and licence carried through on screen.
+
+    Openverse already ranks by relevance, so the FIRST acceptable result wins —
+    re-sorting by pixel count (as an earlier version did) traded the on-topic
+    photo for the biggest vaguely-nearby one.
     """
     r = requests.get(OPENVERSE_API,
                      params={"q": query, "page_size": "20", "mature": "false",
                              "license_type": "all-cc"},
                      headers=UA_HEADERS, timeout=45)
     r.raise_for_status()
-    best = None
     for res in r.json().get("results", []):
         url = res.get("url")
         w, h = res.get("width") or 0, res.get("height") or 0
@@ -1090,11 +1107,8 @@ def _openverse_search(query: str) -> tuple[str, str] | None:
         licence = str(res.get("license") or "").upper()
         credit = " / ".join(x for x in (creator, f"CC {licence}" if licence
                                         else "") if x)
-        score = w * h
-        if best is None or score > best[0]:
-            best = (score, url, f"{credit} — Openverse" if credit
-                    else "Openverse")
-    return (best[1], best[2]) if best else None
+        return url, f"{credit} — Openverse" if credit else "Openverse"
+    return None
 
 
 def _download(url: str, path: str, headers: dict) -> bool:
