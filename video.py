@@ -31,7 +31,7 @@ FONT_DIR = "/usr/share/fonts/truetype/dejavu"
 BOLD = f"{FONT_DIR}/DejaVuSans-Bold.ttf"
 REGULAR = f"{FONT_DIR}/DejaVuSans.ttf"
 
-W, H, FPS = 1280, 720, 25
+W, H, FPS = 1920, 1080, 25    # Full HD: the sting and anchor are 1080p native
 NAVY = "0x0A1428"
 RED = "0xC8102E"
 PALE = "0x9FB6D4"
@@ -173,8 +173,11 @@ def make_backdrop(work: str, image: str, name: str, seconds: float,
     """
     out = os.path.join(work, name)
     frames = int(round(seconds * FPS)) + 2
-    src_w, src_h = int(W * 2.5), int(H * 2.5)     # 3200x1800 working canvas
-    bw, bh = W * 2, H * 2                          # 2560x1440 supersampled move
+    # The move itself stays at 2560x1440 whatever the output size: zoompan cost
+    # is what limits the render, and a 2560-wide window downscaled to 1920 still
+    # lands on 0.75-pixel steps — comfortably sub-pixel after bicubic.
+    src_w, src_h = 3200, 1800                      # working canvas
+    bw, bh = 2560, 1440                            # supersampled move
     # Every variant zooms IN — the window shrinks a little on every frame, which
     # guarantees continuous sub-pixel motion once downscaled (a fixed-zoom pan or
     # a pull-out can land two frames on the same rounded pixel and stutter). The
@@ -314,7 +317,7 @@ def add_music(video_in: str, bed: str, out: str, level: float = 0.30) -> None:
 
 # The anchor's corner-cam box, top-right below the chrome bar — the one large
 # zone the lower-third (topic plate, headline, captions) never reaches.
-CAM_W, CAM_H = 448, 252
+CAM_W, CAM_H = 672, 378
 
 
 def _inset_crop(src: str) -> str:
@@ -394,40 +397,40 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
 
     def chrome(show_credit: bool) -> str:
         c = [
-            f"drawbox=x=0:y=0:w=iw:h=52:color={NAVY}@0.94:t=fill",
-            f"drawbox=x=0:y=52:w=iw:h=3:color={RED}:t=fill",
-            f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=23:x=30:y=15",
-            f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=18:x=w-tw-30:y=17",
+            f"drawbox=x=0:y=0:w=iw:h=78:color={NAVY}@0.94:t=fill",
+            f"drawbox=x=0:y=78:w=iw:h=4:color={RED}:t=fill",
+            f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=34:x=45:y=22",
+            f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=27:x=w-tw-45:y=26",
             # scrim so the lower third and captions stay readable over a bright frame
-            f"drawbox=x=0:y=ih-215:w=iw:h=215:color=black@0.45:t=fill",
+            f"drawbox=x=0:y=ih-322:w=iw:h=322:color=black@0.45:t=fill",
             # topic plate slides in over the first half second, then holds
-            f"drawtext=fontfile={BOLD}:textfile={tf}:fontcolor=white:fontsize=25"
-            f":box=1:boxcolor={RED}@0.96:boxborderw=15"
-            f":x='-560+min(t/0.5\\,1)*588':y=514",
+            f"drawtext=fontfile={BOLD}:textfile={tf}:fontcolor=white:fontsize=38"
+            f":box=1:boxcolor={RED}@0.96:boxborderw=22"
+            f":x='-840+min(t/0.5\\,1)*882':y=771",
         ]
         if hf:
             # the story headline sits just under the topic plate; captions get
             # the clear band below it (see the ASS MarginV) so they never overlap
             c.append(
-                f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=24"
-                f":x=32:y=556:alpha='min(max((t-0.55)/0.4\\,0)\\,1)'")
+                f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=36"
+                f":x=48:y=834:alpha='min(max((t-0.55)/0.4\\,0)\\,1)'")
         if show_credit and cf:
             # Commons licences require attribution, printed top-left under the bar
             c.append(
                 f"drawtext=fontfile={REGULAR}:textfile={cf}:fontcolor=white@0.72"
-                f":fontsize=13:box=1:boxcolor=black@0.42:boxborderw=5:x=30:y=64"
+                f":fontsize=20:box=1:boxcolor=black@0.42:boxborderw=8:x=45:y=96"
                 f":alpha='min(max((t-0.8)/0.5\\,0)\\,1)'")
         if kf:
             # ticker scrolls at ~95 px/s — fast enough that whole-pixel steps are
             # invisible
-            c.append(f"drawbox=x=0:y=ih-32:w=iw:h=27:color={NAVY}@0.96:t=fill")
+            c.append(f"drawbox=x=0:y=ih-48:w=iw:h=40:color={NAVY}@0.96:t=fill")
             c.append(
                 f"drawtext=fontfile={REGULAR}:textfile={kf}:fontcolor={PALE}"
-                f":fontsize=16:y=H-27:x='w-mod(t*95\\,w+tw)'")
+                f":fontsize=24:y=H-40:x='w-mod(t*142\\,w+tw)'")
         c.append("fade=t=in:st=0:d=0.35")          # soft cut into every scene
         return ",".join(c)
 
-    prog = f"color=c={RED}@0.9:s={W}x5:r={FPS}:d={seconds + 1}"
+    prog = f"color=c={RED}@0.9:s={W}x8:r={FPS}:d={seconds + 1}"
 
     # 1. Immersive: full-frame story footage + anchor corner cam. The cam is
     # the LIVING anchor when an animated anchor clip exists — a looping video
@@ -448,12 +451,12 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                       file=sys.stderr)
         # a touch of shade under the bar gives the credit line contrast; the
         # lower-third scrim is drawn in chrome()
-        bg = f"[0:v]drawbox=x=0:y=0:w=iw:h=120:color=black@0.28:t=fill[bg]"
+        bg = f"[0:v]drawbox=x=0:y=0:w=iw:h=180:color=black@0.28:t=fill[bg]"
         bar = (f"[bg][3:v]overlay=x='W*(({elapsed}+t)/{max(total, 1)}-1)'"
-               f":y=H-5:eval=frame[bgp]")
+               f":y=H-8:eval=frame[bgp]")
         # the cam slides in from the right and parks top-right below the bar
         cam = (f"[bgp][ins]overlay=eval=frame"
-               f":x='W-min(t/0.5\\,1)*(w+24)':y=70[cam]")
+               f":x='W-min(t/0.5\\,1)*(w+36)':y=105[cam]")
         graph = f"{ins};{bg};{bar};{cam};[cam]{chrome(True)}{subs}[v]"
         try:
             run(["ffmpeg", "-y", "-loglevel", "error",
@@ -471,7 +474,7 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
     # 2. Fallback: the anchor holds the full frame (no usable picture) — the
     # animated anchor looped and framed when available, the still otherwise.
     bar = (f"[bg][2:v]overlay=x='W*(({elapsed}+t)/{max(total, 1)}-1)'"
-           f":y=H-5:eval=frame[p]")
+           f":y=H-8:eval=frame[p]")
     plain = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}"
     if anchor_video and os.path.exists(anchor_video):
         try:
@@ -514,20 +517,20 @@ def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
     and never garbles), and the flat navy card otherwise. A sting that fails
     to decode degrades to the flat card rather than losing the bulletin.
     """
-    y_title, y_rule = 240, 330
+    y_title, y_rule = 360, 495
     parts = []
     for i, (text, size, color) in enumerate(lines):
         tf = _textfile(work, f"card_{os.path.basename(out)}_{i}.txt", text)
-        y = y_title if i == 0 else y_rule + 40 + (i - 1) * 46
+        y = y_title if i == 0 else y_rule + 60 + (i - 1) * 69
         fade = f":alpha='min(max((t-{0.3 + i * 0.25})/0.5\\,0)\\,1)'"
         parts.append(
-            f"drawtext=fontfile={BOLD if size > 30 else REGULAR}:textfile={tf}"
+            f"drawtext=fontfile={BOLD if size > 45 else REGULAR}:textfile={tf}"
             f":fontcolor={color}:fontsize={size}:x=(w-tw)/2:y={y}{fade}")
     parts.append(f"fade=t=out:st={max(seconds - 0.5, 0.1):.2f}:d=0.5")
     chain = ",".join(parts)
 
-    rule = f"color=c={RED}:s=520x4:r={FPS}:d={seconds}"
-    slide = (f"overlay=x='min(t/0.5\\,1)*((W-520)/2+520)-520'"
+    rule = f"color=c={RED}:s=780x6:r={FPS}:d={seconds}"
+    slide = (f"overlay=x='min(t/0.5\\,1)*((W-780)/2+780)-780'"
              f":y={y_rule}:eval=frame")
 
     if bg_video and os.path.exists(bg_video):

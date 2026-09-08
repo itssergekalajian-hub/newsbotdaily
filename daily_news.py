@@ -1299,9 +1299,9 @@ def build(brief: dict, day: dt.date, work: str,
         print("animated intro sting in use")
     intro = os.path.join(work, "intro.mp4")
     video.render_card(work, 4.5,
-                      [(BRAND, 54, "white"),
-                       (f"{day:%A, %d %B %Y}", 26, video.PALE),
-                       ("The full day in review", 22, video.PALE)],
+                      [(BRAND, 81, "white"),
+                       (f"{day:%A, %d %B %Y}", 39, video.PALE),
+                       ("The full day in review", 33, video.PALE)],
                       intro, bg_video=sting)
     parts = [intro]
 
@@ -1361,8 +1361,8 @@ def build(brief: dict, day: dt.date, work: str,
 
     outro = os.path.join(work, "outro.mp4")
     video.render_card(work, 3.5,
-                      [(BRAND, 44, "white"),
-                       (f"@{TARGET.lstrip('@')}", 24, video.PALE)],
+                      [(BRAND, 66, "white"),
+                       (f"@{TARGET.lstrip('@')}", 36, video.PALE)],
                       outro, wipe=False, bg_video=sting)
     parts.append(outro)
 

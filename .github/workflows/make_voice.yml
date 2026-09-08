@@ -1,0 +1,51 @@
+name: Make voice line
+
+# One-shot utility: synthesise a line in the bulletin's own narration voice
+# (edge-tts, same voice/rate/pitch as production) and commit the mp3. Used to
+# produce the anchor's fixed on-camera lines, which are then lip-synced on an
+# external service and land back in the repo via fetch_asset.
+
+on:
+  workflow_dispatch:
+    inputs:
+      text:
+        description: "The line to speak"
+        required: true
+      dest:
+        description: "Path in the repo to write (e.g. voice_open.mp3)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  speak:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Synthesise
+        env:
+          LINE: ${{ inputs.text }}
+          DEST: ${{ inputs.dest }}
+        run: |
+          pip install -q edge-tts
+          python - <<'EOF'
+          import asyncio, os
+          import edge_tts
+          asyncio.run(edge_tts.Communicate(
+              os.environ["LINE"], "en-US-AndrewMultilingualNeural",
+              rate="+8%", pitch="-2Hz").save(os.environ["DEST"]))
+          size = os.path.getsize(os.environ["DEST"])
+          print(f"wrote {size} bytes")
+          assert size > 5000
+          EOF
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${{ inputs.dest }}"
+          git commit -m "Add voice line: ${{ inputs.dest }}"
+          git push
