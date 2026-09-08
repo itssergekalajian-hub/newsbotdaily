@@ -52,6 +52,9 @@ ENGINE = os.getenv("VOICE_ENGINE", "edge").strip().lower()
 TTS_MODEL = os.getenv("TTS_MODEL", "").strip()
 TTS_VOICE = os.getenv("TTS_VOICE", "Charon")
 PRESENTER = os.getenv("PRESENTER_IMAGE", "presenter.png")
+# an AI-animated clip of the same presenter (blinks, subtle movement); when the
+# file exists the anchor is alive in every scene instead of a frozen still
+ANCHOR_VIDEO = os.getenv("ANCHOR_VIDEO", "anchor.mp4")
 BRAND = os.getenv("BRAND", "MIDWORLD DAILY")
 FORCE_DATE = os.getenv("TARGET_DATE", "").strip()
 # preview a full render without posting to Telegram (the workflow uploads the
@@ -281,6 +284,7 @@ Return ONLY a JSON object, no markdown fences, in exactly this shape:
                 "headline": "four to eight words naming this topic's main story",
                 "sources": [3, 17, 42],
                 "images": [17, 3],
+                "search": "3 to 6 words to search a photo archive",
                 "photo": "2 to 4 words naming a real place to photograph",
                 "script": "the spoken words..."}}]}}
 
@@ -305,7 +309,12 @@ Rules for the segments:
   Never pad the list with a photo of some other story just because it exists.
   If no post's photo genuinely fits, return an empty list [] and the "photo"
   place fallback is used instead.
-- each segment's "photo" is only a FALLBACK, used when "images" is empty. It
+- "search" is a photo-archive query for this segment's LEAD story, used when
+  "images" is empty: 3 to 6 concrete words naming what a real press photograph
+  of this story would show — a named institution, place or event type
+  ("Kremlin press conference", "Gaza aid convoy", "European Central Bank
+  headquarters"). Name things that get photographed, not abstract concepts.
+- each segment's "photo" is a LAST-RESORT fallback behind "search". It
   names a REAL, PHOTOGRAPHABLE PLACE connected to the
   story, which will be looked up in a photo archive. Use a city, country,
   landmark, building or institution: "Beirut", "Kyiv Ukraine", "Tokyo Stock
@@ -611,6 +620,7 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
         head = re.sub(r"\s+", " ", str(s.get("headline", ""))).strip(" .")
         s["headline"] = head[:58]
         s["photo"] = re.sub(r"[^\w\s-]", " ", str(s.get("photo", ""))).strip()[:60]
+        s["search"] = re.sub(r"[^\w\s-]", " ", str(s.get("search", ""))).strip()[:70]
     return {"headline": headline, "segments": segments}
 
 
@@ -1037,6 +1047,41 @@ def _commons_search(query: str) -> tuple[str, str] | None:
     return (best[1], best[2]) if best else None
 
 
+OPENVERSE_API = "https://api.openverse.org/v1/images/"
+
+
+def _openverse_search(query: str) -> tuple[str, str] | None:
+    """A real, openly-licensed photograph from Openverse (CC search).
+
+    Openverse indexes hundreds of millions of CC-licensed photos (Flickr and
+    others), so it often has a genuine press-style photograph of a story that
+    Wikimedia Commons lacks. Same honesty rule as Commons: real photographs
+    only, with the photographer and licence carried through on screen.
+    """
+    r = requests.get(OPENVERSE_API,
+                     params={"q": query, "page_size": "20", "mature": "false",
+                             "license_type": "all-cc"},
+                     headers=UA_HEADERS, timeout=45)
+    r.raise_for_status()
+    best = None
+    for res in r.json().get("results", []):
+        url = res.get("url")
+        w, h = res.get("width") or 0, res.get("height") or 0
+        if not url or w < 800 or h < 500:
+            continue
+        if w / max(h, 1) < 1.15:             # portraits crop badly full-frame
+            continue
+        creator = re.sub(r"\s+", " ", str(res.get("creator") or "")).strip()[:40]
+        licence = str(res.get("license") or "").upper()
+        credit = " / ".join(x for x in (creator, f"CC {licence}" if licence
+                                        else "") if x)
+        score = w * h
+        if best is None or score > best[0]:
+            best = (score, url, f"{credit} — Openverse" if credit
+                    else "Openverse")
+    return (best[1], best[2]) if best else None
+
+
 def _download(url: str, path: str, headers: dict) -> bool:
     r = requests.get(url, timeout=60, headers=headers)
     if not r.ok or len(r.content) < 8000:
@@ -1127,8 +1172,10 @@ def segment_image(seg: dict, posts: list[dict], path: str,
          from — skipped when the writer deliberately judged that none of them
          shows the story (use_post_photos=False), because a full-screen wrong
          picture is worse than a generic one of the right place
-      2. a real photograph of the named place from Wikimedia Commons
-      3. a generated illustration, only if explicitly enabled
+      2. a real photograph MATCHING THE STORY, searched by the writer's own
+         archive query across Wikimedia Commons and Openverse
+      3. a real photograph of the named place from Wikimedia Commons
+      4. a generated illustration, only if explicitly enabled
 
     Everything degrades quietly: a scene with no picture is fine, a build that
     dies over a missing picture is not.
@@ -1148,15 +1195,21 @@ def segment_image(seg: dict, posts: list[dict], path: str,
                 except Exception as e:
                     print(f"    post {n} image failed: {str(e)[:70]}")
 
-    # 2. a real photograph of the place
-    query = seg.get("photo", "")
-    if query:
+    # 2. a real photograph of the story itself, then 3. of the place
+    story_q = seg.get("search", "")
+    place_q = seg.get("photo", "")
+    for query, source in ((story_q, "commons"), (story_q, "openverse"),
+                          (place_q, "commons")):
+        if not query:
+            continue
         try:
-            hit = _commons_search(query)
+            hit = (_commons_search(query) if source == "commons"
+                   else _openverse_search(query))
             if hit and _download(hit[0], path, UA_HEADERS):
                 return path, hit[1]
         except Exception as e:
-            print(f"    commons lookup failed: {str(e)[:80]}")
+            print(f"    {source} lookup failed: {str(e)[:80]}")
+    query = place_q or story_q
 
     # 3. generated, off by default and always labelled as an illustration
     if ALLOW_GENERATED and query:
@@ -1277,6 +1330,10 @@ def build(brief: dict, day: dt.date, work: str,
         backdrops.append(backdrop)
         credits.append(credit)
 
+    anchor = ANCHOR_VIDEO if os.path.exists(ANCHOR_VIDEO) else None
+    if anchor:
+        print("animated anchor in use")
+
     print("rendering scenes:")
     elapsed = 0.0
     for i, seg in enumerate(segments):
@@ -1285,7 +1342,7 @@ def build(brief: dict, day: dt.date, work: str,
         video.render_scene(work, PRESENTER, audio[i], srts[i], seg["topic"],
                            seg.get("headline", ""), BRAND, date_text, ticker,
                            i, elapsed, total, out, backdrop=backdrops[i],
-                           credit=credits[i])
+                           credit=credits[i], anchor_video=anchor)
         elapsed += spans[i]
         parts.append(out)
 
