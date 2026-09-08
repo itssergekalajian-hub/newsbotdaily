@@ -58,6 +58,13 @@ ANCHOR_VIDEO = os.getenv("ANCHOR_VIDEO", "anchor.mp4")
 # a branded animated opener; when the file exists the title and sign-off cards
 # play over it instead of a flat navy plate
 INTRO_VIDEO = os.getenv("INTRO_VIDEO", "intro_sting.mp4")
+# the anchor ON CAMERA, lip-synced to fixed lines in the narration voice: a
+# spoken greeting after the title card and a spoken sign-off before the outro.
+# Each needs its clip and the exact mp3 it was synced to.
+ANCHOR_OPEN = os.getenv("ANCHOR_OPEN", "anchor_open.mp4")
+VOICE_OPEN = os.getenv("VOICE_OPEN", "voice_open.mp3")
+ANCHOR_CLOSE = os.getenv("ANCHOR_CLOSE", "anchor_close.mp4")
+VOICE_CLOSE = os.getenv("VOICE_CLOSE", "voice_close.mp3")
 BRAND = os.getenv("BRAND", "MIDWORLD DAILY")
 FORCE_DATE = os.getenv("TARGET_DATE", "").strip()
 # preview a full render without posting to Telegram (the workflow uploads the
@@ -389,15 +396,13 @@ Rules for the segments:
   emojis, no asterisks, no hashtags, no bullets, no links, and no numbers
   written as digits where a reader would say them differently — write "twenty
   thousand", not "20,000".
-- Open the whole bulletin with a genuine hook — one crisp line on the single
-  most striking thing that happened today, the story you are about to lead
-  with. Make it land in one breath: concrete, specific, impossible to scroll
-  past. Then a brief warm greeting and the day's headline, and go straight into
-  that lead story. Do not open with a bare "welcome to the news", and do not
-  tease a story you then make the viewer wait for.
-- End the last segment with a short, warm sign-off in the anchor's own voice —
-  a genuine goodbye that lands the day and invites the viewer back tomorrow,
-  not a formulaic "that's all for today".
+- The anchor greets the viewer ON CAMERA before your script begins, and speaks
+  a fixed sign-off after it ends — so write NO greeting, NO "welcome", and NO
+  goodbye anywhere. Open the first segment with a genuine hook: one crisp line
+  on the single most striking thing that happened today, concrete and specific,
+  impossible to scroll past — then straight into that lead story.
+- End the last segment by landing its story with a real sense of completion —
+  a final line that resolves — because the anchor's own goodbye follows it.
 
 POSTS FROM {date}:
 {items}
@@ -1305,6 +1310,16 @@ def build(brief: dict, day: dt.date, work: str,
                       intro, bg_video=sting)
     parts = [intro]
 
+    if os.path.exists(ANCHOR_OPEN) and os.path.exists(VOICE_OPEN):
+        talk = os.path.join(work, "open_talk.mp4")
+        try:
+            video.render_anchor_talk(work, ANCHOR_OPEN, VOICE_OPEN,
+                                     BRAND, date_text, talk)
+            parts.append(talk)
+            print("anchor speaks the open on camera")
+        except Exception as e:
+            print(f"spoken open skipped ({str(e)[:80]})", file=sys.stderr)
+
     # the ticker carries the day's topics so the strip always has content
     ticker = "     •     ".join(
         f"{s['topic'].upper()}: {s.get('headline') or 'latest'}"
@@ -1358,6 +1373,16 @@ def build(brief: dict, day: dt.date, work: str,
                            credit=credits[i], anchor_video=anchor)
         elapsed += spans[i]
         parts.append(out)
+
+    if os.path.exists(ANCHOR_CLOSE) and os.path.exists(VOICE_CLOSE):
+        talk = os.path.join(work, "close_talk.mp4")
+        try:
+            video.render_anchor_talk(work, ANCHOR_CLOSE, VOICE_CLOSE,
+                                     BRAND, date_text, talk)
+            parts.append(talk)
+            print("anchor speaks the sign-off on camera")
+        except Exception as e:
+            print(f"spoken sign-off skipped ({str(e)[:80]})", file=sys.stderr)
 
     outro = os.path.join(work, "outro.mp4")
     video.render_card(work, 3.5,

@@ -507,6 +507,33 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
     raise RuntimeError(f"could not render scene: {topic}")
 
 
+def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
+                       date_text: str, out: str) -> None:
+    """The anchor on camera, actually speaking a fixed line — full frame.
+
+    The clip is lip-synced to `voice` (the same edge-tts voice as the
+    narration), and that mp3 is muxed over the video regardless of any audio
+    the generator produced, so the man on screen always speaks in exactly the
+    narration's voice. Only the brand bar rides on top — the moment is the
+    anchor, not the furniture.
+    """
+    seconds = probe_duration(clip)
+    bf = _textfile(work, "brand.txt", brand)
+    df = _textfile(work, "date.txt", date_text)
+    chain = ",".join([
+        f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},setsar=1",
+        f"drawbox=x=0:y=0:w=iw:h=78:color={NAVY}@0.94:t=fill",
+        f"drawbox=x=0:y=78:w=iw:h=4:color={RED}:t=fill",
+        f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=34:x=45:y=22",
+        f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=27:x=w-tw-45:y=26",
+        "fade=t=in:st=0:d=0.35",
+    ])
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", clip, "-i", voice,
+         "-filter_complex",
+         f"[0:v]{chain}[v];[1:a]apad,aformat=channel_layouts=stereo[a]",
+         "-map", "[v]", "-map", "[a]", *ENC, "-t", f"{seconds:.2f}", out])
+
+
 def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
                 out: str, wipe: bool = True, bg_video: str | None = None) -> None:
     """Title or outro card: stacked text over a background.
