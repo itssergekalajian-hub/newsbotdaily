@@ -1,0 +1,38 @@
+name: Fetch asset
+
+# One-shot utility: download a file into the repo from a URL. Used to land
+# generated media assets (e.g. the animated anchor clip) that are produced on
+# an external service — the runner has open internet where dev sandboxes may
+# not. Manual trigger only, write access required to dispatch.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Source URL to download"
+        required: true
+      dest:
+        description: "Path in the repo to write (e.g. anchor.mp4)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download
+        run: |
+          curl -fSL --retry 3 -o "${{ inputs.dest }}" "${{ inputs.url }}"
+          size=$(stat -c %s "${{ inputs.dest }}")
+          echo "downloaded $size bytes"
+          test "$size" -gt 100000
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${{ inputs.dest }}"
+          git commit -m "Add fetched asset: ${{ inputs.dest }}"
+          git push
