@@ -161,12 +161,18 @@ def _post_media(block) -> dict:
     clips are in a <video src> — those are the gold: a few seconds of the real
     footage the newsroom posted beats any still. Returns both, kept apart so the
     builder can prefer a clip and fall back to a photo.
+
+    LINK PREVIEWS ARE DELIBERATELY EXCLUDED. When a post shares a URL, Telegram
+    renders that page's og:image as a preview thumbnail — for a YouTube link
+    that is some creator's face-and-flags clickbait collage, not a photograph
+    of the news. One of those blown up as a full-screen backdrop is what put a
+    random bearded YouTuber behind the Russia-Ukraine story. Only pictures the
+    newsroom actually POSTED (photos and frames of its own videos) qualify.
     """
     photos, videos = [], []
     for node in block.select(
             ".tgme_widget_message_photo_wrap, .tgme_widget_message_video_thumb,"
-            " .tgme_widget_message_roundvideo_thumb, i.link_preview_image,"
-            " i.link_preview_right_image"):
+            " .tgme_widget_message_roundvideo_thumb"):
         m = re.search(r"background-image\s*:\s*url\(['\"]?(.*?)['\"]?\)",
                       node.get("style", ""))
         if m and m.group(1).startswith("http"):
