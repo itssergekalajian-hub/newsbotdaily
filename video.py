@@ -340,19 +340,23 @@ def build_theme(work: str) -> str:
     A3, E4 = 220.0, 329.63
     A4, C5, D5, E5 = 440.0, 523.25, 587.33, 659.26
 
-    bass = {f: _note(work, f"tb{int(f)}.wav", f, _E8, 0.34, bright=0.5)
+    bass = {f: _note(work, f"tb{int(f)}.wav", f, _E8, 0.46, bright=0.6)
             for f in (A2, F2, G2)}
     bass_track = _seq(work, "theme_bass.wav",
                       [bass[A2]] * 16 + [bass[F2]] * 8 + [bass[G2]] * 8)
 
-    ost = [_note(work, "to220.wav", A3, _E8, 0.10, bright=0.6),
-           _note(work, "to330.wav", E4, _E8, 0.08, bright=0.6)]
+    ost = [_note(work, "to220.wav", A3, _E8, 0.14, bright=0.6),
+           _note(work, "to330.wav", E4, _E8, 0.11, bright=0.6)]
     ost_track = _seq(work, "theme_ost.wav", ost * 16)
 
+    # timpani plus a low noise impact — the drum needs skin, not just pitch
     hit = os.path.join(work, "timp.wav")
     run(["ffmpeg", "-y", "-loglevel", "error", "-filter_complex",
-         f"sine=r=48000:frequency=58:duration={_BAR:.4f},volume=0.55,"
-         f"afade=t=out:st=0.01:d={_BAR - 0.02:.4f},lowpass=f=180,"
+         f"sine=r=48000:frequency=58:duration={_BAR:.4f},volume=0.85,"
+         f"afade=t=out:st=0.01:d={_BAR - 0.02:.4f},lowpass=f=180[k];"
+         f"anoisesrc=r=48000:colour=pink:seed=3:duration=0.3,volume=0.5,"
+         f"lowpass=f=900,afade=t=out:st=0.005:d=0.28[n];"
+         f"[k][n]amix=inputs=2:normalize=0:duration=first,"
          f"aformat=channel_layouts=stereo", "-t", f"{_BAR:.4f}", hit])
     gap = _rest(work, "timp_gap.wav", _BAR)
     hit_track = _seq(work, "theme_hits.wav", [hit, gap, hit, gap])
@@ -360,22 +364,26 @@ def build_theme(work: str) -> str:
     motif_files = [_rest(work, "motif_rest.wav", _BAR * 2)]
     for i, (f, d) in enumerate([(A4, _Q4), (C5, _Q4), (E5, _Q4), (D5, _Q4),
                                 (C5, _Q4), (D5, _Q4), (E5, _Q4 * 2)]):
-        motif_files.append(_note(work, f"tm{i}.wav", f, d, 0.22, bright=0.45,
+        motif_files.append(_note(work, f"tm{i}.wav", f, d, 0.30, bright=0.45,
                                  attack=0.015))
     # a held open fifth lands the theme
     tail = os.path.join(work, "theme_tail.wav")
     run(["ffmpeg", "-y", "-loglevel", "error", "-filter_complex",
-         f"sine=r=48000:frequency={A4},volume=0.16[a];"
-         f"sine=r=48000:frequency={E5},volume=0.12[b];"
+         f"sine=r=48000:frequency={A4},volume=0.22[a];"
+         f"sine=r=48000:frequency={E5},volume=0.17[b];"
          f"[a][b]amix=inputs=2:normalize=0,afade=t=in:st=0:d=0.05,"
          f"afade=t=out:st=0.3:d=1.3,aformat=channel_layouts=stereo",
          "-t", "1.6", tail])
     motif_files.append(tail)
     motif_track = _seq(work, "theme_motif.wav", motif_files)
 
+    # hot master: drive it into a limiter so the theme actually LEADS the open
+    # instead of murmuring under it; the underscore stays untouched and quiet
     return _mix(work, "theme.wav",
                 [bass_track, ost_track, hit_track, motif_track],
-                post="lowpass=f=5200,afade=t=out:st=8.4:d=0.8")
+                post="lowpass=f=5200,volume=2.2,"
+                     "alimiter=limit=0.85:level=false,"
+                     "afade=t=out:st=8.4:d=0.8")
 
 
 def build_underscore(work: str) -> str:
@@ -424,7 +432,7 @@ def build_bed(work: str, seconds: float) -> str:
     return bed
 
 
-def add_music(video_in: str, bed: str, out: str, level: float = 0.30) -> None:
+def add_music(video_in: str, bed: str, out: str, level: float = 0.36) -> None:
     """Mix the bed under the finished bulletin, ducking it beneath the voice.
 
     sidechaincompress keys the music off the narration, so it lifts in the gaps
@@ -642,44 +650,45 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
     raise RuntimeError(f"could not render scene: {topic}")
 
 
-def render_coming_up(work: str, items: list[tuple[str, str]], out: str) -> None:
-    """A rapid-fire 'COMING UP' montage of tonight's stories.
+def render_headlines(work: str, items: list[tuple[str, str, str, float]],
+                     out: str) -> None:
+    """The spoken opening headlines — the anchor's VOICE over the pictures.
 
-    Right after the anchor's greeting: each story's own moving backdrop for a
-    couple of seconds with its headline in big type, slid hard into the next.
-    The oldest trick on television for keeping a viewer through the whole
-    bulletin — show them what they'd miss by leaving.
+    Silent pictures before a bulletin read as a glitch; every real newsroom
+    opens with voiced headlines ("Tonight: ...") over the footage, each shot
+    held exactly as long as its line takes to say, then a hard cut to the
+    next. Each item is (backdrop, display text, narration wav, narration
+    seconds); the wav is the anchor's own voice reading that line.
     """
-    cu = _textfile(work, "comingup.txt", "COMING UP")
+    chip = _textfile(work, "tonight.txt", "TONIGHT")
     parts = []
-    for i, (backdrop, headline) in enumerate(items):
-        hf = _textfile(work, f"cu_head{i}.txt", headline)
-        piece = os.path.join(work, f"cu{i}.mp4")
+    for i, (backdrop, text, wav, dur) in enumerate(items):
+        span = dur + 0.5
+        # break the tease onto at most two lines so the type stays big
+        words, lines, cur = text.split(), [], ""
+        for w in words:
+            if cur and len(cur) + len(w) + 1 > 34:
+                lines.append(cur)
+                cur = w
+            else:
+                cur = f"{cur} {w}".strip()
+        if cur:
+            lines.append(cur)
+        hf = _textfile(work, f"hl{i}.txt", "\n".join(lines[:2]))
+        piece = os.path.join(work, f"hl{i}.mp4")
         chain = ",".join([
-            f"drawbox=x=0:y=ih-360:w=iw:h=360:color=black@0.45:t=fill",
-            f"drawtext=fontfile={BOLD}:textfile={cu}:fontcolor=white:fontsize=30"
+            "drawbox=x=0:y=ih-400:w=iw:h=400:color=black@0.5:t=fill",
+            f"drawtext=fontfile={BOLD}:textfile={chip}:fontcolor=white:fontsize=30"
             f":box=1:boxcolor={RED}@0.96:boxborderw=16:x=48:y=60",
-            f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=52"
-            f":x=48:y=850:alpha='min(t/0.25\\,1)'",
+            f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=54"
+            f":line_spacing=14:x=48:y=790:alpha='min(t/0.25\\,1)'",
         ])
-        run(["ffmpeg", "-y", "-loglevel", "error", "-i", backdrop,
-             "-vf", chain, "-an", "-t", "2.3",
-             "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
-             "-pix_fmt", "yuv420p", "-r", str(FPS), piece])
+        run(["ffmpeg", "-y", "-loglevel", "error", "-i", backdrop, "-i", wav,
+             "-filter_complex",
+             f"[0:v]{chain}[v];[1:a]apad,aformat=channel_layouts=stereo[a]",
+             "-map", "[v]", "-map", "[a]", *ENC, "-t", f"{span:.2f}", piece])
         parts.append(piece)
-
-    joined = os.path.join(work, "cu_joined.mp4")
-    if len(parts) > 1:
-        try:
-            _xfade_join(parts, joined, fade=0.25)
-        except RuntimeError:
-            concat(parts, joined)
-    else:
-        joined = parts[0]
-    # give it the silent stereo track every other part carries
-    run(["ffmpeg", "-y", "-loglevel", "error", "-i", joined,
-         "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
-         "-map", "0:v", "-map", "1:a", *ENC, "-shortest", out])
+    concat(parts, out)
 
 
 def render_anchor_talk(work: str, clip: str, voice: str, brand: str,

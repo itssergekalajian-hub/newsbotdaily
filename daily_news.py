@@ -300,6 +300,7 @@ Return ONLY a JSON object, no markdown fences, in exactly this shape:
                 "headline": "four to eight words naming this topic's main story",
                 "sources": [3, 17, 42],
                 "images": [17, 3],
+                "tease": "one spoken headline of six to twelve words",
                 "search": "3 to 6 words to search a photo archive",
                 "photo": "2 to 4 words naming a real place to photograph",
                 "script": "the spoken words..."}}]}}
@@ -325,6 +326,12 @@ Rules for the segments:
   Never pad the list with a photo of some other story just because it exists.
   If no post's photo genuinely fits, return an empty list [] and the "photo"
   place fallback is used instead.
+- "tease" is the segment's OPENING HEADLINE, spoken by the anchor over the
+  story's pictures in the bulletin's first seconds ("Tonight: ..."): six to
+  twelve words, present tense, punchy, a complete readable sentence that makes
+  the viewer need the full story — "Moscow issues new warnings as frontline
+  strikes continue", "Oil slides as ceasefire talk builds". No hedging words,
+  no "reportedly", and never the same phrasing as the script's first line.
 - "search" is a photo-archive query for this segment's LEAD story, used when
   "images" is empty: 3 to 6 concrete words naming what a real press photograph
   of this story would show — a named institution, place or event type
@@ -644,6 +651,7 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
         s["headline"] = head[:58]
         s["photo"] = re.sub(r"[^\w\s-]", " ", str(s.get("photo", ""))).strip()[:60]
         s["search"] = re.sub(r"[^\w\s-]", " ", str(s.get("search", ""))).strip()[:70]
+        s["tease"] = re.sub(r"\s+", " ", str(s.get("tease", ""))).strip()[:110]
     return {"headline": headline, "segments": segments}
 
 
@@ -1388,19 +1396,42 @@ def build(brief: dict, day: dt.date, work: str,
     if anchor:
         print("animated anchor in use")
 
-    # the "coming up" teaser: tonight's stories in six seconds, right after
-    # the greeting — each topic's own moving backdrop with its headline
-    tease_items = [(backdrops[i], segments[i].get("headline") or
-                    segments[i]["topic"].upper())
-                   for i in range(len(segments)) if backdrops[i]][:4]
-    if len(tease_items) >= 2:
-        teaser = os.path.join(work, "comingup.mp4")
+    # the opening headlines, right after the greeting: the anchor's VOICE over
+    # each story's pictures, every shot held for exactly its spoken line —
+    # silent pictures before a bulletin read as a glitch, so a line whose
+    # narration fails is dropped rather than shown mute
+    head_items = []
+    for i, seg in enumerate(segments):
+        if len(head_items) >= 4 or not backdrops[i]:
+            continue
+        line = seg.get("tease", "") or (seg.get("headline") or "").strip()
+        if not line:
+            continue
+        if not line.endswith((".", "!", "?")):
+            line += "."
+        spoken = f"Tonight: {line}" if not head_items else line
+        raw = os.path.join(work, f"tease{i}_raw.mp3")
+        for attempt in range(3):
+            try:
+                asyncio.run(_speak(spoken, raw))
+                break
+            except Exception:
+                time.sleep(2 * (attempt + 1))
+        if not os.path.exists(raw) or os.path.getsize(raw) < 200:
+            continue
+        wav = os.path.join(work, f"tease{i}.wav")
+        dur = video.trim_silence(raw, wav)
+        if dur < 0.5:
+            continue
+        head_items.append((backdrops[i], line.rstrip("."), wav, dur))
+    if len(head_items) >= 2:
+        headlines = os.path.join(work, "headlines.mp4")
         try:
-            video.render_coming_up(work, tease_items, teaser)
-            parts.append(teaser)
-            print(f"coming-up teaser: {len(tease_items)} stories")
+            video.render_headlines(work, head_items, headlines)
+            parts.append(headlines)
+            print(f"opening headlines: {len(head_items)} stories, voiced")
         except Exception as e:
-            print(f"teaser skipped ({str(e)[:80]})", file=sys.stderr)
+            print(f"headlines skipped ({str(e)[:80]})", file=sys.stderr)
 
     print("rendering scenes:")
     elapsed = 0.0
