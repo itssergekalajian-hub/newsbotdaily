@@ -264,35 +264,163 @@ def make_video_backdrop(work: str, clip: str, name: str, seconds: float) -> str:
     return out
 
 
-def build_bed(work: str, seconds: float) -> str:
-    """A soft four-chord pad, synthesised — no licensing, no download.
+# ----------------------------------------------------------------------------
+# Score. Synthesised note by note — no licensing, no download, identical every
+# night, which is the point: a signature theme is what turns a daily video into
+# a programme people recognise from the first second.
+#
+# Everything is in A minor at 126 bpm. The THEME (over the title and the
+# anchor's greeting) is a driving eighth-note bass with timpani hits and a
+# rising four-note motif; the UNDERSCORE (under the stories) is the same pulse
+# stripped to a whisper — a ticking eighth, a walking quarter-note bass through
+# Am-F-C-G and a low pad — so the show keeps momentum without the music ever
+# competing with the voice (the sidechain in add_music handles the rest).
+# ----------------------------------------------------------------------------
+_BAR = 60.0 / 126 * 4                     # one 4/4 bar at 126 bpm  (~1.905s)
+_E8, _Q4 = _BAR / 8, _BAR / 4
 
-    Roots move every 26 seconds so it evolves instead of droning. Everything is
-    low-passed hard and kept far below the voice; it is meant to remove the dead
-    silence between sentences, not to be listened to.
-    """
-    roots = [110.0, 87.31, 130.81, 98.0]          # A2, F2, C3, G2
-    parts = []
-    for i, r in enumerate(roots):
-        piece = os.path.join(work, f"chord{i}.wav")
-        graph = (f"sine=r=48000:frequency={r}:duration=26,volume=0.5[a];"
-                 f"sine=r=48000:frequency={r * 1.5:.2f}:duration=26,volume=0.30[b];"
-                 f"sine=r=48000:frequency={r * 2:.2f}:duration=26,volume=0.18[c];"
-                 f"[a][b][c]amix=inputs=3:normalize=0,"
-                 f"tremolo=f=0.1:d=0.3,lowpass=f=480,"
-                 f"afade=t=in:st=0:d=3,afade=t=out:st=23:d=3,"
-                 f"aformat=channel_layouts=stereo")
-        run(["ffmpeg", "-y", "-loglevel", "error",
-             "-filter_complex", graph, "-t", "26", piece])
-        parts.append(piece)
 
-    listing = os.path.join(work, "bed_list.txt")
+def _note(work: str, name: str, freq: float, dur: float, vol: float,
+          bright: float = 0.35, attack: float = 0.008) -> str:
+    """One plucked note: a sine with two harmonics and a fast decay."""
+    path = os.path.join(work, name)
+    if os.path.exists(path):
+        return path
+    graph = (f"sine=r=48000:frequency={freq:.2f}:duration={dur:.4f},"
+             f"volume={vol:.3f}[a];"
+             f"sine=r=48000:frequency={freq * 2:.2f},volume={vol * bright:.3f}[b];"
+             f"sine=r=48000:frequency={freq * 3:.2f},volume={vol * bright * 0.4:.3f}[c];"
+             f"[a][b][c]amix=inputs=3:normalize=0:duration=first,"
+             f"afade=t=in:st=0:d={attack},"
+             f"afade=t=out:st={attack:.3f}:d={max(dur - attack, 0.03):.4f},"
+             f"aformat=channel_layouts=stereo")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-filter_complex", graph,
+         "-t", f"{dur:.4f}", path])
+    return path
+
+
+def _rest(work: str, name: str, seconds: float) -> str:
+    """Stereo silence for score tracks. The narration-gap silence() is MONO,
+    and the concat demuxer stream-copies whatever format the first file has —
+    mixing the two halves or doubles every following clip's duration."""
+    path = os.path.join(work, name)
+    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi",
+         "-i", "anullsrc=r=48000:cl=stereo", "-t", f"{seconds:.4f}", path])
+    return path
+
+
+def _seq(work: str, name: str, files: list[str]) -> str:
+    """Concatenate note files (repeats welcome) into one track."""
+    listing = os.path.join(work, f"{name}.txt")
     with open(listing, "w") as f:
-        for p in parts:
+        for p in files:
             f.write(f"file '{os.path.abspath(p)}'\n")
-    bed = os.path.join(work, "bed.wav")
+    path = os.path.join(work, name)
     run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
-         "-i", listing, "-c", "copy", bed])
+         "-i", listing, "-c", "copy", path])
+    return path
+
+
+def _mix(work: str, name: str, tracks: list[str], post: str = "") -> str:
+    path = os.path.join(work, name)
+    inputs: list[str] = []
+    for t in tracks:
+        inputs += ["-i", t]
+    labels = "".join(f"[{i}:a]" for i in range(len(tracks)))
+    graph = (f"{labels}amix=inputs={len(tracks)}:normalize=0:duration=longest"
+             f"{',' + post if post else ''}")
+    run(["ffmpeg", "-y", "-loglevel", "error", *inputs,
+         "-filter_complex", graph, path])
+    return path
+
+
+def build_theme(work: str) -> str:
+    """The opening signature (~9s): pulse, timpani, and a rising motif."""
+    A2, F2, G2 = 110.0, 87.31, 98.0
+    A3, E4 = 220.0, 329.63
+    A4, C5, D5, E5 = 440.0, 523.25, 587.33, 659.26
+
+    bass = {f: _note(work, f"tb{int(f)}.wav", f, _E8, 0.34, bright=0.5)
+            for f in (A2, F2, G2)}
+    bass_track = _seq(work, "theme_bass.wav",
+                      [bass[A2]] * 16 + [bass[F2]] * 8 + [bass[G2]] * 8)
+
+    ost = [_note(work, "to220.wav", A3, _E8, 0.10, bright=0.6),
+           _note(work, "to330.wav", E4, _E8, 0.08, bright=0.6)]
+    ost_track = _seq(work, "theme_ost.wav", ost * 16)
+
+    hit = os.path.join(work, "timp.wav")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-filter_complex",
+         f"sine=r=48000:frequency=58:duration={_BAR:.4f},volume=0.55,"
+         f"afade=t=out:st=0.01:d={_BAR - 0.02:.4f},lowpass=f=180,"
+         f"aformat=channel_layouts=stereo", "-t", f"{_BAR:.4f}", hit])
+    gap = _rest(work, "timp_gap.wav", _BAR)
+    hit_track = _seq(work, "theme_hits.wav", [hit, gap, hit, gap])
+
+    motif_files = [_rest(work, "motif_rest.wav", _BAR * 2)]
+    for i, (f, d) in enumerate([(A4, _Q4), (C5, _Q4), (E5, _Q4), (D5, _Q4),
+                                (C5, _Q4), (D5, _Q4), (E5, _Q4 * 2)]):
+        motif_files.append(_note(work, f"tm{i}.wav", f, d, 0.22, bright=0.45,
+                                 attack=0.015))
+    # a held open fifth lands the theme
+    tail = os.path.join(work, "theme_tail.wav")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-filter_complex",
+         f"sine=r=48000:frequency={A4},volume=0.16[a];"
+         f"sine=r=48000:frequency={E5},volume=0.12[b];"
+         f"[a][b]amix=inputs=2:normalize=0,afade=t=in:st=0:d=0.05,"
+         f"afade=t=out:st=0.3:d=1.3,aformat=channel_layouts=stereo",
+         "-t", "1.6", tail])
+    motif_files.append(tail)
+    motif_track = _seq(work, "theme_motif.wav", motif_files)
+
+    return _mix(work, "theme.wav",
+                [bass_track, ost_track, hit_track, motif_track],
+                post="lowpass=f=5200,afade=t=out:st=8.4:d=0.8")
+
+
+def build_underscore(work: str) -> str:
+    """~61s of quiet momentum for under the stories, loop-safe."""
+    roots = [110.0, 87.31, 130.81, 98.0]          # Am, F, C, G — 2 bars each
+    plucks = {r: _note(work, f"ub{int(r)}.wav", r, _Q4, 0.20, bright=0.3)
+              for r in roots}
+    bass_files: list[str] = []
+    for r in roots:
+        bass_files += [plucks[r]] * 8              # 8 quarters = 2 bars
+    bass_track = _seq(work, "under_bass.wav", bass_files * 4)
+
+    tick = os.path.join(work, "tick.wav")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-filter_complex",
+         f"anoisesrc=r=48000:colour=pink:seed=7:duration={_E8:.4f},"
+         f"highpass=f=3800,volume=0.055,"
+         f"afade=t=out:st=0.004:d={_E8 - 0.01:.4f},"
+         f"aformat=channel_layouts=stereo", "-t", f"{_E8:.4f}", tick])
+    tick_track = _seq(work, "under_tick.wav", [tick] * 256)
+
+    pad_files = []
+    span = _BAR * 2
+    for i, r in enumerate(roots):
+        pad = os.path.join(work, f"upad{i}.wav")
+        run(["ffmpeg", "-y", "-loglevel", "error", "-filter_complex",
+             f"sine=r=48000:frequency={r},volume=0.30[a];"
+             f"sine=r=48000:frequency={r * 1.5:.2f},volume=0.18[b];"
+             f"sine=r=48000:frequency={r * 2:.2f},volume=0.10[c];"
+             f"[a][b][c]amix=inputs=3:normalize=0,lowpass=f=480,"
+             f"afade=t=in:st=0:d=0.4,afade=t=out:st={span - 0.5:.3f}:d=0.5,"
+             f"aformat=channel_layouts=stereo", "-t", f"{span:.4f}", pad])
+        pad_files.append(pad)
+    pad_track = _seq(work, "under_pad.wav", pad_files * 4)
+
+    return _mix(work, "underscore.wav", [bass_track, tick_track, pad_track],
+                post="lowpass=f=6000")
+
+
+def build_bed(work: str, seconds: float) -> str:
+    """Theme, then the underscore looped to fill the bulletin."""
+    theme = build_theme(work)
+    under = build_underscore(work)
+    t_len, u_len = probe_duration(theme), probe_duration(under)
+    loops = max(int((seconds - t_len) / max(u_len, 1)) + 1, 1)
+    bed = _seq(work, "bed.wav", [theme] + [under] * loops)
     return bed
 
 
@@ -370,7 +498,7 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  headline: str, brand: str, date_text: str, ticker: str,
                  variant: int, elapsed: float, total: float, out: str,
                  backdrop: str | None = None, credit: str = "",
-                 anchor_video: str | None = None) -> None:
+                 anchor_video: str | None = None, badge: str = "") -> None:
     """One topic.
 
     When the story has its own footage or photograph, that fills the screen
@@ -390,6 +518,7 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
     hf = _textfile(work, f"head{variant}.txt", headline) if headline else ""
     kf = _textfile(work, "ticker.txt", ticker) if ticker else ""
     cf = _textfile(work, f"credit{variant}.txt", credit) if credit else ""
+    bdg = _textfile(work, f"badge{variant}.txt", badge) if badge else ""
 
     subs = ""
     if srt and os.path.exists(srt) and os.path.getsize(srt) > 20:
@@ -408,6 +537,12 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
             f":box=1:boxcolor={RED}@0.96:boxborderw=22"
             f":x='-840+min(t/0.5\\,1)*882':y=771",
         ]
+        if bdg:
+            # a small white flag above the topic plate ("TOP STORY")
+            c.append(
+                f"drawtext=fontfile={BOLD}:textfile={bdg}:fontcolor={NAVY}"
+                f":fontsize=24:box=1:boxcolor=white@0.95:boxborderw=10"
+                f":x=48:y=718:alpha='min(max((t-0.4)/0.3\\,0)\\,1)'")
         if hf:
             # the story headline sits just under the topic plate; captions get
             # the clear band below it (see the ASS MarginV) so they never overlap
@@ -505,6 +640,46 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
         except RuntimeError as e:
             print(f"  scene '{topic}' {label} render failed: {e}", file=sys.stderr)
     raise RuntimeError(f"could not render scene: {topic}")
+
+
+def render_coming_up(work: str, items: list[tuple[str, str]], out: str) -> None:
+    """A rapid-fire 'COMING UP' montage of tonight's stories.
+
+    Right after the anchor's greeting: each story's own moving backdrop for a
+    couple of seconds with its headline in big type, slid hard into the next.
+    The oldest trick on television for keeping a viewer through the whole
+    bulletin — show them what they'd miss by leaving.
+    """
+    cu = _textfile(work, "comingup.txt", "COMING UP")
+    parts = []
+    for i, (backdrop, headline) in enumerate(items):
+        hf = _textfile(work, f"cu_head{i}.txt", headline)
+        piece = os.path.join(work, f"cu{i}.mp4")
+        chain = ",".join([
+            f"drawbox=x=0:y=ih-360:w=iw:h=360:color=black@0.45:t=fill",
+            f"drawtext=fontfile={BOLD}:textfile={cu}:fontcolor=white:fontsize=30"
+            f":box=1:boxcolor={RED}@0.96:boxborderw=16:x=48:y=60",
+            f"drawtext=fontfile={BOLD}:textfile={hf}:fontcolor=white:fontsize=52"
+            f":x=48:y=850:alpha='min(t/0.25\\,1)'",
+        ])
+        run(["ffmpeg", "-y", "-loglevel", "error", "-i", backdrop,
+             "-vf", chain, "-an", "-t", "2.3",
+             "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
+             "-pix_fmt", "yuv420p", "-r", str(FPS), piece])
+        parts.append(piece)
+
+    joined = os.path.join(work, "cu_joined.mp4")
+    if len(parts) > 1:
+        try:
+            _xfade_join(parts, joined, fade=0.25)
+        except RuntimeError:
+            concat(parts, joined)
+    else:
+        joined = parts[0]
+    # give it the silent stereo track every other part carries
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", joined,
+         "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+         "-map", "0:v", "-map", "1:a", *ENC, "-shortest", out])
 
 
 def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
@@ -637,14 +812,17 @@ def crossfade_concat(parts: list[str], out: str, fade: float = 0.5) -> None:
     for p in parts:
         inputs += ["-i", p]
 
+    # varying the wipe keeps six straight stories from feeling like one long
+    # dissolve; all four read as broadcast, none as a slideshow effect
+    trans = ["fade", "slideleft", "fade", "slideright"]
     vf, af, acc, vp, ap = [], [], durs[0], "0:v", "0:a"
     for i in range(1, len(parts)):
         # a clip shorter than the fade cannot dissolve cleanly; clamp so the
         # offset never runs past the accumulated timeline
         d = min(fade, durs[i], acc)
         off = max(acc - d, 0.0)
-        vf.append(f"[{vp}][{i}:v]xfade=transition=fade:duration={d:.3f}"
-                  f":offset={off:.3f}[v{i}]")
+        vf.append(f"[{vp}][{i}:v]xfade=transition={trans[(i - 1) % len(trans)]}"
+                  f":duration={d:.3f}:offset={off:.3f}[v{i}]")
         af.append(f"[{ap}][{i}:a]acrossfade=d={d:.3f}[a{i}]")
         acc = off + durs[i]
         vp, ap = f"v{i}", f"a{i}"

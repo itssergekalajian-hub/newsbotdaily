@@ -339,7 +339,9 @@ Rules for the segments:
   landmark, building or institution: "Beirut", "Kyiv Ukraine", "Tokyo Stock
   Exchange", "Santiago Bernabeu stadium". Never a person's name, never an event,
   never a description of a scene, never anything violent or distressing.
-- "script" is what the anchor says out loud for that topic: 90 to 170 words.
+- "script" is what the anchor says out loud for that topic: 70 to 170 words —
+  and VARY the lengths. A couple of quick-hit segments between the big ones
+  change the bulletin's pulse; seven segments all the same length is a march.
 - Cover the whole day. Where a story developed over several hours, tell it in
   order — what was first reported, how it changed, where it stood by the end.
 - Explain what happened and why it matters. Do not just read headlines.
@@ -363,7 +365,11 @@ Rules for the segments:
     finale.
   * End on the most human or uplifting note available — sport, a lighter
     story, a hopeful turn — so the viewer leaves on a lift, then the sign-off.
-    Do not end on the grimmest item of the day.
+    Do not end on the grimmest item of the day. When the day's posts contain a
+    genuinely delightful, curious or human story — a record, a rescue, an
+    oddity, a triumph — make it the closing segment, open it with "And
+    finally..." and let the writing smile; that final minute is the one that
+    brings people back tomorrow.
   * The through-line is a producer's judgement of what the viewer most wants to
     hear next, told at a pace that keeps building.
 - Write for the EAR, not the page. This is the difference between a bulletin
@@ -1382,6 +1388,20 @@ def build(brief: dict, day: dt.date, work: str,
     if anchor:
         print("animated anchor in use")
 
+    # the "coming up" teaser: tonight's stories in six seconds, right after
+    # the greeting — each topic's own moving backdrop with its headline
+    tease_items = [(backdrops[i], segments[i].get("headline") or
+                    segments[i]["topic"].upper())
+                   for i in range(len(segments)) if backdrops[i]][:4]
+    if len(tease_items) >= 2:
+        teaser = os.path.join(work, "comingup.mp4")
+        try:
+            video.render_coming_up(work, tease_items, teaser)
+            parts.append(teaser)
+            print(f"coming-up teaser: {len(tease_items)} stories")
+        except Exception as e:
+            print(f"teaser skipped ({str(e)[:80]})", file=sys.stderr)
+
     print("rendering scenes:")
     elapsed = 0.0
     for i, seg in enumerate(segments):
@@ -1390,7 +1410,8 @@ def build(brief: dict, day: dt.date, work: str,
         video.render_scene(work, PRESENTER, audio[i], srts[i], seg["topic"],
                            seg.get("headline", ""), BRAND, date_text, ticker,
                            i, elapsed, total, out, backdrop=backdrops[i],
-                           credit=credits[i], anchor_video=anchor)
+                           credit=credits[i], anchor_video=anchor,
+                           badge="TOP STORY" if i == 0 else "")
         elapsed += spans[i]
         parts.append(out)
 
