@@ -547,7 +547,11 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
     alternates = [m for m in candidate_models() if m != model]
     tried = 0
 
-    for attempt in range(8):
+    # A midnight Google outage can hold 503 for half an hour; run 158 died
+    # after ~7 minutes of retrying and the day went unpublished. Waiting
+    # longer costs nothing on a runner — the bulletin arriving late beats
+    # not arriving.
+    for attempt in range(16):
         r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
                           headers=headers, json=body, timeout=300)
         if r.ok:
@@ -582,14 +586,14 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
                 tried += 1
                 print(f"{reason} ({r.status_code}) — switching to {model}")
                 continue
-            wait = min(20 * 2 ** (attempt // 2), 120)
+            wait = min(20 * 2 ** (attempt // 2), 240)
             print(f"{reason} ({r.status_code}) — waiting {wait}s")
             time.sleep(wait)
             continue
         print(f"gemini error {r.status_code}: {r.text[:1000]}", file=sys.stderr)
         r.raise_for_status()
     else:
-        raise RuntimeError(f"gemini unavailable after 8 attempts (last: {model})")
+        raise RuntimeError(f"gemini unavailable after 16 attempts (last: {model})")
 
     data = r.json()
     cands = data.get("candidates") or []
