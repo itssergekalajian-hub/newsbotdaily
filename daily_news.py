@@ -1106,7 +1106,9 @@ MUSIC = os.getenv("MUSIC_BED", "1") == "1"
 # a held beat after each topic and a dissolve into the next, so the bulletin
 # moves between stories the way a broadcast does rather than snapping across
 TOPIC_PAUSE = float(os.getenv("TOPIC_PAUSE", "0.8"))
-SCENE_XFADE = float(os.getenv("SCENE_XFADE", "0.5"))
+# 0.7s sits inside the 0.8s held beat, so the dissolve rides the silence and
+# the incoming picture is fully up before its narration starts
+SCENE_XFADE = float(os.getenv("SCENE_XFADE", "0.7"))
 
 UA_HEADERS = {"User-Agent": "MidWorldDaily/1.0 (Telegram news digest bot)"}
 _BAD_FILE = ("logo", "icon", "map of", "flag of", "coat of arms", "diagram",
@@ -1550,7 +1552,7 @@ def build(brief: dict, day: dt.date, work: str,
     video.render_card(work, 3.5,
                       [(BRAND, 66, "white"),
                        (f"@{TARGET.lstrip('@')}", 36, video.PALE)],
-                      outro, wipe=False, bg_video=sting)
+                      outro, wipe=False, bg_video=sting, fade_out=True)
     parts.append(outro)
 
     joined = os.path.join(work, "joined.mp4")

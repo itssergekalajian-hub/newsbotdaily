@@ -590,7 +590,10 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
             c.append(
                 f"drawtext=fontfile={REGULAR}:textfile={kf}:fontcolor={PALE}"
                 f":fontsize=24:y=H-40:x='w-mod(t*142\\,w+tw)'")
-        c.append("fade=t=in:st=0:d=0.35")          # soft cut into every scene
+        # no fade-in from black here: the bulletin joins scenes with a
+        # dissolve, and dissolving INTO a clip whose first frames are black
+        # makes every topic change dip through darkness instead of blending
+        # picture into picture
         return ",".join(c)
 
     prog = f"color=c={RED}@0.9:s={W}x8:r={FPS}:d={seconds + 1}"
@@ -676,9 +679,10 @@ def render_headlines(work: str, items: list[tuple[str, str, str, float]],
 
     Silent pictures before a bulletin read as a glitch; every real newsroom
     opens with voiced headlines ("Tonight: ...") over the footage, each shot
-    held exactly as long as its line takes to say, then a hard cut to the
-    next. Each item is (backdrop, display text, narration wav, narration
-    seconds); the wav is the anchor's own voice reading that line.
+    held exactly as long as its line takes to say, then a quick dissolve to
+    the next — the half-second pad on each shot gives the blend room without
+    touching the spoken line. Each item is (backdrop, display text, narration
+    wav, narration seconds); the wav is the anchor's own voice reading it.
     """
     chip = _textfile(work, "tonight.txt", "TONIGHT")
     parts = []
@@ -708,7 +712,7 @@ def render_headlines(work: str, items: list[tuple[str, str, str, float]],
              f"[0:v]{chain}[v];[1:a]apad,aformat=channel_layouts=stereo[a]",
              "-map", "[v]", "-map", "[a]", *ENC, "-t", f"{span:.2f}", piece])
         parts.append(piece)
-    concat(parts, out)
+    crossfade_concat(parts, out, 0.35)
 
 
 def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
@@ -730,7 +734,6 @@ def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
         f"drawbox=x=0:y=78:w=iw:h=4:color={RED}:t=fill",
         f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=34:x=45:y=22",
         f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=27:x=w-tw-45:y=26",
-        "fade=t=in:st=0:d=0.35",
     ])
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", clip, "-i", voice,
          "-filter_complex",
@@ -740,7 +743,8 @@ def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
 
 
 def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
-                out: str, wipe: bool = True, bg_video: str | None = None) -> None:
+                out: str, wipe: bool = True, bg_video: str | None = None,
+                fade_out: bool = False) -> None:
     """Title or outro card: stacked text over a background.
 
     The background is the branded animated sting when one exists (looped to
@@ -748,6 +752,9 @@ def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
     drawn here, never baked into generated footage, so it renders pin-sharp
     and never garbles), and the flat navy card otherwise. A sting that fails
     to decode degrades to the flat card rather than losing the bulletin.
+
+    fade_out is for the FINAL card only: mid-bulletin cards hand over via the
+    join's dissolve, and fading to black first would put a dark dip inside it.
     """
     y_title, y_rule = 360, 495
     parts = []
@@ -758,7 +765,8 @@ def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
         parts.append(
             f"drawtext=fontfile={BOLD if size > 45 else REGULAR}:textfile={tf}"
             f":fontcolor={color}:fontsize={size}:x=(w-tw)/2:y={y}{fade}")
-    parts.append(f"fade=t=out:st={max(seconds - 0.5, 0.1):.2f}:d=0.5")
+    if fade_out:
+        parts.append(f"fade=t=out:st={max(seconds - 0.5, 0.1):.2f}:d=0.5")
     chain = ",".join(parts)
 
     rule = f"color=c={RED}:s=780x6:r={FPS}:d={seconds}"
@@ -842,18 +850,24 @@ def crossfade_concat(parts: list[str], out: str, fade: float = 0.5) -> None:
     for p in parts:
         inputs += ["-i", p]
 
-    # varying the wipe keeps six straight stories from feeling like one long
-    # dissolve; all four read as broadcast, none as a slideshow effect
-    trans = ["fade", "slideleft", "fade", "slideright"]
+    # one transition, everywhere: the plain dissolve. Slide wipes read as a
+    # slideshow effect, and mixing transition styles is what makes a join feel
+    # mechanical — a broadcast blends picture into picture the same way every
+    # time and lets the content change, not the effect.
     vf, af, acc, vp, ap = [], [], durs[0], "0:v", "0:a"
     for i in range(1, len(parts)):
         # a clip shorter than the fade cannot dissolve cleanly; clamp so the
         # offset never runs past the accumulated timeline
         d = min(fade, durs[i], acc)
         off = max(acc - d, 0.0)
-        vf.append(f"[{vp}][{i}:v]xfade=transition={trans[(i - 1) % len(trans)]}"
+        vf.append(f"[{vp}][{i}:v]xfade=transition=fade"
                   f":duration={d:.3f}:offset={off:.3f}[v{i}]")
-        af.append(f"[{ap}][{i}:a]acrossfade=d={d:.3f}[a{i}]")
+        # c2=nofade: the outgoing side of the overlap is the held-beat
+        # silence, so only IT fades — the incoming voice enters at full level
+        # while the outgoing picture is still dissolving away (a J-cut).
+        # Fading the incoming side too soft-swallowed the first word of
+        # every story.
+        af.append(f"[{ap}][{i}:a]acrossfade=d={d:.3f}:c2=nofade[a{i}]")
         acc = off + durs[i]
         vp, ap = f"v{i}", f"a{i}"
 
