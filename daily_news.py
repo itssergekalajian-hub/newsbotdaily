@@ -664,7 +664,11 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
 
     for s in segments:
         label = re.sub(r"[^\w &-]", "", s.get("topic", "News")).strip()
-        s["topic"] = label[:22] or "News"
+        if len(label) > 24:
+            # cut at a word boundary — "ARTIFICIAL INTELLIGENC" on a topic
+            # plate reads as a typo, "AI" or "ARTIFICIAL" does not
+            label = label[:24].rsplit(" ", 1)[0]
+        s["topic"] = label or "News"
         src = s.get("sources") or []
         s["sources"] = [int(n) for n in src
                         if isinstance(n, (int, float, str))
