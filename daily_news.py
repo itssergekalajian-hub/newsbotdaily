@@ -40,9 +40,11 @@ GEMINI_KEY = os.environ["GEMINI_API_KEY"]
 
 TZ = ZoneInfo(os.getenv("TIMEZONE", "Asia/Beirut"))
 MODEL = os.getenv("GEMINI_MODEL", "").strip()      # empty = auto-detect
-VOICE = os.getenv("VOICE", "en-US-AndrewMultilingualNeural")
-# a touch quicker than default reads as a broadcaster rather than a reader
-RATE = os.getenv("VOICE_RATE", "+8%")
+# Brian is edge's warmest, most conversational voice — the closest the free
+# tier gets to a person talking to a person
+VOICE = os.getenv("VOICE", "en-US-BrianMultilingualNeural")
+# a touch above neutral keeps broadcast energy without the read feeling rushed
+RATE = os.getenv("VOICE_RATE", "+4%")
 # a hair below the voice's default centre reads warmer and less synthetic; edge
 # takes a signed Hz offset like "-2Hz". Neutral is "+0Hz".
 PITCH = os.getenv("VOICE_PITCH", "-2Hz")
@@ -85,6 +87,8 @@ _SKIP = ("embedding", "aqa", "image", "tts", "live", "vision", "learnlm", "gemma
 # Which day are we covering?
 # ----------------------------------------------------------------------------
 CRON_HOURS = (21, 22)          # must match the schedule in the workflow
+CATCHUP_HOUR = 4               # UTC; publishes yesterday only if midnight failed
+MARKER = ".last_published"     # committed by the workflow after each publish
 
 
 def _midnight_cron(now: dt.datetime) -> int:
@@ -135,6 +139,20 @@ def resolve_day() -> dt.date | None:
             fired = int(CRON.split()[1])
         except (IndexError, ValueError):
             fired = wanted                     # unparseable: assume it's ours
+        if fired == CATCHUP_HOUR:
+            # hours after midnight: publish yesterday ONLY if the midnight run
+            # never recorded a publish (e.g. a Gemini outage killed it)
+            target = now.date() - dt.timedelta(days=1)
+            try:
+                done = open(MARKER).read().strip()
+            except OSError:
+                done = ""
+            if done == target.isoformat():
+                print(f"catch-up: {target} already published — nothing to do")
+                return None
+            print(f"catch-up run: {target} missing "
+                  f"(last published: {done or 'none'})")
+            return target
         if fired != wanted:
             print(f"cron {fired:02d}:00 UTC is the off-season one "
                   f"({wanted:02d}:00 UTC is local midnight today) — exiting")
@@ -162,17 +180,17 @@ def _post_media(block) -> dict:
     footage the newsroom posted beats any still. Returns both, kept apart so the
     builder can prefer a clip and fall back to a photo.
 
-    LINK PREVIEWS ARE DELIBERATELY EXCLUDED. When a post shares a URL, Telegram
-    renders that page's og:image as a preview thumbnail — for a YouTube link
-    that is some creator's face-and-flags clickbait collage, not a photograph
-    of the news. One of those blown up as a full-screen backdrop is what put a
-    random bearded YouTuber behind the Russia-Ukraine story. Only pictures the
-    newsroom actually POSTED (photos and frames of its own videos) qualify.
+    LINK PREVIEWS AND VIDEO THUMBNAILS ARE DELIBERATELY EXCLUDED from photos.
+    A link preview is the shared page's og:image — for a YouTube link, some
+    creator's face-and-flags clickbait collage. A video THUMBNAIL is the tiny
+    cover frame of a posted clip — usually a talking head, and low-res, so it
+    lands on screen both irrelevant AND blurry (that is exactly the bearded
+    commentator who filled the Russia-Ukraine frame twice). Only photographs
+    the newsroom actually POSTED count as photos; posted VIDEOS are still
+    collected as videos and used as real footage.
     """
     photos, videos = [], []
-    for node in block.select(
-            ".tgme_widget_message_photo_wrap, .tgme_widget_message_video_thumb,"
-            " .tgme_widget_message_roundvideo_thumb"):
+    for node in block.select(".tgme_widget_message_photo_wrap"):
         m = re.search(r"background-image\s*:\s*url\(['\"]?(.*?)['\"]?\)",
                       node.get("style", ""))
         if m and m.group(1).startswith("http"):
@@ -308,9 +326,12 @@ Return ONLY a JSON object, no markdown fences, in exactly this shape:
 Rules for the segments:
 - One segment per topic. Use topics that fit the day, for example: Middle East,
   Russia and Ukraine, China and Asia, Europe, United States, Markets, Football,
-  MMA. Skip a topic only if it genuinely had no news. Cover EVERY distinct
-  region or subject that saw real reporting today — the viewer should feel they
-  got the whole channel, not a hand-picked few. Between 4 and 9 segments.
+  MMA. Choose like a great editor, not a cataloguer: the day's five to eight
+  stories that genuinely MATTER or fascinate, each told properly — depth beats
+  box-ticking. When several minor items remain that don't deserve their own
+  segment, fold them into ONE quick segment called "Also Today": one crisp
+  sentence per item, 40 to 70 words total, images list empty. Never stretch a
+  thin story into a full segment. Between 4 and 9 segments including it.
 - "topic" is a screen label: 1 to 3 words, no punctuation.
 - each segment's "headline" is an on-screen caption for that topic: 4 to 8
   words, no final full stop. It is read by the viewer, not spoken.
@@ -402,6 +423,11 @@ Rules for the segments:
     exaggeration, hype or opinion. Report it straight, but make it alive.
   * Give each story a shape: what happened, why it matters, what to watch next.
     Land the final line of each topic so it resolves instead of trailing off.
+  * Tell it as a STORY, not a report card: someone wants something, something
+    stands in the way, and today it changed. Name the actor, the stakes, and
+    the turn. Chain the sentences by cause and consequence — "because", "so",
+    "which means", "and that's why" — never as a flat list of facts joined by
+    "also" and "meanwhile".
   * Use a vivid, exact verb over a vague one; a concrete detail over a generic
     phrase — but only details that are actually in the posts.
   * Hand the viewer from one story to the next like a person, not a list. Open
@@ -1135,7 +1161,8 @@ def _openverse_search(query: str) -> tuple[str, str] | None:
     return None
 
 
-def _download(url: str, path: str, headers: dict) -> bool:
+def _download(url: str, path: str, headers: dict,
+              min_size: tuple[int, int] = (480, 270)) -> bool:
     r = requests.get(url, timeout=60, headers=headers)
     if not r.ok or len(r.content) < 8000:
         print(f"    image unavailable ({r.status_code}, {len(r.content)} bytes)")
@@ -1145,10 +1172,12 @@ def _download(url: str, path: str, headers: dict) -> bool:
         return False
     with open(path, "wb") as f:
         f.write(r.content)
-    # ffprobe exits 0 on a non-image and reports 0x0, so check the dimensions
+    # ffprobe exits 0 on a non-image and reports 0x0, so check the dimensions.
+    # The floor is high because these fill a 1920-wide frame: a small thumbnail
+    # upscaled that far reads as a smear.
     w, h = video.probe_size(path)
-    if w < 200 or h < 200:
-        print(f"    image did not decode ({w}x{h})")
+    if w < min_size[0] or h < min_size[1]:
+        print(f"    image did not decode or too small ({w}x{h})")
         return False
     return True
 
@@ -1185,7 +1214,8 @@ def segment_media(seg: dict, posts: list[dict], work: str,
             for url in posts[n - 1].get("videos", []):
                 raw = os.path.join(work, f"{tag}_clip.mp4")
                 try:
-                    if _download(url, raw, UA) and video.probe_duration(raw) >= 1.0:
+                    if (_download(url, raw, UA, min_size=(200, 200))
+                            and video.probe_duration(raw) >= 1.0):
                         return [raw], f"@{SOURCE}", True
                 except Exception as e:
                     print(f"    post {n} clip failed: {str(e)[:70]}")
@@ -1539,6 +1569,10 @@ def main() -> None:
             return
         publish_video(day, brief.get("headline", ""), final)
         print("published video")
+        # the workflow commits this marker so the catch-up cron can tell a
+        # published day from a missed one
+        with open(MARKER, "w") as f:
+            f.write(day.isoformat())
     finally:
         shutil.rmtree(work, ignore_errors=True)
 

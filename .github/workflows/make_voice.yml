@@ -36,8 +36,8 @@ jobs:
           import asyncio, os
           import edge_tts
           asyncio.run(edge_tts.Communicate(
-              os.environ["LINE"], "en-US-AndrewMultilingualNeural",
-              rate="+8%", pitch="-2Hz").save(os.environ["DEST"]))
+              os.environ["LINE"], "en-US-BrianMultilingualNeural",
+              rate="+4%", pitch="-2Hz").save(os.environ["DEST"]))
           size = os.path.getsize(os.environ["DEST"])
           print(f"wrote {size} bytes")
           assert size > 5000
