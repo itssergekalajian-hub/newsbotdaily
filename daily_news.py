@@ -43,8 +43,9 @@ MODEL = os.getenv("GEMINI_MODEL", "").strip()      # empty = auto-detect
 # Brian is edge's warmest, most conversational voice — the closest the free
 # tier gets to a person talking to a person
 VOICE = os.getenv("VOICE", "en-US-BrianMultilingualNeural")
-# a touch above neutral keeps broadcast energy without the read feeling rushed
-RATE = os.getenv("VOICE_RATE", "+4%")
+# above neutral for broadcast urgency — a brisk read holds attention where a
+# leisurely one drifts; +6% is still comfortably intelligible
+RATE = os.getenv("VOICE_RATE", "+6%")
 # a hair below the voice's default centre reads warmer and less synthetic; edge
 # takes a signed Hz offset like "-2Hz". Neutral is "+0Hz".
 PITCH = os.getenv("VOICE_PITCH", "-2Hz")
@@ -341,12 +342,17 @@ Rules for the segments:
   that best represents the story first. Between 1 and 6 numbers.
 - "images" lists posts marked [has photo] whose photograph actually SHOWS a
   story this segment tells — in the order the script reaches those stories, up
-  to three. These pictures appear FULL SCREEN behind the narration, so a wrong
-  picture is worse than no picture: include a post ONLY when its photo depicts
-  the specific event, place or people the script is describing at that moment.
-  Never pad the list with a photo of some other story just because it exists.
-  If no post's photo genuinely fits, return an empty list [] and the "photo"
-  place fallback is used instead.
+  to three. The photographs themselves are ATTACHED after the posts, each
+  labelled "PHOTO attached to POST n" — LOOK at them and judge by what each
+  picture visibly contains, never by the caption or by what the post's text is
+  about. These pictures appear FULL SCREEN behind the narration, so a wrong
+  picture is worse than no picture: include a post ONLY when you can see that
+  its photo depicts the specific event, place or people the script is
+  describing at that moment. A logo, a screenshot of text, a talking-head
+  portrait of someone unrelated, a meme or a promotional graphic NEVER
+  qualifies. Never pad the list with a photo of some other story just because
+  it exists. If no post's photo genuinely fits, return an empty list [] and
+  the "photo" place fallback is used instead — an empty list is a good answer.
 - "tease" is the segment's OPENING HEADLINE, spoken by the anchor over the
   story's pictures in the bulletin's first seconds ("Tonight: ..."): six to
   twelve words, present tense, punchy, a complete readable sentence that makes
@@ -546,6 +552,41 @@ def _plain_text(raw: str) -> str:
     return text.strip()
 
 
+def _photo_parts(posts: list[dict], cap: int = 24) -> list[dict]:
+    """The posts' photographs as inline images, so the writer can SEE them.
+
+    Picking pictures from post TEXT alone is guessing — the photo attached to
+    a post about strikes can just as easily be a portrait, a poster or a chart,
+    and blind picks are what put loosely-related pictures on screen. Gemini is
+    multimodal: hand it each post's first photo (shrunk to thumbnail size) and
+    the "images" choices become grounded in what the pictures actually show.
+    Every failure is quietly skipped — a text-only pick beats a dead run.
+    """
+    parts: list[dict] = []
+    tmp = tempfile.mkdtemp(prefix="ph")
+    n = 0
+    for i, p in enumerate(posts, 1):
+        if n >= cap or not p.get("images"):
+            continue
+        raw = os.path.join(tmp, f"{i}.img")
+        small = os.path.join(tmp, f"{i}.jpg")
+        try:
+            if not _download(p["images"][0], raw, UA, min_size=(120, 90)):
+                continue
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw,
+                            "-vf", "scale='min(480,iw)':-2", "-q:v", "6",
+                            small], check=True, capture_output=True)
+            with open(small, "rb") as f:
+                blob = base64.b64encode(f.read()).decode()
+            parts.append({"text": f"PHOTO attached to POST {i}:"})
+            parts.append({"inline_data": {"mime_type": "image/jpeg",
+                                          "data": blob}})
+            n += 1
+        except Exception:
+            continue
+    return parts
+
+
 def summarize(posts: list[dict], day: dt.date) -> dict:
     items = "\n\n---\n\n".join(
         f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
@@ -553,7 +594,9 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
         for i, p in enumerate(posts, 1))
     prompt = PROMPT.format(date=f"{day:%A, %d %B %Y}", items=items[:600_000])
     model = MODEL or candidate_models()[0]
-    print(f"using model: {model}  |  prompt: {len(prompt):,} chars")
+    photos = _photo_parts(posts)
+    print(f"using model: {model}  |  prompt: {len(prompt):,} chars"
+          f"  |  {len(photos) // 2} photos attached")
 
     # thinkingBudget=0 is the important line here. Gemini 2.5 Flash turns
     # "thinking" on by default, and those tokens count against maxOutputTokens.
@@ -564,7 +607,7 @@ def summarize(posts: list[dict], day: dt.date) -> dict:
     # generations (2.0 Flash) reject the field with a generic INVALID_ARGUMENT;
     # the retry loop below drops it, then the cap, on a 400.
     body = {
-        "contents": [{"parts": [{"text": prompt}]}],
+        "contents": [{"parts": [{"text": prompt}] + photos}],
         "generationConfig": {"temperature": 0.6, "maxOutputTokens": 16384,
                              "responseMimeType": "application/json",
                              "thinkingConfig": {"thinkingBudget": 0}},
@@ -961,6 +1004,7 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
                     splits.append(span * acc / total_chars)
                 print("    (no clear pauses — captions spaced by length)")
             video.run(["ffmpeg", "-y", "-loglevel", "error", "-i", whole,
+                       "-af", video.SPEECH,
                        "-c:a", "libmp3lame", "-q:a", "3", mp3_path])
             bounds = [0.0] + splits + [span]
             with open(srt_path, "w", encoding="utf-8") as f:
@@ -1375,19 +1419,19 @@ def build(brief: dict, day: dt.date, work: str,
     if sting:
         print("animated intro sting in use")
     intro = os.path.join(work, "intro.mp4")
-    video.render_card(work, 4.5,
+    video.render_card(work, 3.5,
                       [(BRAND, 81, "white"),
                        (f"{day:%A, %d %B %Y}", 39, video.PALE),
                        ("The full day in review", 33, video.PALE)],
                       intro, bg_video=sting)
-    parts = [intro]
 
+    open_talk = None
     if os.path.exists(ANCHOR_OPEN) and os.path.exists(VOICE_OPEN):
         talk = os.path.join(work, "open_talk.mp4")
         try:
             video.render_anchor_talk(work, ANCHOR_OPEN, VOICE_OPEN,
                                      BRAND, date_text, talk)
-            parts.append(talk)
+            open_talk = talk
             print("anchor speaks the open on camera")
         except Exception as e:
             print(f"spoken open skipped ({str(e)[:80]})", file=sys.stderr)
@@ -1434,10 +1478,11 @@ def build(brief: dict, day: dt.date, work: str,
     if anchor:
         print("animated anchor in use")
 
-    # the opening headlines, right after the greeting: the anchor's VOICE over
-    # each story's pictures, every shot held for exactly its spoken line —
-    # silent pictures before a bulletin read as a glitch, so a line whose
-    # narration fails is dropped rather than shown mute
+    # the COLD OPEN: before any titles, the anchor's voice over each story's
+    # pictures — "Tonight: ..." — every shot held for exactly its spoken line.
+    # That's how real broadcasts start: hook first, then the title sting, then
+    # the greeting. Silent pictures read as a glitch, so a line whose
+    # narration fails is dropped rather than shown mute.
     head_items = []
     for i, seg in enumerate(segments):
         if len(head_items) >= 4 or not backdrops[i]:
@@ -1461,15 +1506,22 @@ def build(brief: dict, day: dt.date, work: str,
         dur = video.trim_silence(raw, wav)
         if dur < 0.5:
             continue
+        # same broadcast chain as the segments, so the cold open hits at the
+        # same level as everything after it
+        wav = video.master_speech(wav, os.path.join(work, f"tease{i}_m.wav"))
         head_items.append((backdrops[i], line.rstrip("."), wav, dur))
+    cold_open = None
     if len(head_items) >= 2:
         headlines = os.path.join(work, "headlines.mp4")
         try:
             video.render_headlines(work, head_items, headlines)
-            parts.append(headlines)
-            print(f"opening headlines: {len(head_items)} stories, voiced")
+            cold_open = headlines
+            print(f"cold open: {len(head_items)} stories, voiced")
         except Exception as e:
             print(f"headlines skipped ({str(e)[:80]})", file=sys.stderr)
+
+    # broadcast running order: cold open -> title sting -> greeting -> stories
+    parts = [p for p in (cold_open, intro, open_talk) if p]
 
     print("rendering scenes:")
     elapsed = 0.0

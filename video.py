@@ -145,13 +145,33 @@ def pad_audio_tail(src: str, dst: str, seconds: float) -> str:
     return dst
 
 
+# The broadcast speech chain. Raw TTS comes out quiet and dynamically flat-
+# footed — peaks well below full scale, energy that sags mid-sentence — which
+# on a phone speaker reads as a weak, unfocused voice. Rolling off the rumble,
+# compressing 3:1 and normalising to a loud broadcast target (-15 LUFS) gives
+# the read the up-front presence of a transmitted signal; the music duck keys
+# off it more decisively too. Applied once per finished narration, never per
+# sentence (per-sentence normalisation would pump the level between lines).
+SPEECH = ("highpass=f=70,"
+          "acompressor=threshold=-18dB:ratio=3:attack=8:release=150:makeup=4dB,"
+          "loudnorm=I=-15:TP=-1.2:LRA=11")
+
+
+def master_speech(src: str, dst: str) -> str:
+    """Run a finished narration clip through the broadcast speech chain."""
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", src,
+         "-af", SPEECH, "-ar", "48000", dst])
+    return dst
+
+
 def join_audio(work: str, pieces: list[str], out: str) -> None:
     listing = os.path.join(work, os.path.basename(out) + ".txt")
     with open(listing, "w") as f:
         for p in pieces:
             f.write(f"file '{os.path.abspath(p)}'\n")
     run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
-         "-i", listing, "-c:a", "libmp3lame", "-q:a", "3", out])
+         "-i", listing, "-af", SPEECH,
+         "-c:a", "libmp3lame", "-q:a", "3", out])
 
 
 def make_backdrop(work: str, image: str, name: str, seconds: float,
@@ -714,7 +734,8 @@ def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
     ])
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", clip, "-i", voice,
          "-filter_complex",
-         f"[0:v]{chain}[v];[1:a]apad,aformat=channel_layouts=stereo[a]",
+         f"[0:v]{chain}[v];[1:a]{SPEECH},apad,"
+         f"aformat=channel_layouts=stereo[a]",
          "-map", "[v]", "-map", "[a]", *ENC, "-t", f"{seconds:.2f}", out])
 
 
