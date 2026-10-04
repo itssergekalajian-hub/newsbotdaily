@@ -174,51 +174,60 @@ def join_audio(work: str, pieces: list[str], out: str) -> None:
          "-c:a", "libmp3lame", "-q:a", "3", out])
 
 
-def make_backdrop(work: str, image: str, name: str, seconds: float,
-                  variant: int = 0) -> str:
-    """A full-frame background from a still, with smooth, judder-free motion.
+def _still_shot(image: str, out: str, seconds: float,
+                zoom: float, px: float, py: float) -> str:
+    """One locked-off full-frame shot of a still: scaled, cropped, no motion.
 
-    The story's own photograph fills the whole screen instead of sitting in a
-    little over-the-shoulder panel — the single biggest change that makes the
-    bulletin read as a real broadcast rather than a captioned slideshow. The
-    catch is the motion: zoompan snaps its window to whole pixels, so a slow
-    drift freezes for several frames and then jumps, which reads as a shake.
-    The fix is to run the move at double size and scale it back down — the
-    downscale turns each one-pixel jump into a half-pixel one and interpolates
-    it away. Measured against the naive version: the naive move froze for whole
-    frames and then snapped; this one moves a little on every single frame.
-
-    A different framing per topic (push in, pan across, pull out, tilt down)
-    keeps consecutive stories from moving the same way.
+    zoom 1.0 is the whole picture filling the frame; a larger zoom is a tighter
+    crop. px/py place the crop window across the leftover width/height
+    (0 = left/top edge, 0.5 = centred, 1 = right/bottom edge).
     """
-    out = os.path.join(work, name)
-    frames = int(round(seconds * FPS)) + 2
-    # The move itself stays at 2560x1440 whatever the output size: zoompan cost
-    # is what limits the render, and a 2560-wide window downscaled to 1920 still
-    # lands on 0.75-pixel steps — comfortably sub-pixel after bicubic.
-    src_w, src_h = 3200, 1800                      # working canvas
-    bw, bh = 2560, 1440                            # supersampled move
-    # Every variant zooms IN — the window shrinks a little on every frame, which
-    # guarantees continuous sub-pixel motion once downscaled (a fixed-zoom pan or
-    # a pull-out can land two frames on the same rounded pixel and stutter). The
-    # variants differ only in where the frame drifts while it pushes in.
-    zin = "min(zoom+0.00045,1.13)"
-    ctr_x, ctr_y = "iw/2-(iw/zoom/2)", "ih/2-(ih/zoom/2)"
-    moves = [
-        (zin, ctr_x, ctr_y),                              # push in, centred
-        (zin, ctr_x, f"(ih-ih/zoom)*(on/{frames})"),      # push in, tilt down
-        (zin, ctr_x, f"(ih-ih/zoom)*(1-on/{frames})"),    # push in, tilt up
-        (zin, f"(iw-iw/zoom)*(on/{frames})", ctr_y),      # push in, drift right
-    ]
-    z, x, y = moves[variant % len(moves)]
-    vf = (f"scale={src_w}:{src_h}:force_original_aspect_ratio=increase,"
-          f"crop={src_w}:{src_h},"
-          f"zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={bw}x{bh}:fps={FPS},"
-          f"scale={W}:{H}:flags=bicubic,setsar=1")
+    vf = (f"scale={int(W * zoom)}:{int(H * zoom)}"
+          f":force_original_aspect_ratio=increase,"
+          f"crop={W}:{H}:(iw-ow)*{px:.2f}:(ih-oh)*{py:.2f},setsar=1")
     run(["ffmpeg", "-y", "-loglevel", "error", "-loop", "1", "-i", image,
          "-vf", vf, "-t", f"{seconds + 0.3:.2f}", "-r", str(FPS),
          "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", out])
     return out
+
+
+def make_backdrop(work: str, image: str, name: str, seconds: float,
+                  variant: int = 0) -> str:
+    """A full-frame background from a still — locked off, nothing drifts.
+
+    The story's own photograph fills the whole screen instead of sitting in a
+    little over-the-shoulder panel. It used to carry a slow Ken Burns push-in,
+    but however it was smoothed, a constantly creeping background reads as
+    shaky and pulls the eye away from the anchor and the words — the viewer
+    said as much — so the photograph now sits rock-still, like a broadcast
+    full-screen graphic.
+
+    A single frozen frame would go dead over a long story, so past ~15 seconds
+    the still becomes a short sequence of DIFFERENT static framings — the full
+    picture, then a tighter crop on its subject — dissolving slowly from one
+    to the next. The view changes; nothing ever moves.
+    """
+    out = os.path.join(work, name)
+    # the tighter framings bias toward the upper third, where a news
+    # photograph's subject usually is; the variant alternates which side the
+    # closest crop favours so consecutive topics aren't framed identically
+    side = 0.33 if variant % 2 else 0.67
+    framings = [(1.0, 0.5, 0.5), (1.22, 0.5, 0.3), (1.45, side, 0.35)]
+    shots = max(1, min(3, int(round(seconds / 15))))
+    if shots == 1:
+        return _still_shot(image, out, seconds, *framings[variant % 3])
+    fade = 0.8
+    share = (seconds + fade * (shots - 1)) / shots
+    parts = [_still_shot(image, os.path.join(work, f"{name}.s{j}.mp4"),
+                         share, *framings[j])
+             for j in range(shots)]
+    try:
+        _xfade_join(parts, out, fade)
+        return out
+    except RuntimeError as e:
+        print(f"  framing join failed ({str(e)[:80]}) — single framing",
+              file=sys.stderr)
+        return _still_shot(image, out, seconds, *framings[0])
 
 
 def _xfade_join(parts: list[str], out: str, fade: float = 0.6) -> None:
@@ -247,9 +256,9 @@ def make_backdrop_multi(work: str, images: list[str], name: str,
 
     A topic often tells two or three stories; holding one photograph for a
     minute both bores the eye and mislabels the later stories. Each image gets
-    an equal share of the scene with its own slow move, dissolving into the
+    an equal share of the scene as a locked-off shot, dissolving into the
     next as the narration advances. Falls back to the first image alone if the
-    join fails — a moving single still is still a working scene.
+    join fails — a single still is still a working scene.
     """
     if len(images) == 1:
         return make_backdrop(work, images[0], name, seconds, variant)

@@ -90,6 +90,32 @@ _SKIP = ("embedding", "aqa", "image", "tts", "live", "vision", "learnlm", "gemma
 CRON_HOURS = (21, 22)          # must match the schedule in the workflow
 CATCHUP_HOUR = 4               # UTC; publishes yesterday only if midnight failed
 MARKER = ".last_published"     # committed by the workflow after each publish
+RECENT = ".recent_briefs.json" # what the last few bulletins covered, committed
+                               # alongside the marker so a running story can be
+                               # told as a follow-up instead of fresh news
+
+
+def load_recent() -> list[dict]:
+    """The last few nights' story lists, oldest first ([] when none yet)."""
+    try:
+        with open(RECENT) as f:
+            data = json.load(f)
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
+def remember_brief(day: dt.date, brief: dict) -> None:
+    """Record tonight's stories so tomorrow's writer knows what was covered."""
+    keep = [r for r in load_recent() if r.get("date") != day.isoformat()]
+    keep.append({"date": day.isoformat(),
+                 "stories": [{"topic": s.get("topic", ""),
+                              "headline": s.get("headline", ""),
+                              "tease": s.get("tease", "")}
+                             for s in brief.get("segments", [])]})
+    keep = sorted(keep, key=lambda r: r.get("date", ""))[-4:]
+    with open(RECENT, "w") as f:
+        json.dump(keep, f, ensure_ascii=False, indent=1)
 
 
 def _midnight_cron(now: dt.datetime) -> int:
@@ -379,6 +405,30 @@ Rules for the segments:
 - Cover the whole day. Where a story developed over several hours, tell it in
   order — what was first reported, how it changed, where it stood by the end.
 - Explain what happened and why it matters. Do not just read headlines.
+- This bulletin is many viewers' ONLY news source. Every story must be fully
+  understandable on first hearing with no outside knowledge:
+  * Within a story's first two sentences the listener must know WHO did WHAT,
+    WHERE. Anchor it before you develop it.
+  * Give one short clause of context for any person, body or term that isn't
+    a household name — "Pakistan's foreign minister, Ishaq Dar", "the IAEA,
+    the UN's nuclear watchdog" — the first time it is spoken.
+  * If the day's posts don't carry enough for a CLEAR telling — you cannot
+    say plainly who did what and why it matters — do not stretch it into a
+    vague segment. Give it one clear sentence in "Also Today", or leave it
+    out. A story half-told is worse than a story held for tomorrow.
+- CONTINUING STORIES: the viewer watches every night. When a story listed
+  under STORIES ALREADY COVERED continues today, tell it as a FOLLOW-UP, never
+  as breaking news:
+  * Open it as a development — "Day three of...", "An update on the hijacking
+    we've been following...", "Back to..." — and lead with what is NEW today.
+  * Recap the standing story in one short clause at most; the viewer heard
+    the full version already.
+  * If today adds nothing genuinely new to a running story, leave it out
+    rather than re-telling yesterday's bulletin.
+- BACKGROUND posts, when present below, are from the PREVIOUS days and were
+  already reported. Use them only to complete or anchor a continuing story —
+  a name, a number, how it started — never as today's events. Everything you
+  present as happening "today" must come from the posts dated {date}.
 - Use ONLY the information in the posts. Never add facts, numbers or names that
   are not there.
 - Merge duplicate reports of one event. If several posts confirm it, you may
@@ -458,8 +508,12 @@ Rules for the segments:
 - End the last segment by landing its story with a real sense of completion —
   a final line that resolves — because the anchor's own goodbye follows it.
 
+{previous}
+
 POSTS FROM {date}:
 {items}
+
+{background}
 """
 
 
@@ -587,12 +641,30 @@ def _photo_parts(posts: list[dict], cap: int = 24) -> list[dict]:
     return parts
 
 
-def summarize(posts: list[dict], day: dt.date) -> dict:
+def summarize(posts: list[dict], day: dt.date,
+              background: str = "", recent: list[dict] | None = None) -> dict:
     items = "\n\n---\n\n".join(
         f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
         f"{p['text']}"
         for i, p in enumerate(posts, 1))
-    prompt = PROMPT.format(date=f"{day:%A, %d %B %Y}", items=items[:600_000])
+
+    # what recent bulletins covered, newest first, so running stories are told
+    # as follow-ups rather than re-announced as fresh news
+    prev_lines = []
+    for r in (recent or [])[::-1]:
+        heads = "; ".join(f"{s.get('topic')}: {s.get('headline')}"
+                          for s in r.get("stories", []) if s.get("headline"))
+        if heads:
+            prev_lines.append(f"{r.get('date')}: {heads}")
+    previous = ("STORIES ALREADY COVERED in this bulletin's previous editions "
+                "(newest first):\n" + "\n".join(prev_lines)) if prev_lines else ""
+
+    bg = (f"BACKGROUND — posts from the previous days, already reported in "
+          f"earlier bulletins (context only, never today's news):\n"
+          f"{background[:150_000]}") if background else ""
+
+    prompt = PROMPT.format(date=f"{day:%A, %d %B %Y}", items=items[:450_000],
+                           previous=previous, background=bg)
     model = MODEL or candidate_models()[0]
     photos = _photo_parts(posts)
     print(f"using model: {model}  |  prompt: {len(prompt):,} chars"
@@ -1604,7 +1676,19 @@ def main() -> None:
         print("not enough for a brief, nothing published")
         return
 
-    brief = summarize(posts, day)
+    # the previous two days' posts, as background the writer may draw on to
+    # complete a continuing story — a failure here costs context, not the run
+    background = []
+    for back in (1, 2):
+        prev = day - dt.timedelta(days=back)
+        try:
+            for p in fetch_posts(SOURCE, prev):
+                background.append(f"[{prev} {p['time']}] {p['text']}")
+        except Exception as e:
+            print(f"background fetch for {prev} failed: {str(e)[:80]}",
+                  file=sys.stderr)
+
+    brief = summarize(posts, day, "\n\n".join(background), load_recent())
     words = sum(len(s["script"].split()) for s in brief["segments"])
     print(f"script: {words} words across {len(brief['segments'])} segments")
 
@@ -1631,6 +1715,9 @@ def main() -> None:
         # published day from a missed one
         with open(MARKER, "w") as f:
             f.write(day.isoformat())
+        # ...and tonight's story list, so tomorrow's writer treats running
+        # stories as follow-ups
+        remember_brief(day, brief)
     finally:
         shutil.rmtree(work, ignore_errors=True)
 
