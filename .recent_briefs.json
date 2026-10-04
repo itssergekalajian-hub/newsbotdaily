@@ -1,0 +1,47 @@
+[
+ {
+  "date": "2026-10-03",
+  "stories": [
+   {
+    "topic": "Aviation Terror",
+    "headline": "Flydubai Co-Pilot Used Crash Axe in Attempted Hijacking",
+    "tease": "Emirati authorities investigate an attempted hijacking after a co-pilot attacks his captain"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Tanker Projectile Strike Escalates Gulf Tensions",
+    "tease": "A tanker is struck in the Strait of Hormuz amid widening strikes"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Russian Missile Strike Damages Second Major Kyiv Bridge",
+    "tease": "Kyiv infrastructure burns as Russian strikes take aim at vital bridges"
+   },
+   {
+    "topic": "Artificial Intelligence",
+    "headline": "Internal Friction and Safety Warnings Roil Tech Giants",
+    "tease": "Resignations and community backlash expose mounting pressure across the AI sector"
+   },
+   {
+    "topic": "United States",
+    "headline": "DOJ Clears Powell as Political Feuds Escalate",
+    "tease": "Federal prosecutors decline to reopen criminal probe into former Fed Chair"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Farage Attack Plot Foiled as Latvia Votes",
+    "tease": "British counter terror police foil an alleged plot targeting Nigel Farage"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Developments Across Markets Tech and Security",
+    "tease": "Missile tests delisted apps and fresh robotaxi struggles make headlines"
+   },
+   {
+    "topic": "Football",
+    "headline": "Robert Lewandowski Hits Hat Trick for Poland",
+    "tease": "Veteran striker Robert Lewandowski lights up the pitch in dominant victory"
+   }
+  ]
+ }
+]
