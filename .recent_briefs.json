@@ -43,5 +43,40 @@
     "tease": "Veteran striker Robert Lewandowski lights up the pitch in dominant victory"
    }
   ]
+ },
+ {
+  "date": "2026-10-04",
+  "stories": [
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Russian Strikes Target Kyiv as German Leaders Visit",
+    "tease": "Russian strikes hit Kyiv as top German leaders arrive in solidarity"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Riyadh Targeted as Yemen Clashes and Regional Tensions Esc",
+    "tease": "Saudi Arabia requests allied air defenses following fresh Houthi strikes"
+   },
+   {
+    "topic": "Korean Peninsula",
+    "headline": "North Korea Tests Hypersonic Missile Overseen by Kim",
+    "tease": "North Korea fires hypersonic missile in major military test"
+   },
+   {
+    "topic": "Artificial Intelligence",
+    "headline": "Trump Names Jay Clayton as Federal AI Czar",
+    "tease": "Former SEC chairman appointed to lead new federal AI force"
+   },
+   {
+    "topic": "United States",
+    "headline": "Justice Alito Weighs Retirement as Political Campaigns Esc",
+    "tease": "Supreme Court Justice Samuel Alito signals possible retirement plans"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Elections Across Europe and Latin America Amid Protests",
+    "tease": "Voters cast ballots in Brazil and Europe as global developments unfold"
+   }
+  ]
  }
 ]
