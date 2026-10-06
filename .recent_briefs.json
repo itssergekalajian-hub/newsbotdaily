@@ -78,5 +78,45 @@
     "tease": "Voters cast ballots in Brazil and Europe as global developments unfold"
    }
   ]
+ },
+ {
+  "date": "2026-10-05",
+  "stories": [
+   {
+    "topic": "Security",
+    "headline": "US bombers abruptly evacuated from British base",
+    "tease": "Strategic American bombers rapidly depart Britain amid terror warnings"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Spanish prime minister calls snap election",
+    "tease": "Spain heads to snap elections as housing protests boil over"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Russian missile strikes grain freighter in Black Sea",
+    "tease": "A Russian missile hits an Egyptian-bound grain freighter"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Diplomatic deadlock deepens as Iran reviews naval proposal",
+    "tease": "Indirect talks stall while Tehran weighs Hormuz transit terms"
+   },
+   {
+    "topic": "Artificial Intelligence",
+    "headline": "Trump establishes White House Super Intelligence Force",
+    "tease": "A new federal force takes command of national artificial intelligence"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Ultimatums trade spats and strange lab alerts",
+    "tease": "Tariff threats tax vows and an overseas lab incident"
+   },
+   {
+    "topic": "Combat Sports",
+    "headline": "Champs open as betting underdogs for UFC 335",
+    "tease": "And finally tonight, oddsmakers flip the script on fan favorites"
+   }
+  ]
  }
 ]
