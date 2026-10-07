@@ -118,5 +118,35 @@
     "tease": "And finally tonight, oddsmakers flip the script on fan favorites"
    }
   ]
+ },
+ {
+  "date": "2026-10-06",
+  "stories": [
+   {
+    "topic": "Security",
+    "headline": "Arrest at UK Airbase Following Bomber Evacuation",
+    "tease": "Police make an arrest following the sudden evacuation of RAF Fairford"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Far Right Wins Regional Speakership as Paris Protests Swel",
+    "tease": "Germany crosses a political taboo as French student protests expand"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Russian Drone Strikes Disrupt Ukraine Railway Network",
+    "tease": "Russian drones target Ukraine's vital passenger and freight railway system"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Paramount and Warner Bros Combine in Blockbuster Deal",
+    "tease": "Hollywood reshapes under a massive one hundred ten billion dollar merger"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Measles Outbreak AI Watermarks and Combat Challenges",
+    "tease": "Public health warnings and technological moves round out today's developments"
+   }
+  ]
  }
 ]
