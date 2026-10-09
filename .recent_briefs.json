@@ -1,40 +1,5 @@
 [
  {
-  "date": "2026-10-04",
-  "stories": [
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Russian Strikes Target Kyiv as German Leaders Visit",
-    "tease": "Russian strikes hit Kyiv as top German leaders arrive in solidarity"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Riyadh Targeted as Yemen Clashes and Regional Tensions Esc",
-    "tease": "Saudi Arabia requests allied air defenses following fresh Houthi strikes"
-   },
-   {
-    "topic": "Korean Peninsula",
-    "headline": "North Korea Tests Hypersonic Missile Overseen by Kim",
-    "tease": "North Korea fires hypersonic missile in major military test"
-   },
-   {
-    "topic": "Artificial Intelligence",
-    "headline": "Trump Names Jay Clayton as Federal AI Czar",
-    "tease": "Former SEC chairman appointed to lead new federal AI force"
-   },
-   {
-    "topic": "United States",
-    "headline": "Justice Alito Weighs Retirement as Political Campaigns Esc",
-    "tease": "Supreme Court Justice Samuel Alito signals possible retirement plans"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Elections Across Europe and Latin America Amid Protests",
-    "tease": "Voters cast ballots in Brazil and Europe as global developments unfold"
-   }
-  ]
- },
- {
   "date": "2026-10-05",
   "stories": [
    {
@@ -146,6 +111,41 @@
     "topic": "Football",
     "headline": "Mikel Arteta signs new Arsenal extension",
     "tease": "Arsenal manager Mikel Arteta commits future with contract extension"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-08",
+  "stories": [
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Russian Strike on Ukrainian Buses Kills Thirty",
+    "tease": "At least thirty civilians are dead after Russian strikes hit buses in Ukraine."
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Trump Rules Out Pre-Election Iran Strikes",
+    "tease": "Donald Trump vows no military action against Iran ahead of midterm voting."
+   },
+   {
+    "topic": "United States",
+    "headline": "Maduro Indicted in Washington Over Torture Conspiracy",
+    "tease": "Federal prosecutors charge former Venezuelan leader Nicolas Maduro with torture conspiracy."
+   },
+   {
+    "topic": "Markets",
+    "headline": "Treasury Yield Spikes Spark Wall Street Selloff",
+    "tease": "Rising Treasury yields trigger a sharp selloff across top market sectors."
+   },
+   {
+    "topic": "Tech and AI",
+    "headline": "Samsung Flags Record Eighty Billion Profit",
+    "tease": "Samsung forecasts historic eighty billion dollar profit on booming AI demand."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Pakistan Bailout and Global Corporate News",
+    "tease": "Islamabad clinches a vital bailout as Musk clashes with Indian tycoons."
    }
   ]
  }
