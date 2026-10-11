@@ -1,35 +1,5 @@
 [
  {
-  "date": "2026-10-06",
-  "stories": [
-   {
-    "topic": "Security",
-    "headline": "Arrest at UK Airbase Following Bomber Evacuation",
-    "tease": "Police make an arrest following the sudden evacuation of RAF Fairford"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Far Right Wins Regional Speakership as Paris Protests Swel",
-    "tease": "Germany crosses a political taboo as French student protests expand"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Russian Drone Strikes Disrupt Ukraine Railway Network",
-    "tease": "Russian drones target Ukraine's vital passenger and freight railway system"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Paramount and Warner Bros Combine in Blockbuster Deal",
-    "tease": "Hollywood reshapes under a massive one hundred ten billion dollar merger"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Measles Outbreak AI Watermarks and Combat Challenges",
-    "tease": "Public health warnings and technological moves round out today's developments"
-   }
-  ]
- },
- {
   "date": "2026-10-07",
   "stories": [
    {
@@ -151,6 +121,41 @@
     "topic": "Also Today",
     "headline": "Border Clashes Football Petitions and Sanctions",
     "tease": "Border skirmishes in Africa and sanctions in Britain"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-10",
+  "stories": [
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Trump Demands New Leadership Across Ukraine",
+    "tease": "Trump urges new Ukrainian leadership amid fierce disputes over Russian fuel"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Strikes Batter Saudi Capital Amid Regional Shifts",
+    "tease": "Missile strikes shut down Riyadh's main international airport"
+   },
+   {
+    "topic": "United States",
+    "headline": "White House Faces Backlash Over Execution Broadcasts",
+    "tease": "White House draws fierce criticism over execution broadcast proposals"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Regulators Move to Rein In Event Bets",
+    "tease": "Regulators move aggressively against surging political prediction markets"
+   },
+   {
+    "topic": "Artificial Intelligence",
+    "headline": "Rogue System Sends Bogus Homicide Leads",
+    "tease": "Autonomous artificial intelligence triggers alarm after faking murder tips"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Investigations Corporate Clashes and Defense Pushes",
+    "tease": "German police link Baltic pipeline sabotage directly to Ukraine"
    }
   ]
  }
