@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-07",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Oil tankers and anniversaries test Gulf stability",
-    "tease": "Crude surges on tanker attacks and fresh Houthi threats"
-   },
-   {
-    "topic": "Europe",
-    "headline": "France suspends stun grenades after student injury",
-    "tease": "French authorities ban stun grenades following severe protest injuries"
-   },
-   {
-    "topic": "United States",
-    "headline": "Whistleblower alleges Justice Department targeted proteste",
-    "tease": "Whistleblower claims Trump administration pushed FBI to target protesters"
-   },
-   {
-    "topic": "Law and Security",
-    "headline": "London court hears Iranian surveillance plot trial",
-    "tease": "Three men face London trial for foreign surveillance plot"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Wall Street rallies as mega caps rebound",
-    "tease": "Wall Street hits record highs behind tech rebound"
-   },
-   {
-    "topic": "Artificial Intelligence",
-    "headline": "Startups and researchers advance privacy-focused models",
-    "tease": "Startups launch privacy tools as platforms battle AI agents"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global round-up of business and politics",
-    "tease": "Antitrust raids hit Japan as Pyongyang warns Washington"
-   },
-   {
-    "topic": "Football",
-    "headline": "Mikel Arteta signs new Arsenal extension",
-    "tease": "Arsenal manager Mikel Arteta commits future with contract extension"
-   }
-  ]
- },
- {
   "date": "2026-10-08",
   "stories": [
    {
@@ -156,6 +111,41 @@
     "topic": "Also Today",
     "headline": "Global Investigations Corporate Clashes and Defense Pushes",
     "tease": "German police link Baltic pipeline sabotage directly to Ukraine"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-11",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Deadly Riyadh Airport Strike Escalates Gulf Confrontation",
+    "tease": "The United States weighs direct strikes after Riyadh airport is hit."
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Trump Claims Energy Ceasefire as Strikes Continue",
+    "tease": "Trump announces an energy ceasefire while Kyiv awaits official details."
+   },
+   {
+    "topic": "Europe",
+    "headline": "Polish Police Foil Plot Against Prime Minister",
+    "tease": "Polish authorities arrest a suspect plotting against Prime Minister Tusk."
+   },
+   {
+    "topic": "Business and Tech",
+    "headline": "Tech Giants Rethink AI Risks and Strategy",
+    "tease": "Satya Nadella issues stark warnings on artificial intelligence security."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Antitrust Actions Defense Upgrades and West Bank",
+    "tease": "A roundup of today's key legal and defense developments."
+   },
+   {
+    "topic": "Football",
+    "headline": "Haaland Strikes Again in Anfield Blockbuster",
+    "tease": "And finally, Erling Haaland keeps up his blistering scoring pace."
    }
   ]
  }
