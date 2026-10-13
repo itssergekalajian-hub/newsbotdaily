@@ -25,10 +25,24 @@ import time
 from zoneinfo import ZoneInfo
 
 import edge_tts
+import edge_tts.communicate
 import requests
 from bs4 import BeautifulSoup
 
 import video
+
+# On 10 October 2026 Microsoft changed the token check on the public Edge
+# read-aloud endpoint and every edge-tts release started getting 403s on the
+# websocket handshake (rany2/edge-tts#490) — two nights of bulletins died in
+# narration. The msedgeservices gateway speaks the same protocol and accepts
+# the same trusted client token as a plain subscription key, with no DRM
+# token to break, so narration goes through it until a fixed edge-tts ships.
+# communicate imported its own copy of WSS_URL at load time, so the override
+# must land on that module, not on edge_tts.constants.
+edge_tts.communicate.WSS_URL = (
+    "wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1"
+    "?Ocp-Apim-Subscription-Key="
+    + edge_tts.constants.TRUSTED_CLIENT_TOKEN)
 
 # ----------------------------------------------------------------------------
 # Config
