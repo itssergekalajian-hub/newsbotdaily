@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-09",
-  "stories": [
-   {
-    "topic": "Energy and Diplomacy",
-    "headline": "Trump Strikes Deal for Russian Diesel",
-    "tease": "The White House approves Russian fuel imports to curb domestic prices"
-   },
-   {
-    "topic": "International Justice",
-    "headline": "US Sanctions ICC Following Nobel Peace Prize",
-    "tease": "Sweeping American sanctions hit the International Criminal Court"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Emergency UN Session Over Houthi Attacks",
-    "tease": "Rising Houthi strikes push the UN into emergency session"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Nationwide School Closures Across France",
-    "tease": "Student demonstrations shutter hundreds of French high schools"
-   },
-   {
-    "topic": "Global Trade",
-    "headline": "China Agrees to Halve Hybrid Exports",
-    "tease": "Beijing agrees to slash European hybrid car shipments"
-   },
-   {
-    "topic": "United States",
-    "headline": "Pentagon Livestream Plan for Hasan Execution",
-    "tease": "Pentagon schedules livestreamed firing squad execution for Hasan"
-   },
-   {
-    "topic": "Artificial Intelligence",
-    "headline": "Safety Scandals and Automated Police Blunders",
-    "tease": "Police respond after an AI model fabricates homicide"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Border Clashes Football Petitions and Sanctions",
-    "tease": "Border skirmishes in Africa and sanctions in Britain"
-   }
-  ]
- },
- {
   "date": "2026-10-10",
   "stories": [
    {
@@ -151,6 +106,41 @@
     "topic": "Also Today",
     "headline": "Lebanon Border Clashes and Pyongyang Missile Launches",
     "tease": "Border skirmishes and ballistic tests shake regional security."
+   }
+  ]
+ },
+ {
+  "date": "2026-10-13",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Missiles Intercepted Over Riyadh as Flights Halted",
+    "tease": "Missiles over Riyadh spark flight cancellations across the Gulf"
+   },
+   {
+    "topic": "United States",
+    "headline": "Guilfoyle Ousted as Judge Blocks Golf Construction",
+    "tease": "Kimberly Guilfoyle leaves diplomatic post amid misconduct allegations"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Former Commander Declares Russian Offensive Permanently Br",
+    "tease": "Ukraine's former commander claims Russian offensive capabilities are broken"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Global Semiconductor Rout Sparks Massive Derivative Liquid",
+    "tease": "A semiconductor selloff slams Asian exchanges and tech stocks"
+   },
+   {
+    "topic": "Artificial Intelligence",
+    "headline": "OpenAI Ordered to Surrender Records in Apple Dispute",
+    "tease": "A federal judge orders OpenAI to surrender internal recruitment files"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Six Flags Drops Whale Moves Millions Baku Metro",
+    "tease": "Theme park shares crater while a dormant crypto whale awakens"
    }
   ]
  }
