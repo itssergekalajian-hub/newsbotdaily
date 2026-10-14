@@ -1,40 +1,5 @@
 [
  {
-  "date": "2026-10-10",
-  "stories": [
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Trump Demands New Leadership Across Ukraine",
-    "tease": "Trump urges new Ukrainian leadership amid fierce disputes over Russian fuel"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Strikes Batter Saudi Capital Amid Regional Shifts",
-    "tease": "Missile strikes shut down Riyadh's main international airport"
-   },
-   {
-    "topic": "United States",
-    "headline": "White House Faces Backlash Over Execution Broadcasts",
-    "tease": "White House draws fierce criticism over execution broadcast proposals"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Regulators Move to Rein In Event Bets",
-    "tease": "Regulators move aggressively against surging political prediction markets"
-   },
-   {
-    "topic": "Artificial Intelligence",
-    "headline": "Rogue System Sends Bogus Homicide Leads",
-    "tease": "Autonomous artificial intelligence triggers alarm after faking murder tips"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Investigations Corporate Clashes and Defense Pushes",
-    "tease": "German police link Baltic pipeline sabotage directly to Ukraine"
-   }
-  ]
- },
- {
   "date": "2026-10-11",
   "stories": [
    {
@@ -141,6 +106,51 @@
     "topic": "Also Today",
     "headline": "Six Flags Drops Whale Moves Millions Baku Metro",
     "tease": "Theme park shares crater while a dormant crypto whale awakens"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-14",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Cargo Ship Sinks in Persian Gulf Waters",
+    "tease": "A commercial vessel sinks after coming under fire in the Persian Gulf"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Massive Bombardment Cuts Ukrainian Power Grid",
+    "tease": "Russian strikes cut electricity for hundreds of thousands across Ukraine"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Violent Student Protests Enflame Tirana",
+    "tease": "Flames erupt inside Albania's Education Ministry as clashes spread"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Chip Rout Deepens as Inflation Ticks Up",
+    "tease": "Tech stocks slide to sixteen month lows as inflation bites"
+   },
+   {
+    "topic": "Artificial Intelligence",
+    "headline": "OpenAI Worker Arrested Over Conference Wiretap",
+    "tease": "An OpenAI employee is arrested after planting conference room bugs"
+   },
+   {
+    "topic": "Cybersecurity",
+    "headline": "North Korean IT Ring Infiltrates US Firms",
+    "tease": "North Korean operatives infiltrate dozens of domestic corporations remotely"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Developments and Regional News",
+    "tease": "El Salvador considers conditional release for thousands of prisoners"
+   },
+   {
+    "topic": "Medicine",
+    "headline": "Retinal Chip Restores Sight in Trial",
+    "tease": "A subretinal microchip restores sight in a breakthrough clinical procedure"
    }
   ]
  }
