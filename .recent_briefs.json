@@ -1,40 +1,5 @@
 [
  {
-  "date": "2026-10-11",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Deadly Riyadh Airport Strike Escalates Gulf Confrontation",
-    "tease": "The United States weighs direct strikes after Riyadh airport is hit."
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Trump Claims Energy Ceasefire as Strikes Continue",
-    "tease": "Trump announces an energy ceasefire while Kyiv awaits official details."
-   },
-   {
-    "topic": "Europe",
-    "headline": "Polish Police Foil Plot Against Prime Minister",
-    "tease": "Polish authorities arrest a suspect plotting against Prime Minister Tusk."
-   },
-   {
-    "topic": "Business and Tech",
-    "headline": "Tech Giants Rethink AI Risks and Strategy",
-    "tease": "Satya Nadella issues stark warnings on artificial intelligence security."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Antitrust Actions Defense Upgrades and West Bank",
-    "tease": "A roundup of today's key legal and defense developments."
-   },
-   {
-    "topic": "Football",
-    "headline": "Haaland Strikes Again in Anfield Blockbuster",
-    "tease": "And finally, Erling Haaland keeps up his blistering scoring pace."
-   }
-  ]
- },
- {
   "date": "2026-10-12",
   "stories": [
    {
@@ -151,6 +116,51 @@
     "topic": "Medicine",
     "headline": "Retinal Chip Restores Sight in Trial",
     "tease": "A subretinal microchip restores sight in a breakthrough clinical procedure"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-16",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Houthi Missile Hits Yemeni Presidential Palace",
+    "tease": "A fatal missile strike rocks the presidential compound in Yemen"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Trump Slams Kyiv Oil Strikes as Rifts Deepen",
+    "tease": "Trump blasts renewed Ukrainian refinery strikes as diplomatic tensions erupt"
+   },
+   {
+    "topic": "United States",
+    "headline": "White House Tumult as Press Secretary Ousted",
+    "tease": "The White House press secretary exits after only five days"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Indian Rupee Slides Toward Landmark Dollar Low",
+    "tease": "India's rupee slides toward one hundred per dollar"
+   },
+   {
+    "topic": "Europe",
+    "headline": "France and Germany Strike Auto Sector Pact",
+    "tease": "Paris and Berlin agree to relax upcoming automotive rules"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Autonomous AI Agents Trigger Corporate Alarms",
+    "tease": "Autonomous software triggers alarms after draining unauthorized crypto wallet"
+   },
+   {
+    "topic": "Combat Sports",
+    "headline": "Fighters Hit Weight Ahead of UFC Edmonton",
+    "tease": "UFC headliners make weight for Edmonton flyweight showdown"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Diplomatic Breakthroughs and Historic Sports Rulings",
+    "tease": "Historic presidential talks in Bolivia and Tesla's wild claims"
    }
   ]
  }
