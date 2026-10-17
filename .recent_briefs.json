@@ -1,45 +1,5 @@
 [
  {
-  "date": "2026-10-12",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Renewed Airport Strikes Shake Saudi Arabia",
-    "tease": "Fresh missile strikes hit Riyadh airport as regional tensions mount."
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Russian Strikes Pummel Power Sites After Ceasefire Push",
-    "tease": "Russian bombardments hammer Ukrainian power plants despite proposed ceasefire."
-   },
-   {
-    "topic": "United States",
-    "headline": "Mounting Pushback Against Russian Fuel Imports",
-    "tease": "Senators push to kill planned Russian diesel shipments."
-   },
-   {
-    "topic": "Cybersecurity",
-    "headline": "Hackers Warm French Supermarket Freezers",
-    "tease": "Cyberattack turns supermarket freezers into hot ovens."
-   },
-   {
-    "topic": "Europe",
-    "headline": "Britain Blames Tehran for Strategic Airfield Plot",
-    "tease": "Britain accuses Iranian intelligence of targeting airbase."
-   },
-   {
-    "topic": "Artificial Intelligence",
-    "headline": "Tech Giants Unveil Frontier AI Systems",
-    "tease": "Meta enters frontier computing with multimedia systems."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Lebanon Border Clashes and Pyongyang Missile Launches",
-    "tease": "Border skirmishes and ballistic tests shake regional security."
-   }
-  ]
- },
- {
   "date": "2026-10-13",
   "stories": [
    {
@@ -161,6 +121,56 @@
     "topic": "Also Today",
     "headline": "Diplomatic Breakthroughs and Historic Sports Rulings",
     "tease": "Historic presidential talks in Bolivia and Tesla's wild claims"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-17",
+  "stories": [
+   {
+    "topic": "Europe",
+    "headline": "Riots Explode Across France Over Living Costs",
+    "tease": "Violent riots shake France as hundreds of thousands seize city streets"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Hormuz Shipping Crisis Deepens Amid New Strikes",
+    "tease": "Tanker mine explosions shut vital shipping routes through Persian Gulf"
+   },
+   {
+    "topic": "Diplomacy",
+    "headline": "Settlers Assault European Diplomats in West Bank",
+    "tease": "Masked West Bank settlers beat visiting European diplomatic envoy"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Trump Pauses Sanctions as Zelensky Rallies Europe",
+    "tease": "Trump halts Russian sanctions while Zelensky pleads for European backing"
+   },
+   {
+    "topic": "United States",
+    "headline": "White House Shakeup and Bitter Midterm Battles",
+    "tease": "White House communications chief ousted after five turbulent days"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Tech Equities Tumble as Silver Drops Sharply",
+    "tease": "Global tech rout deepens while silver plunges fifty percent"
+   },
+   {
+    "topic": "Football",
+    "headline": "Haaland and Maresca Power Historic Premier Starts",
+    "tease": "Haaland brace secures victory as Maresca writes Premier League history"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Protests Tragedies and Historic Pontiff Recovery",
+    "tease": "The Pope leaves hospital as regional clashes expand worldwide"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Critical Days Ahead for Ukraine Gulf and Markets",
+    "tease": "Key global tests await world leaders in the week ahead"
    }
   ]
  }
