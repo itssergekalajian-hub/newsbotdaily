@@ -426,7 +426,8 @@ Rules for the segments:
   box-ticking. When several minor items remain that don't deserve their own
   segment, fold them into ONE quick segment called "Also Today": one crisp
   sentence per item, 40 to 70 words total, images list empty. Never stretch a
-  thin story into a full segment. Between 4 and 9 segments including it.
+  thin story into a full segment. Between 4 and 9 segments including it and
+  the "What to Watch" closer described below.
 - "topic" is a screen label: 1 to 3 words, no punctuation.
 - each segment's "headline" is an on-screen caption for that topic: 4 to 8
   words, no final full stop. It is read by the viewer, not spoken.
@@ -538,13 +539,23 @@ Rules for the segments:
     two intense stories with a lighter beat so the bulletin breathes.
   * Put markets in the middle, where it reads as a pause for breath, not as the
     finale.
-  * End on the most human or uplifting note available — sport, a lighter
-    story, a hopeful turn — so the viewer leaves on a lift, then the sign-off.
-    Do not end on the grimmest item of the day. When the day's posts contain a
+  * End the stories on the most human or uplifting note available — sport, a
+    lighter story, a hopeful turn — so the viewer leaves the day's events on
+    a lift. Do not end on the grimmest item. When the day's posts contain a
     genuinely delightful, curious or human story — a record, a rescue, an
-    oddity, a triumph — make it the closing segment, open it with "And
-    finally..." and let the writing smile; that final minute is the one that
+    oddity, a triumph — make it the LAST STORY segment, open it with "And
+    finally..." and let the writing smile; that minute is the one that
     brings people back tomorrow.
+  * After all the stories, EVERY bulletin ends with one fixed closer
+    segment: topic exactly "What to Watch", headline naming the week's
+    biggest upcoming moment. In 50 to 90 words, pull together the three or
+    four most consequential things coming in the next days and week — a
+    summit, a vote, a ruling, a deadline, a results date, a match — each
+    named concretely, with the day or date when the posts or wire give one,
+    and one short clause on why it matters. Draw every item from the posts
+    and wire context; never invent a date or an event. Its "images" list is
+    empty. It is the viewer's reason to come back, so land the final line
+    forward-looking ("...and we'll follow all of it, right here.").
   * The through-line is a producer's judgement of what the viewer most wants to
     hear next, told at a pace that keeps building.
 - Write for the EAR, not the page. This is the difference between a bulletin
@@ -596,8 +607,9 @@ Rules for the segments:
   goodbye anywhere. Open the first segment with a genuine hook: one crisp line
   on the single most striking thing that happened today, concrete and specific,
   impossible to scroll past — then straight into that lead story.
-- End the last segment by landing its story with a real sense of completion —
-  a final line that resolves — because the anchor's own goodbye follows it.
+- The "What to Watch" closer is the last thing spoken before the anchor's own
+  goodbye, so land its final line with a real sense of completion — resolved
+  and forward-looking, never trailing off.
 
 {previous}
 
@@ -795,10 +807,17 @@ def summarize(posts: list[dict], day: dt.date,
                           headers=headers, json=body, timeout=300)
         if r.ok:
             break
-        if r.status_code == 404 and attempt == 0:
-            model = candidate_models()[0]
-            print(f"model not found, falling back to: {model}")
-            continue
+        if r.status_code == 404:
+            # A listed model can still be retired at the endpoint — run 241
+            # died when the rotation reached gemini-2.5-flash, which the API
+            # lists but no longer serves. A dead name is never worth the run:
+            # drop it and move to the next candidate.
+            print(f"model {model} not found — dropping it from the rotation")
+            if tried < len(alternates):
+                model = alternates[tried]
+                tried += 1
+                continue
+            raise RuntimeError(f"every candidate model 404s (last: {model})")
         if r.status_code == 400:
             # Degrade one field at a time rather than dropping the whole config
             # (which would also lose responseMimeType JSON). Thinking config and
