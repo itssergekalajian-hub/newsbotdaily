@@ -22,6 +22,8 @@ import shutil
 import sys
 import tempfile
 import time
+from email.utils import parsedate_to_datetime
+from xml.etree import ElementTree
 from zoneinfo import ZoneInfo
 
 import edge_tts
@@ -290,6 +292,58 @@ def fetch_posts(username: str, day: dt.date, max_pages: int = 12) -> list[dict]:
     return ordered
 
 
+# Public RSS wires the writer may draw CONTEXT from — the who/why/impact
+# details and numbers that complete a story the channel covered. The channel
+# stays the editor: wire items never decide what the bulletin covers.
+WIRE_FEEDS = (
+    ("BBC", "https://feeds.bbci.co.uk/news/world/rss.xml"),
+    ("Al Jazeera", "https://www.aljazeera.com/xml/rss/all.xml"),
+    ("Google News", "https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en"),
+)
+
+
+def fetch_wire(day: dt.date) -> str:
+    """Same-day agency headlines, one labelled line per item.
+
+    Items older than the covered day (or dated after it, for catch-up runs
+    rebuilding yesterday) are dropped; an unparsable date keeps the item.
+    Every feed is best-effort — a dead feed costs context, never the run.
+    """
+    lines: list[str] = []
+    for name, url in WIRE_FEEDS:
+        n = 0
+        try:
+            r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"},
+                             timeout=30)
+            r.raise_for_status()
+            root = ElementTree.fromstring(r.content)
+            for item in root.iter("item"):
+                title = (item.findtext("title") or "").strip()
+                if not title:
+                    continue
+                pub = item.findtext("pubDate")
+                if pub:
+                    try:
+                        when = parsedate_to_datetime(pub).astimezone(TZ).date()
+                        if when > day or (day - when).days > 1:
+                            continue
+                    except Exception:
+                        pass
+                desc = re.sub(r"<[^>]+>", " ", item.findtext("description") or "")
+                desc = re.sub(r"\s+", " ", desc).strip()
+                line = f"- [{name}] {title}"
+                if desc and desc[:60].lower() not in title.lower():
+                    line += f" — {desc[:240]}"
+                lines.append(line)
+                n += 1
+                if n >= 25:
+                    break
+        except Exception as e:
+            print(f"wire feed {name} failed: {str(e)[:70]}", file=sys.stderr)
+        print(f"wire: {n} items from {name}")
+    return "\n".join(lines)[:60_000]
+
+
 # ----------------------------------------------------------------------------
 # 2. Script — Gemini returns topic segments, not one wall of text
 # ----------------------------------------------------------------------------
@@ -419,6 +473,23 @@ Rules for the segments:
 - Cover the whole day. Where a story developed over several hours, tell it in
   order — what was first reported, how it changed, where it stood by the end.
 - Explain what happened and why it matters. Do not just read headlines.
+- ANALYSIS is the product. The viewer watches to understand what happens
+  NEXT — politically, geopolitically, in markets, in sport — not to hear a
+  list of events. For every major story, mine the posts for and deliver,
+  wherever the material allows:
+  * WHO is behind it — the actor, named, and on whose behalf.
+  * WHY now — the motive, trigger or pressure that made it happen today.
+  * WHAT IT CHANGES — the concrete consequence: a trade route, a price, an
+    election, a negotiation, an alliance, a deal, a title race. "A vessel
+    was seized" is a headline; "a vessel was seized in a strait a fifth of
+    the region's oil moves through, so freight costs are already climbing"
+    is a story.
+  * WHAT TO WATCH — the forward edge: the vote, deadline, meeting, ruling
+    or response expected in the coming days or weeks. Close each major
+    story on it, so the viewer knows what tomorrow's bulletin will pick up.
+  The channel's posts carry this detail — names, motives, numbers,
+  consequences, connections. Use it. Never flatten a detailed post into a
+  bare headline, and never invent an impact the material doesn't support.
 - This bulletin is many viewers' ONLY news source. Every story must be fully
   understandable on first hearing with no outside knowledge:
   * Within a story's first two sentences the listener must know WHO did WHAT,
@@ -443,8 +514,14 @@ Rules for the segments:
   already reported. Use them only to complete or anchor a continuing story —
   a name, a number, how it started — never as today's events. Everything you
   present as happening "today" must come from the posts dated {date}.
-- Use ONLY the information in the posts. Never add facts, numbers or names that
-  are not there.
+- WIRE CONTEXT, when present below, is same-day headlines from international
+  news agencies. Use it ONLY to confirm a story, or to supply a missing WHY,
+  impact or number for a story the channel covered — and attribute any fact
+  that exists only there ("the BBC reports...", "according to Al Jazeera").
+  Never build a segment from wire items alone: the channel's posts decide
+  what the bulletin covers.
+- Use ONLY the information in the posts and the labelled WIRE CONTEXT. Never
+  add facts, numbers or names that are not there.
 - Merge duplicate reports of one event. If several posts confirm it, you may
   say it was widely reported.
 - The source labels single-source or unverified claims. Keep that hedging —
@@ -528,6 +605,8 @@ POSTS FROM {date}:
 {items}
 
 {background}
+
+{wire}
 """
 
 
@@ -656,7 +735,8 @@ def _photo_parts(posts: list[dict], cap: int = 24) -> list[dict]:
 
 
 def summarize(posts: list[dict], day: dt.date,
-              background: str = "", recent: list[dict] | None = None) -> dict:
+              background: str = "", recent: list[dict] | None = None,
+              wire: str = "") -> dict:
     items = "\n\n---\n\n".join(
         f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
         f"{p['text']}"
@@ -677,8 +757,12 @@ def summarize(posts: list[dict], day: dt.date,
           f"earlier bulletins (context only, never today's news):\n"
           f"{background[:150_000]}") if background else ""
 
+    wires = (f"WIRE CONTEXT — same-day headlines from international news "
+             f"agencies (confirmation and missing detail only; attribute "
+             f"facts that exist only here):\n{wire}") if wire else ""
+
     prompt = PROMPT.format(date=f"{day:%A, %d %B %Y}", items=items[:450_000],
-                           previous=previous, background=bg)
+                           previous=previous, background=bg, wire=wires)
     model = MODEL or candidate_models()[0]
     photos = _photo_parts(posts)
     print(f"using model: {model}  |  prompt: {len(prompt):,} chars"
@@ -1702,7 +1786,8 @@ def main() -> None:
             print(f"background fetch for {prev} failed: {str(e)[:80]}",
                   file=sys.stderr)
 
-    brief = summarize(posts, day, "\n\n".join(background), load_recent())
+    brief = summarize(posts, day, "\n\n".join(background), load_recent(),
+                      fetch_wire(day))
     words = sum(len(s["script"].split()) for s in brief["segments"])
     print(f"script: {words} words across {len(brief['segments'])} segments")
 
