@@ -802,7 +802,11 @@ def summarize(posts: list[dict], day: dt.date,
     # after ~7 minutes of retrying and the day went unpublished. Waiting
     # longer costs nothing on a runner — the bulletin arriving late beats
     # not arriving.
-    for attempt in range(16):
+    # Run 242 burned through 16 attempts in 18 minutes against a Google
+    # evening where EVERY generation was 503 or 429, and the night died.
+    # The budget is now ~an hour of patience: a bulletin arriving late beats
+    # one not arriving, and the runner's time is free.
+    for attempt in range(24):
         r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
                           headers=headers, json=body, timeout=300)
         if r.ok:
@@ -844,14 +848,24 @@ def summarize(posts: list[dict], day: dt.date,
                 tried += 1
                 print(f"{reason} ({r.status_code}) — switching to {model}")
                 continue
-            wait = min(20 * 2 ** (attempt // 2), 240)
+            wait = min(20 * 2 ** (attempt // 2), 300)
+            # a 429 usually carries the server's own retryDelay — waiting any
+            # less than it asks just burns an attempt on a guaranteed 429
+            if r.status_code == 429:
+                try:
+                    for d in r.json()["error"]["details"]:
+                        delay = str(d.get("retryDelay", "")).rstrip("s")
+                        if delay:
+                            wait = max(wait, int(float(delay)) + 2)
+                except Exception:
+                    pass
             print(f"{reason} ({r.status_code}) — waiting {wait}s")
             time.sleep(wait)
             continue
         print(f"gemini error {r.status_code}: {r.text[:1000]}", file=sys.stderr)
         r.raise_for_status()
     else:
-        raise RuntimeError(f"gemini unavailable after 16 attempts (last: {model})")
+        raise RuntimeError(f"gemini unavailable after 24 attempts (last: {model})")
 
     data = r.json()
     cands = data.get("candidates") or []
