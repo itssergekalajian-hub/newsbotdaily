@@ -553,7 +553,7 @@ def render() -> None:
         os.remove(os.path.join(OUT_DIR, old))
     work = tempfile.mkdtemp(prefix="ig-")
     cover_bg = None
-    if deck.get("cover_scene"):
+    if os.getenv("SCENE_GEN") == "1" and deck.get("cover_scene"):
         gen = os.path.join(work, "cover_gen.png")
         if gen_scene(deck["cover_scene"], gen):
             cover_bg = gen
@@ -562,13 +562,16 @@ def render() -> None:
                  bg=cover_bg)
     print(f"  slide 1: cover ({'generated' if cover_bg else 'backdrop'})")
     for i, slide in enumerate(deck["slides"]):
-        # each story gets imagery that REPRESENTS it: a freshly generated
-        # scene when the key allows it, else the matching catalog scene,
-        # else the story's own photo, else the branded regional backdrop
+        # each story gets imagery that REPRESENTS it: the matching Higgsfield
+        # catalog scene first (the channel's chosen image source), else the
+        # story's own photo, else the branded regional backdrop. Per-story
+        # Gemini generation runs only when SCENE_GEN=1 is set deliberately —
+        # the owner keeps imagery on Higgsfield.
         bg, label, graded = art_for(slide["region"]), "backdrop", False
         gen = os.path.join(work, f"gen{i}.png")
         cat = scene_art(slide.get("art"))
-        if slide.get("scene") and gen_scene(slide["scene"], gen):
+        if (os.getenv("SCENE_GEN") == "1" and slide.get("scene")
+                and gen_scene(slide["scene"], gen)):
             bg, label, graded = gen, "generated scene", True
         elif cat:
             bg, label = cat, f"catalog {slide.get('art')}"
