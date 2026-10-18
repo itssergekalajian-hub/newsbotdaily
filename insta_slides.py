@@ -76,22 +76,33 @@ otherwise. Order the regions by how much the story matters.
 
 Return ONLY JSON, no markdown fences:
 {{"cover": "one punchy line summing up the day, eight to fourteen words",
+  "cover_scene": "one vivid sentence describing an editorial illustration
+                  for the day as a whole (see scene rules)",
   "slides": [{{"region": "Middle East",
               "photo": 17,
+              "scene": "one vivid sentence describing an editorial
+                        illustration for THIS story",
               "headline": "the story in five to nine words, no final stop",
-              "body": "30 to 55 words explaining it briefly and clearly:
+              "body": "25 to 45 words explaining it briefly and clearly:
                        WHO did WHAT, WHY it happened, and the one concrete
                        consequence or thing to watch. Plain complete
                        sentences a stranger understands with no context."}}]}}
 
 Rules:
 - "region" is 1 to 3 words as shown above ("Sports" for the sports slide).
+- "scene" drives an AI illustration that fills the slide, so make it CONCRETE
+  and specific to the story: the flags of the nations involved, a named
+  landmark or setting, the objects of the story (a tanker in a strait, a
+  fighter jet, a trading floor, a stadium), the weather and mood. NEVER
+  include identifiable real people or faces, never text, signs or logos.
+  Example: "A damaged oil tanker escorted through a narrow strait at dawn,
+  Iranian and Panamanian flags on masts, warships silhouetted on the
+  horizon".
 - "photo" is the number of ONE post marked [has photo] whose photograph —
   ATTACHED below as "PHOTO attached to POST n", look at it — actually SHOWS
-  this slide's story. The picture fills the slide behind the text, so a
-  wrong picture is worse than none: choose null unless you can SEE that the
-  photo depicts this story's event, place or people. A logo, a screenshot
-  of text, a meme, a chart or an unrelated portrait NEVER qualifies.
+  this slide's story. Choose null unless you can SEE that the photo depicts
+  this story's event, place or people. A logo, a screenshot of text, a meme,
+  a chart or an unrelated portrait NEVER qualifies.
 - Facts come ONLY from the posts and the agency headlines; attribute anything
   that exists only in an agency headline ("per BBC"). Never invent.
 - No emojis, no hashtags, no quotes around the texts, no markdown.
@@ -188,71 +199,151 @@ def _base(bg: str) -> str:
             f"crop={W}:{H},setsar=1")
 
 
-def _brandbar(work: str, tag: str, date_text: str) -> list[str]:
-    bf = video._textfile(work, f"{tag}_brand.txt", BRAND)
-    df = video._textfile(work, f"{tag}_date.txt", date_text)
-    return [
-        f"drawbox=x=0:y=0:w=iw:h=86:color={video.NAVY}@0.92:t=fill",
-        f"drawbox=x=0:y=86:w=iw:h=5:color={video.RED}:t=fill",
-        f"drawtext=fontfile={video.BOLD}:textfile={bf}:fontcolor=white"
-        f":fontsize=34:x=42:y=26",
-        f"drawtext=fontfile={video.REGULAR}:textfile={df}"
-        f":fontcolor={video.PALE}:fontsize=28:x=w-tw-42:y=30",
-    ]
+# Anton: the tall condensed display face the poster format is built on —
+# committed to the repo (OFL licence) so every runner renders identically
+ANTON = os.path.join("fonts", "Anton-Regular.ttf")
+
+
+def _display_font() -> str:
+    return ANTON if os.path.exists(ANTON) else video.BOLD
+
+
+# the fixed house look every generated illustration is asked for — ONE style
+# across every slide, every day, is what makes the feed read as a brand
+SCENE_STYLE = (
+    ". Cinematic photorealistic editorial news illustration, dramatic stormy "
+    "sky, deep navy blue and crimson red colour palette, volumetric light, "
+    "high detail, moody and simple lower half for a text overlay, vertical "
+    "portrait composition. No words, no letters, no numbers, no captions, "
+    "no logos, no watermarks, no identifiable real people.")
+
+
+def image_models() -> tuple[str, ...]:
+    r = requests.get(f"{dn.GEMINI_ROOT}/models",
+                     headers={"x-goog-api-key": dn.GEMINI_KEY}, timeout=60)
+    r.raise_for_status()
+    names = [m["name"].removeprefix("models/")
+             for m in r.json().get("models", [])
+             if "image" in m["name"]
+             and "generateContent" in m.get("supportedGenerationMethods", [])]
+
+    def rank(n: str) -> tuple:
+        m = re.search(r"gemini-(\d+(?:\.\d+)?)", n)
+        return ("preview" in n or "exp" in n,
+                -(float(m.group(1)) if m else 0.0), len(n))
+
+    return tuple(sorted(names, key=rank))
+
+
+def gen_scene(scene: str, out: str) -> bool:
+    """One on-theme illustration from the slide's scene line, best-effort.
+
+    Uses the same Gemini key as the writer. Every failure path returns False
+    so the slide falls back to the story photo or the branded backdrop — an
+    image model outage can never cost the deck.
+    """
+    headers = {"x-goog-api-key": dn.GEMINI_KEY,
+               "Content-Type": "application/json"}
+    try:
+        models = image_models()[:3]
+    except Exception as e:
+        print(f"  image models unavailable ({str(e)[:60]})", file=sys.stderr)
+        return False
+    for model in models:
+        body = {"contents": [{"parts": [{"text": scene + SCENE_STYLE}]}],
+                "generationConfig": {"responseModalities": ["IMAGE"],
+                                     "imageConfig": {"aspectRatio": "4:5"}}}
+        for attempt in range(4):
+            try:
+                r = requests.post(
+                    f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
+                    headers=headers, json=body, timeout=180)
+            except Exception:
+                break
+            if r.ok:
+                parts = (r.json().get("candidates") or [{}])[0] \
+                    .get("content", {}).get("parts", [])
+                for p in parts:
+                    blob = (p.get("inlineData") or p.get("inline_data")
+                            or {}).get("data")
+                    if blob:
+                        data = base64.b64decode(blob)
+                        if len(data) > 20_000:
+                            with open(out, "wb") as f:
+                                f.write(data)
+                            return True
+                break                              # refused: next model
+            if r.status_code == 400 and "imageConfig" in str(
+                    body["generationConfig"]):
+                body["generationConfig"].pop("imageConfig", None)
+                continue
+            if r.status_code in (429, 500, 502, 503, 504):
+                time.sleep(8 * (attempt + 1))
+                continue
+            break                                  # 404 etc: next model
+    return False
 
 
 def render_story(work: str, idx: int, total: int, slide: dict,
                  date_text: str, bg: str, out: str,
                  is_photo: bool = False) -> None:
-    """One story slide, designed as a system rather than a collage.
+    """One story slide in the poster format.
 
-    What keeps the deck looking professional however wild the source
-    pictures are: every PHOTO passes through one fixed brand grade (gently
-    desaturated, shadows pulled toward the house navy) so no slide arrives
-    with clashing color; and the text never sits on a flat box — the image
-    fades through a smooth gradient into solid navy, the same curve on every
-    slide, photo or backdrop. Text is bottom-anchored with fixed margins and
-    carries a soft shadow, so slide after slide the type sits in exactly the
-    same place at exactly the same weight.
+    Full-bleed image, a smooth fade into solid navy, and the story told in
+    big stacked condensed capitals — lines alternating white and crimson —
+    with a short plain-type explainer beneath and a centred brand footer.
+    Photographs pass through one fixed brand grade so no slide arrives with
+    clashing colour; generated scenes are asked for the palette outright.
+    The geometry is identical on every slide, which is what makes the feed
+    read as one designed system.
     """
     tag = f"s{idx}"
-    head_lines = _wrap(slide["headline"], 26, 3)
-    body_lines = _wrap(slide["body"], 48, 6)
+    disp = _display_font()
+    head_lines = [l.upper() for l in _wrap(slide["headline"], 16, 5)]
+    body_lines = _wrap(slide["body"], 52, 3)
 
-    # bottom-anchored text block: last body line lands at a fixed margin
-    body_h = len(body_lines) * 54
-    head_h = len(head_lines) * 78
-    y_body = H - 120 - body_h
-    y_head = y_body - 24 - head_h
-    y_chip = y_head - 84
-    grad_top = max(y_chip - 320, 160)     # where the fade begins
+    head_fs, head_step = 96, 108
+    body_fs, body_step = 34, 46
+    foot_y = H - 96
+    body_h = len(body_lines) * body_step
+    y_body = foot_y - 46 - body_h
+    head_h = len(head_lines) * head_step
+    y_head = y_body - 30 - head_h
+    y_chip = y_head - 72
+    grad_top = max(y_chip - 300, 140)
 
-    # one consistent grade for photographs; backdrops are already on-brand
     grade = (",eq=saturation=0.72:contrast=1.06,"
              "colorbalance=bs=0.12:rs=-0.05:bm=0.05:gm=0.01"
              if is_photo else "")
 
-    shadow = ":shadowcolor=0x000000@0.55:shadowx=0:shadowy=3"
-    c = [*_brandbar(work, tag, date_text)]
+    shadow = ":shadowcolor=0x000000@0.6:shadowx=0:shadowy=4"
+    c = []
     rf = video._textfile(work, f"{tag}_region.txt", slide["region"].upper())
     c.append(f"drawtext=fontfile={video.BOLD}:textfile={rf}:fontcolor=white"
-             f":fontsize=36:box=1:boxcolor={video.RED}@0.96:boxborderw=14"
-             f":x=42:y={y_chip}")
+             f":fontsize=30:box=1:boxcolor={video.RED}@0.96:boxborderw=12"
+             f":x=(w-tw)/2:y={y_chip}")
     y = y_head
     for j, line in enumerate(head_lines):
         hf = video._textfile(work, f"{tag}_h{j}.txt", line)
-        c.append(f"drawtext=fontfile={video.BOLD}:textfile={hf}"
-                 f":fontcolor=white:fontsize=66:x=42:y={y}{shadow}")
-        y += 78
+        color = "white" if j % 2 == 0 else "0xE8374F"
+        c.append(f"drawtext=fontfile={disp}:textfile={hf}"
+                 f":fontcolor={color}:fontsize={head_fs}"
+                 f":x=(w-tw)/2:y={y}{shadow}")
+        y += head_step
     y = y_body
     for j, line in enumerate(body_lines):
         bf = video._textfile(work, f"{tag}_b{j}.txt", line)
         c.append(f"drawtext=fontfile={video.REGULAR}:textfile={bf}"
-                 f":fontcolor=0xE8EEF7:fontsize=40:x=42:y={y}{shadow}")
-        y += 54
-    nf = video._textfile(work, f"{tag}_n.txt", f"{idx + 1}/{total}")
-    c.append(f"drawtext=fontfile={video.REGULAR}:textfile={nf}"
-             f":fontcolor={video.PALE}:fontsize=30:x=w-tw-42:y=h-56")
+                 f":fontcolor=0xD9E2EF:fontsize={body_fs}"
+                 f":x=(w-tw)/2:y={y}{shadow}")
+        y += body_step
+    brf = video._textfile(work, f"{tag}_brand.txt", "—   MIDWORLD  DAILY   —")
+    c.append(f"drawtext=fontfile={video.BOLD}:textfile={brf}"
+             f":fontcolor=white:fontsize=30:x=(w-tw)/2:y={foot_y}")
+    mf = video._textfile(work, f"{tag}_meta.txt",
+                         f"{date_text}   ·   {idx + 1}/{total}")
+    c.append(f"drawtext=fontfile={video.REGULAR}:textfile={mf}"
+             f":fontcolor={video.PALE}:fontsize=24:x=(w-tw)/2:y={foot_y + 42}")
 
     graph = (
         f"[0:v]{_base('')}{grade}[bg];"
@@ -265,55 +356,80 @@ def render_story(work: str, idx: int, total: int, slide: dict,
                "-f", "lavfi", "-i", f"color=c={video.NAVY}:s={W}x{H}:d=1",
                "-f", "lavfi", "-i",
                f"gradients=s={W}x{H}:c0=black:c1=white"
-               f":x0={W // 2}:y0={grad_top}:x1={W // 2}:y1={H - 150}:d=1",
+               f":x0={W // 2}:y0={grad_top}:x1={W // 2}:y1={H - 170}:d=1",
                "-filter_complex", graph, "-map", "[v]",
                "-frames:v", "1", "-q:v", "2", out])
 
 
 def render_cover(work: str, cover_line: str, date_text: str, total: int,
-                 out: str) -> None:
-    c = [_base("")]
-    c.append(f"drawbox=x=0:y=0:w=iw:h=ih:color={video.NAVY}@0.35:t=fill")
+                 out: str, bg: str | None = None) -> None:
+    disp = _display_font()
+    bg = bg or os.path.join(TEMPLATES, "cover.png")
+    lines = [l.upper() for l in _wrap(cover_line, 18, 4)]
+    step = 102
+    y0 = H - 210 - 46 - len(lines) * step
+    c = []
     tf = video._textfile(work, "c_brand.txt", "MIDWORLD")
-    c.append(f"drawtext=fontfile={video.BOLD}:textfile={tf}:fontcolor=white"
-             f":fontsize=116:x=(w-tw)/2:y=360")
+    c.append(f"drawtext=fontfile={disp}:textfile={tf}:fontcolor=white"
+             f":fontsize=120:x=(w-tw)/2:y=170"
+             f":shadowcolor=0x000000@0.6:shadowx=0:shadowy=4")
     td = video._textfile(work, "c_today.txt", "TODAY")
-    c.append(f"drawtext=fontfile={video.BOLD}:textfile={td}:fontcolor=white"
-             f":fontsize=56:box=1:boxcolor={video.RED}@0.96:boxborderw=16"
-             f":x=(w-tw)/2:y=508")
+    c.append(f"drawtext=fontfile={disp}:textfile={td}:fontcolor=white"
+             f":fontsize=54:box=1:boxcolor={video.RED}@0.96:boxborderw=14"
+             f":x=(w-tw)/2:y=316")
     df = video._textfile(work, "c_date.txt", date_text)
     c.append(f"drawtext=fontfile={video.REGULAR}:textfile={df}"
-             f":fontcolor={video.PALE}:fontsize=42:x=(w-tw)/2:y=630")
-    y = 760
-    for j, line in enumerate(_wrap(cover_line, 34, 3)):
+             f":fontcolor={video.PALE}:fontsize=38:x=(w-tw)/2:y=432")
+    y = y0
+    for j, line in enumerate(lines):
         lf = video._textfile(work, f"c_l{j}.txt", line)
-        c.append(f"drawtext=fontfile={video.BOLD}:textfile={lf}"
-                 f":fontcolor=white:fontsize=52:x=(w-tw)/2:y={y}")
-        y += 66
+        color = "white" if j % 2 == 0 else "0xE8374F"
+        c.append(f"drawtext=fontfile={disp}:textfile={lf}:fontcolor={color}"
+                 f":fontsize=88:x=(w-tw)/2:y={y}"
+                 f":shadowcolor=0x000000@0.6:shadowx=0:shadowy=4")
+        y += step
     sf = video._textfile(work, "c_swipe.txt",
-                         f"{total - 2} stories  ·  swipe")
-    c.append(f"drawtext=fontfile={video.REGULAR}:textfile={sf}"
-             f":fontcolor=white:fontsize=36:box=1"
-             f":boxcolor={video.NAVY}@0.8:boxborderw=14:x=(w-tw)/2:y=h-150")
-    video.run(["ffmpeg", "-y", "-loglevel", "error", "-i",
-               os.path.join(TEMPLATES, "cover.png"), "-vf", ",".join(c),
+                         f"{total - 2} STORIES   ·   SWIPE")
+    c.append(f"drawtext=fontfile={video.BOLD}:textfile={sf}"
+             f":fontcolor=white:fontsize=32:box=1"
+             f":boxcolor={video.NAVY}@0.85:boxborderw=14:x=(w-tw)/2:y=h-120")
+    graph = (
+        f"[0:v]{_base('')}[bg];"
+        f"[1:v]format=rgba[nv];[2:v]format=gray[gr];"
+        f"[nv][gr]alphamerge[scrim];"
+        f"[bg][scrim]overlay=0:0,{','.join(c)}[v]"
+    )
+    video.run(["ffmpeg", "-y", "-loglevel", "error", "-i", bg,
+               "-f", "lavfi", "-i", f"color=c={video.NAVY}:s={W}x{H}:d=1",
+               "-f", "lavfi", "-i",
+               f"gradients=s={W}x{H}:c0=black:c1=white"
+               f":x0={W // 2}:y0={y0 - 280}:x1={W // 2}:y1={H - 160}:d=1",
+               "-filter_complex", graph, "-map", "[v]",
                "-frames:v", "1", "-q:v", "2", out])
 
 
 def render_outro(work: str, date_text: str, out: str) -> None:
-    c = [_base(""), *_brandbar(work, "o", date_text)]
-    tf = video._textfile(work, "o_done.txt", "That's your day.")
-    c.append(f"drawtext=fontfile={video.BOLD}:textfile={tf}:fontcolor=white"
-             f":fontsize=84:x=(w-tw)/2:y=560")
+    disp = _display_font()
+    c = [_base("")]
+    tf = video._textfile(work, "o_done.txt", "THAT'S YOUR DAY.")
+    c.append(f"drawtext=fontfile={disp}:textfile={tf}:fontcolor=white"
+             f":fontsize=96:x=(w-tw)/2:y=520"
+             f":shadowcolor=0x000000@0.6:shadowx=0:shadowy=4")
     lines = ["Full video bulletin on Telegram", "@midworldnews"]
     if IG_HANDLE:
         lines.append(f"Follow @{IG_HANDLE} for tomorrow's brief")
-    y = 700
+    y = 680
     for j, line in enumerate(lines):
         lf = video._textfile(work, f"o_l{j}.txt", line)
         c.append(f"drawtext=fontfile={video.REGULAR}:textfile={lf}"
-                 f":fontcolor={video.PALE}:fontsize=44:x=(w-tw)/2:y={y}")
-        y += 62
+                 f":fontcolor={video.PALE}:fontsize=42:x=(w-tw)/2:y={y}")
+        y += 60
+    brf = video._textfile(work, "o_brand.txt", "—   MIDWORLD  DAILY   —")
+    c.append(f"drawtext=fontfile={video.BOLD}:textfile={brf}"
+             f":fontcolor=white:fontsize=30:x=(w-tw)/2:y=h-96")
+    df = video._textfile(work, "o_date.txt", date_text)
+    c.append(f"drawtext=fontfile={video.REGULAR}:textfile={df}"
+             f":fontcolor={video.PALE}:fontsize=24:x=(w-tw)/2:y=h-54")
     video.run(["ffmpeg", "-y", "-loglevel", "error", "-i",
                os.path.join(TEMPLATES, "outro.png"), "-vf", ",".join(c),
                "-frames:v", "1", "-q:v", "2", out])
@@ -349,22 +465,34 @@ def render() -> None:
     for old in os.listdir(OUT_DIR):
         os.remove(os.path.join(OUT_DIR, old))
     work = tempfile.mkdtemp(prefix="ig-")
+    cover_bg = None
+    if deck.get("cover_scene"):
+        gen = os.path.join(work, "cover_gen.png")
+        if gen_scene(deck["cover_scene"], gen):
+            cover_bg = gen
     render_cover(work, deck.get("cover", "The day around the globe"),
-                 date_text, total, os.path.join(OUT_DIR, "01.jpg"))
+                 date_text, total, os.path.join(OUT_DIR, "01.jpg"),
+                 bg=cover_bg)
+    print(f"  slide 1: cover ({'generated' if cover_bg else 'backdrop'})")
     for i, slide in enumerate(deck["slides"]):
-        # the story's own photograph fills the slide when the writer SAW one
-        # that fits; the branded regional backdrop is the fallback
-        bg, label = art_for(slide["region"]), "backdrop"
-        pick = slide.get("photo")
-        if isinstance(pick, int) and 1 <= pick <= len(posts):
-            urls = posts[pick - 1].get("images") or []
-            raw = os.path.join(work, f"photo{i}.img")
-            if urls and dn._download(urls[0], raw, dn.UA,
-                                     min_size=(540, 540)):
-                bg, label = raw, f"post {pick} photo"
+        # each story gets its OWN illustration, generated in the house look
+        # from the writer's scene line; the story's photograph is the first
+        # fallback and the branded regional backdrop the last
+        bg, label, graded = art_for(slide["region"]), "backdrop", False
+        gen = os.path.join(work, f"gen{i}.png")
+        if slide.get("scene") and gen_scene(slide["scene"], gen):
+            bg, label, graded = gen, "generated scene", True
+        else:
+            pick = slide.get("photo")
+            if isinstance(pick, int) and 1 <= pick <= len(posts):
+                urls = posts[pick - 1].get("images") or []
+                raw = os.path.join(work, f"photo{i}.img")
+                if urls and dn._download(urls[0], raw, dn.UA,
+                                         min_size=(540, 540)):
+                    bg, label, graded = raw, f"post {pick} photo", True
         render_story(work, i + 1, total, slide, date_text, bg,
                      os.path.join(OUT_DIR, f"{i + 2:02d}.jpg"),
-                     is_photo=(label != "backdrop"))
+                     is_photo=graded)
         print(f"  slide {i + 2}: {slide['region']} — {slide['headline']}"
               f" ({label})")
     render_outro(work, date_text, os.path.join(OUT_DIR, f"{total:02d}.jpg"))
@@ -417,6 +545,7 @@ def publish() -> None:
     caption += "\n\n" + "\n".join(
         f"• {s['region']}: {s['headline']}" for s in deck["slides"])
     caption += "\n\nFull video bulletin on Telegram: t.me/midworldnews"
+    caption += "\nImagery: AI-assisted editorial illustration."
     caption += "\n\n#news #worldnews #daily #briefing"
     r = requests.post(f"{GRAPH}/{uid}/media",
                       data={"media_type": "CAROUSEL",
