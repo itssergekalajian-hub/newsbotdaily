@@ -1,0 +1,85 @@
+name: MidWorld Today (Instagram)
+
+on:
+  schedule:
+    # shortly after the video bulletin's midnight slots (Beirut local):
+    - cron: "15 21 * * *"   # 00:15 local during EEST (UTC+3)
+    - cron: "15 22 * * *"   # 00:15 local during EET  (UTC+2)
+    # The off-season run finds the deck already rendered for the day and
+    # exits; the publish step is deduplicated by the .last_ig marker.
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: "Build slides for one specific day (YYYY-MM-DD)."
+        required: false
+        default: ""
+      force:
+        description: "Set to 1 to re-render even if today's deck exists."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  slides:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - name: Install dependencies
+        run: pip install -q -r requirements.txt
+
+      - name: Render slides
+        env:
+          SOURCE_CHANNEL: midworldnews
+          TARGET_CHAT_ID: ${{ secrets.TARGET_CHAT_ID }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TIMEZONE: Asia/Beirut
+          TARGET_DATE: ${{ github.event.inputs.target_date }}
+          FORCE_SLIDES: ${{ github.event.inputs.force }}
+          IG_HANDLE: ${{ vars.IG_HANDLE }}
+        run: python insta_slides.py render
+
+      # the slides must be on main BEFORE Instagram is asked to fetch them —
+      # the Graph API downloads each image from its public raw URL
+      - name: Commit slides
+        run: |
+          if [ -n "$(git status --porcelain slides)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add slides
+            git commit -m "Slides: $(date -u +%F)"
+            git pull --rebase origin main || true
+            git push
+          fi
+
+      - name: Publish to Instagram
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_HANDLE: ${{ vars.IG_HANDLE }}
+          TARGET_CHAT_ID: ${{ secrets.TARGET_CHAT_ID }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TIMEZONE: Asia/Beirut
+        run: python insta_slides.py publish
+
+      - name: Record post marker
+        run: |
+          if [ -n "$(git status --porcelain .last_ig)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .last_ig
+            git commit -m "Record Instagram post: $(cat .last_ig)"
+            git pull --rebase origin main || true
+            git push
+          fi

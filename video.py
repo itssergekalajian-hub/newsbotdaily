@@ -24,6 +24,7 @@ stays on drawbox, which is cheaper.
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 
@@ -724,6 +725,20 @@ def render_headlines(work: str, items: list[tuple[str, str, str, float]],
     crossfade_concat(parts, out, 0.35)
 
 
+def _speech_onset(path: str) -> float:
+    """Seconds of leading quiet before the first audible sound in a file."""
+    p = subprocess.run(
+        ["ffmpeg", "-i", path, "-af", "silencedetect=noise=-35dB:d=0.05",
+         "-f", "null", "-"], capture_output=True, text=True)
+    first_start = re.search(r"silence_start: (-?[0-9.]+)", p.stderr or "")
+    first_end = re.search(r"silence_end: ([0-9.]+)", p.stderr or "")
+    # leading silence shows up as a silence window starting at ~0; if the
+    # first silence starts later, the audio begins immediately
+    if first_start and float(first_start.group(1)) < 0.05 and first_end:
+        return float(first_end.group(1))
+    return 0.0
+
+
 def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
                        date_text: str, out: str) -> None:
     """The anchor on camera, actually speaking a fixed line — full frame.
@@ -733,8 +748,24 @@ def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
     the generator produced, so the man on screen always speaks in exactly the
     narration's voice. Only the brand bar rides on top — the moment is the
     anchor, not the furniture.
+
+    Sync is MEASURED, not assumed: the generated clip's own audio track says
+    when the mouth starts moving, the mp3 says when the voice starts, and the
+    mux shifts the voice by the difference — so a generator that opens on a
+    beat of composure before the first word no longer reads as bad dubbing.
     """
     seconds = probe_duration(clip)
+    sync = ""
+    try:
+        offset = _speech_onset(clip) - _speech_onset(voice)
+        if offset > 0.04:
+            sync = f"adelay={int(round(offset * 1000))}:all=1,"
+            print(f"    anchor sync: voice delayed {offset:.2f}s to the mouth")
+        elif offset < -0.04:
+            sync = f"atrim=start={-offset:.3f},asetpts=PTS-STARTPTS,"
+            print(f"    anchor sync: voice advanced {-offset:.2f}s to the mouth")
+    except Exception:
+        pass
     bf = _textfile(work, "brand.txt", brand)
     df = _textfile(work, "date.txt", date_text)
     chain = ",".join([
@@ -746,7 +777,7 @@ def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
     ])
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", clip, "-i", voice,
          "-filter_complex",
-         f"[0:v]{chain}[v];[1:a]{SPEECH},apad,"
+         f"[0:v]{chain}[v];[1:a]{sync}{SPEECH},apad,"
          f"aformat=channel_layouts=stereo[a]",
          "-map", "[v]", "-map", "[a]", *ENC, "-t", f"{seconds:.2f}", out])
 

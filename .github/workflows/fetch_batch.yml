@@ -1,0 +1,43 @@
+name: Fetch assets (batch)
+
+# One-shot utility: download several files into the repo in a single run and
+# commit them together. Used to land generated media (slide backgrounds,
+# anchor clips) produced on an external service — the runner has open
+# internet where dev sandboxes may not, and one run means one commit and no
+# push races between parallel fetches.
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        description: "One file per line: <url><space><dest path in repo>"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all
+        env:
+          MANIFEST: ${{ inputs.manifest }}
+        run: |
+          while IFS=' ' read -r url dest; do
+            [ -z "$url" ] && continue
+            mkdir -p "$(dirname "$dest")"
+            curl -fSL --retry 3 -o "$dest" "$url"
+            size=$(stat -c %s "$dest")
+            echo "$dest: $size bytes"
+            test "$size" -gt 20000
+          done <<< "$MANIFEST"
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add fetched assets (batch)"
+          git pull --rebase origin main || true
+          git push
