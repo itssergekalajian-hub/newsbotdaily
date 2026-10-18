@@ -250,15 +250,19 @@ def gen_scene(scene: str, out: str) -> bool:
         print(f"  image models unavailable ({str(e)[:60]})", file=sys.stderr)
         return False
     for model in models:
+        # image models answer with a text part AND an image part; asking for
+        # IMAGE alone is an INVALID_ARGUMENT on the gemini image family
         body = {"contents": [{"parts": [{"text": scene + SCENE_STYLE}]}],
-                "generationConfig": {"responseModalities": ["IMAGE"],
-                                     "imageConfig": {"aspectRatio": "4:5"}}}
+                "generationConfig": {
+                    "responseModalities": ["TEXT", "IMAGE"],
+                    "imageConfig": {"aspectRatio": "4:5"}}}
         for attempt in range(4):
             try:
                 r = requests.post(
                     f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
                     headers=headers, json=body, timeout=180)
-            except Exception:
+            except Exception as e:
+                print(f"  scene gen {model}: {str(e)[:80]}", file=sys.stderr)
                 break
             if r.ok:
                 parts = (r.json().get("candidates") or [{}])[0] \
@@ -272,6 +276,8 @@ def gen_scene(scene: str, out: str) -> bool:
                             with open(out, "wb") as f:
                                 f.write(data)
                             return True
+                print(f"  scene gen {model}: no image in reply",
+                      file=sys.stderr)
                 break                              # refused: next model
             if r.status_code == 400 and "imageConfig" in str(
                     body["generationConfig"]):
@@ -280,8 +286,19 @@ def gen_scene(scene: str, out: str) -> bool:
             if r.status_code in (429, 500, 502, 503, 504):
                 time.sleep(8 * (attempt + 1))
                 continue
-            break                                  # 404 etc: next model
+            print(f"  scene gen {model}: {r.status_code} {r.text[:160]}",
+                  file=sys.stderr)
+            break                                  # 400/404 etc: next model
     return False
+
+
+def probe() -> None:
+    """One honest end-to-end test of the scene generator, for a quick run."""
+    print("image models:", list(image_models()))
+    out = os.path.join(tempfile.mkdtemp(), "probe.png")
+    ok = gen_scene("A damaged oil tanker escorted through a narrow strait "
+                   "at dawn, warships silhouetted on the horizon", out)
+    print("generated:", ok and f"{os.path.getsize(out)} bytes")
 
 
 def render_story(work: str, idx: int, total: int, slide: dict,
@@ -488,7 +505,7 @@ def render() -> None:
                 urls = posts[pick - 1].get("images") or []
                 raw = os.path.join(work, f"photo{i}.img")
                 if urls and dn._download(urls[0], raw, dn.UA,
-                                         min_size=(540, 540)):
+                                         min_size=(640, 360)):
                     bg, label, graded = raw, f"post {pick} photo", True
         render_story(work, i + 1, total, slide, date_text, bg,
                      os.path.join(OUT_DIR, f"{i + 2:02d}.jpg"),
@@ -570,4 +587,4 @@ def publish() -> None:
 
 
 if __name__ == "__main__":
-    {"render": render, "publish": publish}[sys.argv[1]]()
+    {"render": render, "publish": publish, "probe": probe}[sys.argv[1]]()

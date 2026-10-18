@@ -1,0 +1,26 @@
+name: Probe scene generator
+
+# One-shot diagnostic: lists the key's image-capable Gemini models and tries
+# one scene generation, printing every failure verbatim. Manual trigger only.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q -r requirements.txt
+      - env:
+          TARGET_CHAT_ID: ${{ secrets.TARGET_CHAT_ID }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TIMEZONE: Asia/Beirut
+        run: python insta_slides.py probe
