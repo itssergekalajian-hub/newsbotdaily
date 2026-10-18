@@ -1,29 +1,29 @@
 {
- "cover": "Riots sweep France, Ukraine strikes Russian oil, and fatal base fire shocks Canada",
+ "cover": "France rocked by violent nationwide protests as cross-border tensions flare worldwide",
  "slides": [
   {
    "region": "Europe",
    "photo": 1,
-   "headline": "Violent Cost of Living Riots Sweep France",
-   "body": "French police detained over 1,800 people as nationwide protests over high living costs turned into widespread unrest and looting. Demonstrators clashed with riot officers, leaving vehicles charred and buildings damaged across multiple cities. President Emmanuel Macron condemned the violence as authorities deploy extra units to restore order."
+   "headline": "Over 1,800 Arrested in Violent French Protests",
+   "body": "Demonstrations over soaring living costs erupted across French cities, leading to chaotic street clashes, arson, and looting. Police detained more than 1,800 people nationwide after deploying riot units. President Emmanuel Macron condemned the unrest, stating there is no place for violence as authorities struggle to restore order."
   },
   {
    "region": "Middle East",
    "photo": null,
-   "headline": "Saudi Military Helicopter Crashes Near Yemeni Border",
-   "body": "A Royal Saudi military helicopter crashed during an operation in the southern border region of Najran, killing both crew members on board. Yemeni forces claimed to have shot down the aircraft amid heightened hostilities. Officials are monitoring whether the border incident will escalate broader cross-border strikes."
+   "headline": "Deadly Saudi Strikes and Crashes Jolt Yemen",
+   "body": "A Saudi airstrike killed nine civilians, including five children, in Yemen's Sa'ada province, while a Saudi military helicopter crashed along the border in Najran, killing two crew members. Yemeni forces claimed to have shot down an Apache helicopter as cross-border hostilities sharply escalated."
   },
   {
    "region": "Americas",
    "photo": null,
-   "headline": "Fatal Fire Engulfs Canadian Military Base",
-   "body": "Canadian authorities confirmed multiple deaths and injuries following a serious incident and fire at Canadian Forces Base Wainwright in Alberta. Emergency crews rushed to extinguish the flames at the facility. Investigators are working to determine the cause of the blaze as officials assess the full casualties."
+   "headline": "Deadly Base Fire Sparks Major Canadian Investigation",
+   "body": "A severe fire and unspecified incident at Canadian Forces Base Wainwright in Alberta left multiple people dead and several others injured. Emergency responders rushed to the scene to extinguish heavy flames engulfing base facilities. Canadian military officials launched an investigation into the fatal origin of the blaze."
   },
   {
    "region": "Asia",
    "photo": null,
-   "headline": "Deadly Stampede at Religious Gathering in India",
-   "body": "A massive crowd surge during a religious event in Kolkata left at least 19 people dead and numerous others injured. Emergency responders cleared the site and rushed victims to local hospitals. The tragedy underscores severe crowd control challenges at large spiritual festivals across the country."
+   "headline": "Kolkata Religious Gathering Stampede Leaves 19 Dead",
+   "body": "A catastrophic crowd surge during a large religious gathering in Kolkata, India, killed at least 19 people and injured dozens more. Emergency responders rushed the wounded to regional hospitals while clearing the packed event grounds, underscoring ongoing crowd safety challenges at massive public festivals."
   }
  ],
  "date": "2026-10-18"
