@@ -64,6 +64,50 @@ def art_for(region: str) -> str:
     return os.path.join(TEMPLATES, "global.png")
 
 
+# The context-scene library: Higgsfield-generated editorial illustrations in
+# the fixed house look, one per news archetype, committed under
+# templates/scenes/. The writer picks the one that matches each story, so
+# every slide carries imagery that REPRESENTS its story even with no image
+# model available at render time.
+SCENES = {
+    "missile_strike": "missiles streak across a night sky over a burning city",
+    "fighter_jets": "fighter jets bank over desert terrain, smoke below",
+    "drones_refinery": "drones circle a burning oil refinery at night",
+    "naval_strait": "warships escort an oil tanker through a narrow strait",
+    "tank_column": "a column of tanks on a muddy winter road",
+    "soldiers_trench": "soldiers in a trench at dusk, flares on the horizon",
+    "city_ruins": "a rubble-strewn city street in smoke after a strike",
+    "summit_hall": "a grand negotiation hall, long table, rows of flags",
+    "handshake": "a handshake between suited figures before flags",
+    "assembly_podium": "a podium in a vast international assembly hall",
+    "election": "a ballot box in a dark polling hall",
+    "protest_night": "a huge night protest crowd with banners and flares",
+    "riot_police": "a line of riot police with shields in smoke",
+    "courtroom": "a gavel and scales in a dark courtroom",
+    "markets_up": "a trading floor glowing green, screens rising",
+    "markets_down": "a trading floor glowing red, screens falling",
+    "oil_energy": "pumpjacks and a refinery against a sunset",
+    "pipeline": "a gas pipeline crossing a snowy landscape",
+    "tech_ai": "a glowing data centre corridor, circuit-board light",
+    "rocket_launch": "a rocket lifting off at night",
+    "city_fire": "firefighters silhouetted against a burning building",
+    "flood_rescue": "a rescue boat on a flooded city street",
+    "earthquake": "rescue workers on a collapsed building at dawn",
+    "aviation": "an airliner on a rain-slick tarmac under storm light",
+    "football_night": "a packed football stadium, players celebrating",
+    "mma_cage": "an octagon cage under a single spotlight",
+}
+
+
+def scene_art(art: str | None) -> str | None:
+    if isinstance(art, str) and art.strip().lower() in SCENES:
+        path = os.path.join(TEMPLATES, "scenes",
+                            f"{art.strip().lower()}.png")
+        if os.path.exists(path):
+            return path
+    return None
+
+
 SLIDES_PROMPT = """You are the editor of MidWorld Today, a daily Instagram
 carousel of still slides. Below is everything a news channel published on
 {date}, plus same-day agency headlines for context only.
@@ -80,6 +124,7 @@ Return ONLY JSON, no markdown fences:
                   for the day as a whole (see scene rules)",
   "slides": [{{"region": "Middle East",
               "photo": 17,
+              "art": "naval_strait",
               "scene": "one vivid sentence describing an editorial
                         illustration for THIS story",
               "headline": "the story in five to nine words, no final stop",
@@ -98,6 +143,9 @@ Rules:
   Example: "A damaged oil tanker escorted through a narrow strait at dawn,
   Iranian and Panamanian flags on masts, warships silhouetted on the
   horizon".
+- "art" is the id of the ONE stock illustration from this catalog that best
+  REPRESENTS the story (null only if nothing remotely fits):
+{catalog}
 - "photo" is the number of ONE post marked [has photo] whose photograph —
   ATTACHED below as "PHOTO attached to POST n", look at it — actually SHOWS
   this slide's story. Choose null unless you can SEE that the photo depicts
@@ -123,7 +171,10 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
     wire = dn.fetch_wire(day)
     prompt = SLIDES_PROMPT.format(date=f"{day:%A, %d %B %Y}",
                                   items=items[:300_000],
-                                  wire=wire[:30_000])
+                                  wire=wire[:30_000],
+                                  catalog="\n".join(
+                                      f"  {k}: {v}"
+                                      for k, v in SCENES.items()))
     # the writer SEES the photos, so its "photo" picks are judged by what
     # each picture shows — the same grounding the video bulletin uses
     photos = dn._photo_parts(posts)
@@ -218,6 +269,10 @@ SCENE_STYLE = (
     "no logos, no watermarks, no identifiable real people.")
 
 
+# set once per run when the key proves to have no image-generation quota
+_GEN_DEAD = False
+
+
 def image_models() -> tuple[str, ...]:
     r = requests.get(f"{dn.GEMINI_ROOT}/models",
                      headers={"x-goog-api-key": dn.GEMINI_KEY}, timeout=60)
@@ -239,9 +294,14 @@ def gen_scene(scene: str, out: str) -> bool:
     """One on-theme illustration from the slide's scene line, best-effort.
 
     Uses the same Gemini key as the writer. Every failure path returns False
-    so the slide falls back to the story photo or the branded backdrop — an
-    image model outage can never cost the deck.
+    so the slide falls back to the catalog scene, the story photo or the
+    branded backdrop — an image model outage can never cost the deck. A
+    billing-quota refusal (free tier includes no image generation) disables
+    further attempts for the whole run instead of crawling through retries.
     """
+    global _GEN_DEAD
+    if _GEN_DEAD:
+        return False
     headers = {"x-goog-api-key": dn.GEMINI_KEY,
                "Content-Type": "application/json"}
     try:
@@ -284,6 +344,13 @@ def gen_scene(scene: str, out: str) -> bool:
                 body["generationConfig"].pop("imageConfig", None)
                 continue
             if r.status_code in (429, 500, 502, 503, 504):
+                if r.status_code == 429 and ("billing" in r.text
+                                             or "check your plan" in r.text):
+                    print(f"  scene gen: no image quota on this key "
+                          f"({model}) — catalog art takes over",
+                          file=sys.stderr, flush=True)
+                    _GEN_DEAD = True
+                    return False
                 if attempt == 0:
                     print(f"  scene gen {model}: {r.status_code} "
                           f"{r.text[:220]}", file=sys.stderr, flush=True)
@@ -495,13 +562,16 @@ def render() -> None:
                  bg=cover_bg)
     print(f"  slide 1: cover ({'generated' if cover_bg else 'backdrop'})")
     for i, slide in enumerate(deck["slides"]):
-        # each story gets its OWN illustration, generated in the house look
-        # from the writer's scene line; the story's photograph is the first
-        # fallback and the branded regional backdrop the last
+        # each story gets imagery that REPRESENTS it: a freshly generated
+        # scene when the key allows it, else the matching catalog scene,
+        # else the story's own photo, else the branded regional backdrop
         bg, label, graded = art_for(slide["region"]), "backdrop", False
         gen = os.path.join(work, f"gen{i}.png")
+        cat = scene_art(slide.get("art"))
         if slide.get("scene") and gen_scene(slide["scene"], gen):
             bg, label, graded = gen, "generated scene", True
+        elif cat:
+            bg, label = cat, f"catalog {slide.get('art')}"
         else:
             pick = slide.get("photo")
             if isinstance(pick, int) and 1 <= pick <= len(posts):
