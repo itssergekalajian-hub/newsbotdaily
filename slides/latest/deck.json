@@ -1,34 +1,46 @@
 {
- "cover": "Riots paralyze France as drone waves strike deep inside Russia",
- "cover_scene": "A split view of burning Parisian barricades shrouded in tear gas and an industrial oil refinery engulfed in flames at night under heavy smoke",
+ "cover": "Nationwide riots shake France while massive drone strikes hit Russian oil refineries",
+ "cover_scene": "A burning Parisian avenue obscured by heavy tear gas and riot police facing silhouettes of protesters against distant refinery fires",
  "slides": [
   {
    "region": "Europe",
-   "photo": 1,
-   "scene": "Riot police with shields confronting burning barricades and tear gas along an empty Parisian boulevard at dusk",
-   "headline": "Widespread Riots and Arrests Shake France",
-   "body": "Over 1,800 people were arrested across France following chaotic nationwide protests over living costs and social security policies. Demonstrations devolved into violent clashes, arson, and looting, prompting President Emmanuel Macron to condemn the violence and demand order."
+   "photo": null,
+   "art": "riot_police",
+   "scene": "A Parisian boulevard at dusk choked with tear gas and burning barricades, riot police forming a wall of shields against turbulent crowds with French tricolor flags visible",
+   "headline": "Over 1,800 arrested in France riots",
+   "body": "Violent protests over living costs and social security erupted across French cities, leading to widespread looting and more than 1,800 arrests. President Emmanuel Macron condemned the unrest, while authorities struggle to restore order following extensive urban destruction."
+  },
+  {
+   "region": "Eastern Europe",
+   "photo": null,
+   "art": "drones_refinery",
+   "scene": "Industrial fuel storage tanks engulfed in massive fireballs under night sky filled with flashing anti-aircraft fire and drone trails",
+   "headline": "Ukraine strikes St Petersburg oil refineries",
+   "body": "Ukraine launched a barrage of over 1,000 drones across Russian territory, igniting large fires at critical oil facilities in Saint Petersburg. The attack killed at least one person, marking a deep strategic escalation against Moscow's energy infrastructure."
   },
   {
    "region": "Middle East",
    "photo": null,
-   "scene": "A military attack helicopter flying low over rugged desert mountains along the Saudi-Yemeni frontier under a dusty sky",
-   "headline": "Helicopter Downed Along Saudi-Yemen Border",
-   "body": "Yemeni forces claimed they shot down a Saudi Apache helicopter over the southern Najran border region, while Saudi sources confirmed two crew members died in a crash. The incident marks a sharp escalation as regional cross-border hostilities intensify."
-  },
-  {
-   "region": "Asia",
-   "photo": 53,
-   "scene": "Industrial fuel storage tanks engulfed in massive fireballs under a night sky with smoke billowing over Saint Petersburg",
-   "headline": "Ukrainian Drones Strike Saint Petersburg Oil Facilities",
-   "body": "Ukraine launched a massive aerial assault involving over 1,000 drones against targets deep inside Russia, igniting major fires at oil facilities in Saint Petersburg. The strike killed at least one person, marking a major expansion of Kyiv's long-range campaign."
+   "art": "city_ruins",
+   "scene": "A fortified government district under high alert with distant smoke plumes rising across a desert metropolis landscape",
+   "headline": "Saudi Arabia issues high-rise shelter warnings",
+   "body": "Saudi authorities ordered skyscraper workers home following heightened security threats from Yemen's Houthis. The advisory follows intensified border clashes, including the crash of a Saudi military helicopter in Najran that killed two crew members."
   },
   {
    "region": "Americas",
    "photo": null,
-   "scene": "Emergency vehicles and fire engines outside a smoke-filled military barracks installation in the flat Alberta landscape",
-   "headline": "Fatal Fire Breaks Out at Canadian Base",
-   "body": "Multiple people died and others were injured after a major fire broke out at Canadian Forces Base Wainwright in Alberta. Defense authorities deployed emergency responders to contain the blaze and launched an official investigation into the cause of the disaster."
+   "art": "city_fire",
+   "scene": "Emergency response vehicles with flashing sirens surrounding smoking barrack facilities at a remote Canadian military installation under gray skies",
+   "headline": "Fatal blaze at Canadian military base",
+   "body": "A major incident and fire broke out at Canadian Forces Base Wainwright in Alberta, causing multiple confirmed deaths and injuries. Defense officials launched an investigation into the cause as emergency teams contained extensive structural damage."
+  },
+  {
+   "region": "Asia",
+   "photo": null,
+   "art": "protest_night",
+   "scene": "An ornate Indian temple complex surrounded by vast disarray and emergency stretchers following a massive surge in Kolkata under festive floodlights",
+   "headline": "Deadly Kolkata stampede kills 19 people",
+   "body": "A severe crowd crush at a religious gathering in Kolkata left at least 19 devotees dead and dozens injured. Emergency responders rushed victims to hospitals, reigniting scrutiny over safety protocols during large public gatherings across India."
   }
  ],
  "date": "2026-10-18"
