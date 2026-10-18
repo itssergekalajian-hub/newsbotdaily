@@ -1,0 +1,30 @@
+{
+ "cover": "Riots sweep France, Ukraine strikes Russian oil, and fatal base fire shocks Canada",
+ "slides": [
+  {
+   "region": "Europe",
+   "photo": 1,
+   "headline": "Violent Cost of Living Riots Sweep France",
+   "body": "French police detained over 1,800 people as nationwide protests over high living costs turned into widespread unrest and looting. Demonstrators clashed with riot officers, leaving vehicles charred and buildings damaged across multiple cities. President Emmanuel Macron condemned the violence as authorities deploy extra units to restore order."
+  },
+  {
+   "region": "Middle East",
+   "photo": null,
+   "headline": "Saudi Military Helicopter Crashes Near Yemeni Border",
+   "body": "A Royal Saudi military helicopter crashed during an operation in the southern border region of Najran, killing both crew members on board. Yemeni forces claimed to have shot down the aircraft amid heightened hostilities. Officials are monitoring whether the border incident will escalate broader cross-border strikes."
+  },
+  {
+   "region": "Americas",
+   "photo": null,
+   "headline": "Fatal Fire Engulfs Canadian Military Base",
+   "body": "Canadian authorities confirmed multiple deaths and injuries following a serious incident and fire at Canadian Forces Base Wainwright in Alberta. Emergency crews rushed to extinguish the flames at the facility. Investigators are working to determine the cause of the blaze as officials assess the full casualties."
+  },
+  {
+   "region": "Asia",
+   "photo": null,
+   "headline": "Deadly Stampede at Religious Gathering in India",
+   "body": "A massive crowd surge during a religious event in Kolkata left at least 19 people dead and numerous others injured. Emergency responders cleared the site and rushed victims to local hospitals. The tragedy underscores severe crowd control challenges at large spiritual festivals across the country."
+  }
+ ],
+ "date": "2026-10-18"
+}
