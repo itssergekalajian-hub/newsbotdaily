@@ -77,6 +77,7 @@ otherwise. Order the regions by how much the story matters.
 Return ONLY JSON, no markdown fences:
 {{"cover": "one punchy line summing up the day, eight to fourteen words",
   "slides": [{{"region": "Middle East",
+              "photo": 17,
               "headline": "the story in five to nine words, no final stop",
               "body": "30 to 55 words explaining it briefly and clearly:
                        WHO did WHAT, WHY it happened, and the one concrete
@@ -85,6 +86,12 @@ Return ONLY JSON, no markdown fences:
 
 Rules:
 - "region" is 1 to 3 words as shown above ("Sports" for the sports slide).
+- "photo" is the number of ONE post marked [has photo] whose photograph —
+  ATTACHED below as "PHOTO attached to POST n", look at it — actually SHOWS
+  this slide's story. The picture fills the slide behind the text, so a
+  wrong picture is worse than none: choose null unless you can SEE that the
+  photo depicts this story's event, place or people. A logo, a screenshot
+  of text, a meme, a chart or an unrelated portrait NEVER qualifies.
 - Facts come ONLY from the posts and the agency headlines; attribute anything
   that exists only in an agency headline ("per BBC"). Never invent.
 - No emojis, no hashtags, no quotes around the texts, no markdown.
@@ -99,16 +106,21 @@ AGENCY HEADLINES (context only):
 
 def write_deck(posts: list[dict], day: dt.date) -> dict:
     items = "\n\n---\n\n".join(
-        f"POST {i} [{p['time']}]\n{p['text']}"
+        f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
+        f"{p['text']}"
         for i, p in enumerate(posts, 1))
     wire = dn.fetch_wire(day)
     prompt = SLIDES_PROMPT.format(date=f"{day:%A, %d %B %Y}",
                                   items=items[:300_000],
                                   wire=wire[:30_000])
+    # the writer SEES the photos, so its "photo" picks are judged by what
+    # each picture shows — the same grounding the video bulletin uses
+    photos = dn._photo_parts(posts)
+    print(f"slide deck: {len(photos) // 2} photos attached")
     model = dn.candidate_models()[0]
     alternates = [m for m in dn.candidate_models() if m != model]
     tried = 0
-    body = {"contents": [{"parts": [{"text": prompt}]}],
+    body = {"contents": [{"parts": [{"text": prompt}] + photos}],
             "generationConfig": {"temperature": 0.5, "maxOutputTokens": 4096,
                                  "responseMimeType": "application/json",
                                  "thinkingConfig": {"thinkingBudget": 0}}}
@@ -190,7 +202,7 @@ def _brandbar(work: str, tag: str, date_text: str) -> list[str]:
 
 
 def render_story(work: str, idx: int, total: int, slide: dict,
-                 date_text: str, out: str) -> None:
+                 date_text: str, bg: str, out: str) -> None:
     tag = f"s{idx}"
     head_lines = _wrap(slide["headline"], 26, 3)
     body_lines = _wrap(slide["body"], 48, 6)
@@ -219,8 +231,8 @@ def render_story(work: str, idx: int, total: int, slide: dict,
     nf = video._textfile(work, f"{tag}_n.txt", f"{idx + 1}/{total}")
     c.append(f"drawtext=fontfile={video.REGULAR}:textfile={nf}"
              f":fontcolor={video.PALE}:fontsize=30:x=w-tw-42:y=h-56")
-    video.run(["ffmpeg", "-y", "-loglevel", "error", "-i",
-               art_for(slide["region"]), "-vf", ",".join(c),
+    video.run(["ffmpeg", "-y", "-loglevel", "error", "-i", bg,
+               "-vf", ",".join(c),
                "-frames:v", "1", "-q:v", "2", out])
 
 
@@ -306,9 +318,20 @@ def render() -> None:
     render_cover(work, deck.get("cover", "The day around the globe"),
                  date_text, total, os.path.join(OUT_DIR, "01.jpg"))
     for i, slide in enumerate(deck["slides"]):
-        render_story(work, i + 1, total, slide, date_text,
+        # the story's own photograph fills the slide when the writer SAW one
+        # that fits; the branded regional backdrop is the fallback
+        bg, label = art_for(slide["region"]), "backdrop"
+        pick = slide.get("photo")
+        if isinstance(pick, int) and 1 <= pick <= len(posts):
+            urls = posts[pick - 1].get("images") or []
+            raw = os.path.join(work, f"photo{i}.img")
+            if urls and dn._download(urls[0], raw, dn.UA,
+                                     min_size=(540, 540)):
+                bg, label = raw, f"post {pick} photo"
+        render_story(work, i + 1, total, slide, date_text, bg,
                      os.path.join(OUT_DIR, f"{i + 2:02d}.jpg"))
-        print(f"  slide {i + 2}: {slide['region']} — {slide['headline']}")
+        print(f"  slide {i + 2}: {slide['region']} — {slide['headline']}"
+              f" ({label})")
     render_outro(work, date_text, os.path.join(OUT_DIR, f"{total:02d}.jpg"))
     with open(deck_path, "w", encoding="utf-8") as f:
         json.dump(deck, f, ensure_ascii=False, indent=1)
