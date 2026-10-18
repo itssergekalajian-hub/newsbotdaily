@@ -1,40 +1,5 @@
 [
  {
-  "date": "2026-10-13",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Missiles Intercepted Over Riyadh as Flights Halted",
-    "tease": "Missiles over Riyadh spark flight cancellations across the Gulf"
-   },
-   {
-    "topic": "United States",
-    "headline": "Guilfoyle Ousted as Judge Blocks Golf Construction",
-    "tease": "Kimberly Guilfoyle leaves diplomatic post amid misconduct allegations"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Former Commander Declares Russian Offensive Permanently Br",
-    "tease": "Ukraine's former commander claims Russian offensive capabilities are broken"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Global Semiconductor Rout Sparks Massive Derivative Liquid",
-    "tease": "A semiconductor selloff slams Asian exchanges and tech stocks"
-   },
-   {
-    "topic": "Artificial Intelligence",
-    "headline": "OpenAI Ordered to Surrender Records in Apple Dispute",
-    "tease": "A federal judge orders OpenAI to surrender internal recruitment files"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Six Flags Drops Whale Moves Millions Baku Metro",
-    "tease": "Theme park shares crater while a dormant crypto whale awakens"
-   }
-  ]
- },
- {
   "date": "2026-10-14",
   "stories": [
    {
@@ -171,6 +136,51 @@
     "topic": "What to Watch",
     "headline": "Critical Days Ahead for Ukraine Gulf and Markets",
     "tease": "Key global tests await world leaders in the week ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-18",
+  "stories": [
+   {
+    "topic": "Europe",
+    "headline": "Massive Cost of Living Riots Overwhelm France",
+    "tease": "Violent riots sweep across France as over eighteen hundred people are arrested."
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Ukraine Strikes Deep Energy Targets in Russia",
+    "tease": "Ukraine launches massive drone strikes against critical Russian oil infrastructure."
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Escalating Cross Border Clashes and Political Shifts",
+    "tease": "Regional clashes escalate across Yemen and Saudi Arabia as tensions deepen."
+   },
+   {
+    "topic": "Markets",
+    "headline": "Wall Street Braces for Jittery Monday Open",
+    "tease": "Financial markets prepare to rebound following severe end of week volatility."
+   },
+   {
+    "topic": "United States",
+    "headline": "Trump Hits Campaign Trail for Midterm Elections",
+    "tease": "Donald Trump flexes executive ambition while rallying Republicans for the midterms."
+   },
+   {
+    "topic": "Football",
+    "headline": "Bayern and Arsenal Maintain Weekend Domestic Momentum",
+    "tease": "Sensational performances shift the domestic football landscape across Europe."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Pontiff Recovers and Global Incidents",
+    "tease": "Pope Leo appears publicly as tragedy hits a Canadian military base."
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Decisive Elections and Crucial European Protests Ahead",
+    "tease": "Crucial diplomatic visits and high stakes elections define the coming week."
    }
   ]
  }
