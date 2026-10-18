@@ -202,37 +202,71 @@ def _brandbar(work: str, tag: str, date_text: str) -> list[str]:
 
 
 def render_story(work: str, idx: int, total: int, slide: dict,
-                 date_text: str, bg: str, out: str) -> None:
+                 date_text: str, bg: str, out: str,
+                 is_photo: bool = False) -> None:
+    """One story slide, designed as a system rather than a collage.
+
+    What keeps the deck looking professional however wild the source
+    pictures are: every PHOTO passes through one fixed brand grade (gently
+    desaturated, shadows pulled toward the house navy) so no slide arrives
+    with clashing color; and the text never sits on a flat box — the image
+    fades through a smooth gradient into solid navy, the same curve on every
+    slide, photo or backdrop. Text is bottom-anchored with fixed margins and
+    carries a soft shadow, so slide after slide the type sits in exactly the
+    same place at exactly the same weight.
+    """
     tag = f"s{idx}"
     head_lines = _wrap(slide["headline"], 26, 3)
     body_lines = _wrap(slide["body"], 48, 6)
-    panel_h = 240 + len(head_lines) * 76 + len(body_lines) * 54
-    top = H - panel_h
-    c = [_base(""), *_brandbar(work, tag, date_text)]
-    c.append(f"drawbox=x=0:y={top}:w=iw:h={panel_h}"
-             f":color={video.NAVY}@0.86:t=fill")
-    c.append(f"drawbox=x=0:y={top - 6}:w=iw:h=6:color={video.RED}:t=fill")
+
+    # bottom-anchored text block: last body line lands at a fixed margin
+    body_h = len(body_lines) * 54
+    head_h = len(head_lines) * 78
+    y_body = H - 120 - body_h
+    y_head = y_body - 24 - head_h
+    y_chip = y_head - 84
+    grad_top = max(y_chip - 320, 160)     # where the fade begins
+
+    # one consistent grade for photographs; backdrops are already on-brand
+    grade = (",eq=saturation=0.72:contrast=1.06,"
+             "colorbalance=bs=0.12:rs=-0.05:bm=0.05:gm=0.01"
+             if is_photo else "")
+
+    shadow = ":shadowcolor=0x000000@0.55:shadowx=0:shadowy=3"
+    c = [*_brandbar(work, tag, date_text)]
     rf = video._textfile(work, f"{tag}_region.txt", slide["region"].upper())
     c.append(f"drawtext=fontfile={video.BOLD}:textfile={rf}:fontcolor=white"
              f":fontsize=36:box=1:boxcolor={video.RED}@0.96:boxborderw=14"
-             f":x=42:y={top + 38}")
-    y = top + 128
+             f":x=42:y={y_chip}")
+    y = y_head
     for j, line in enumerate(head_lines):
         hf = video._textfile(work, f"{tag}_h{j}.txt", line)
         c.append(f"drawtext=fontfile={video.BOLD}:textfile={hf}"
-                 f":fontcolor=white:fontsize=64:x=42:y={y}")
-        y += 76
-    y += 18
+                 f":fontcolor=white:fontsize=66:x=42:y={y}{shadow}")
+        y += 78
+    y = y_body
     for j, line in enumerate(body_lines):
         bf = video._textfile(work, f"{tag}_b{j}.txt", line)
         c.append(f"drawtext=fontfile={video.REGULAR}:textfile={bf}"
-                 f":fontcolor=0xE8EEF7:fontsize=40:x=42:y={y}")
+                 f":fontcolor=0xE8EEF7:fontsize=40:x=42:y={y}{shadow}")
         y += 54
     nf = video._textfile(work, f"{tag}_n.txt", f"{idx + 1}/{total}")
     c.append(f"drawtext=fontfile={video.REGULAR}:textfile={nf}"
              f":fontcolor={video.PALE}:fontsize=30:x=w-tw-42:y=h-56")
-    video.run(["ffmpeg", "-y", "-loglevel", "error", "-i", bg,
-               "-vf", ",".join(c),
+
+    graph = (
+        f"[0:v]{_base('')}{grade}[bg];"
+        f"[1:v]format=rgba[nv];[2:v]format=gray[gr];"
+        f"[nv][gr]alphamerge[scrim];"
+        f"[bg][scrim]overlay=0:0,{','.join(c)}[v]"
+    )
+    video.run(["ffmpeg", "-y", "-loglevel", "error",
+               "-i", bg,
+               "-f", "lavfi", "-i", f"color=c={video.NAVY}:s={W}x{H}:d=1",
+               "-f", "lavfi", "-i",
+               f"gradients=s={W}x{H}:c0=black:c1=white"
+               f":x0={W // 2}:y0={grad_top}:x1={W // 2}:y1={H - 150}:d=1",
+               "-filter_complex", graph, "-map", "[v]",
                "-frames:v", "1", "-q:v", "2", out])
 
 
@@ -329,7 +363,8 @@ def render() -> None:
                                      min_size=(540, 540)):
                 bg, label = raw, f"post {pick} photo"
         render_story(work, i + 1, total, slide, date_text, bg,
-                     os.path.join(OUT_DIR, f"{i + 2:02d}.jpg"))
+                     os.path.join(OUT_DIR, f"{i + 2:02d}.jpg"),
+                     is_photo=(label != "backdrop"))
         print(f"  slide {i + 2}: {slide['region']} — {slide['headline']}"
               f" ({label})")
     render_outro(work, date_text, os.path.join(OUT_DIR, f"{total:02d}.jpg"))
