@@ -284,6 +284,9 @@ def gen_scene(scene: str, out: str) -> bool:
                 body["generationConfig"].pop("imageConfig", None)
                 continue
             if r.status_code in (429, 500, 502, 503, 504):
+                if attempt == 0:
+                    print(f"  scene gen {model}: {r.status_code} "
+                          f"{r.text[:220]}", file=sys.stderr, flush=True)
                 time.sleep(8 * (attempt + 1))
                 continue
             print(f"  scene gen {model}: {r.status_code} {r.text[:160]}",
