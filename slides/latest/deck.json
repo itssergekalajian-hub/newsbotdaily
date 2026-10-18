@@ -1,29 +1,34 @@
 {
- "cover": "France rocked by violent nationwide protests as cross-border tensions flare worldwide",
+ "cover": "Riots paralyze France as drone waves strike deep inside Russia",
+ "cover_scene": "A split view of burning Parisian barricades shrouded in tear gas and an industrial oil refinery engulfed in flames at night under heavy smoke",
  "slides": [
   {
    "region": "Europe",
    "photo": 1,
-   "headline": "Over 1,800 Arrested in Violent French Protests",
-   "body": "Demonstrations over soaring living costs erupted across French cities, leading to chaotic street clashes, arson, and looting. Police detained more than 1,800 people nationwide after deploying riot units. President Emmanuel Macron condemned the unrest, stating there is no place for violence as authorities struggle to restore order."
+   "scene": "Riot police with shields confronting burning barricades and tear gas along an empty Parisian boulevard at dusk",
+   "headline": "Widespread Riots and Arrests Shake France",
+   "body": "Over 1,800 people were arrested across France following chaotic nationwide protests over living costs and social security policies. Demonstrations devolved into violent clashes, arson, and looting, prompting President Emmanuel Macron to condemn the violence and demand order."
   },
   {
    "region": "Middle East",
    "photo": null,
-   "headline": "Deadly Saudi Strikes and Crashes Jolt Yemen",
-   "body": "A Saudi airstrike killed nine civilians, including five children, in Yemen's Sa'ada province, while a Saudi military helicopter crashed along the border in Najran, killing two crew members. Yemeni forces claimed to have shot down an Apache helicopter as cross-border hostilities sharply escalated."
+   "scene": "A military attack helicopter flying low over rugged desert mountains along the Saudi-Yemeni frontier under a dusty sky",
+   "headline": "Helicopter Downed Along Saudi-Yemen Border",
+   "body": "Yemeni forces claimed they shot down a Saudi Apache helicopter over the southern Najran border region, while Saudi sources confirmed two crew members died in a crash. The incident marks a sharp escalation as regional cross-border hostilities intensify."
+  },
+  {
+   "region": "Asia",
+   "photo": 53,
+   "scene": "Industrial fuel storage tanks engulfed in massive fireballs under a night sky with smoke billowing over Saint Petersburg",
+   "headline": "Ukrainian Drones Strike Saint Petersburg Oil Facilities",
+   "body": "Ukraine launched a massive aerial assault involving over 1,000 drones against targets deep inside Russia, igniting major fires at oil facilities in Saint Petersburg. The strike killed at least one person, marking a major expansion of Kyiv's long-range campaign."
   },
   {
    "region": "Americas",
    "photo": null,
-   "headline": "Deadly Base Fire Sparks Major Canadian Investigation",
-   "body": "A severe fire and unspecified incident at Canadian Forces Base Wainwright in Alberta left multiple people dead and several others injured. Emergency responders rushed to the scene to extinguish heavy flames engulfing base facilities. Canadian military officials launched an investigation into the fatal origin of the blaze."
-  },
-  {
-   "region": "Asia",
-   "photo": null,
-   "headline": "Kolkata Religious Gathering Stampede Leaves 19 Dead",
-   "body": "A catastrophic crowd surge during a large religious gathering in Kolkata, India, killed at least 19 people and injured dozens more. Emergency responders rushed the wounded to regional hospitals while clearing the packed event grounds, underscoring ongoing crowd safety challenges at massive public festivals."
+   "scene": "Emergency vehicles and fire engines outside a smoke-filled military barracks installation in the flat Alberta landscape",
+   "headline": "Fatal Fire Breaks Out at Canadian Base",
+   "body": "Multiple people died and others were injured after a major fire broke out at Canadian Forces Base Wainwright in Alberta. Defense authorities deployed emergency responders to contain the blaze and launched an official investigation into the cause of the disaster."
   }
  ],
  "date": "2026-10-18"
