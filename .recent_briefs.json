@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-16",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Houthi Missile Hits Yemeni Presidential Palace",
-    "tease": "A fatal missile strike rocks the presidential compound in Yemen"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Trump Slams Kyiv Oil Strikes as Rifts Deepen",
-    "tease": "Trump blasts renewed Ukrainian refinery strikes as diplomatic tensions erupt"
-   },
-   {
-    "topic": "United States",
-    "headline": "White House Tumult as Press Secretary Ousted",
-    "tease": "The White House press secretary exits after only five days"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Indian Rupee Slides Toward Landmark Dollar Low",
-    "tease": "India's rupee slides toward one hundred per dollar"
-   },
-   {
-    "topic": "Europe",
-    "headline": "France and Germany Strike Auto Sector Pact",
-    "tease": "Paris and Berlin agree to relax upcoming automotive rules"
-   },
-   {
-    "topic": "Technology",
-    "headline": "Autonomous AI Agents Trigger Corporate Alarms",
-    "tease": "Autonomous software triggers alarms after draining unauthorized crypto wallet"
-   },
-   {
-    "topic": "Combat Sports",
-    "headline": "Fighters Hit Weight Ahead of UFC Edmonton",
-    "tease": "UFC headliners make weight for Edmonton flyweight showdown"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Diplomatic Breakthroughs and Historic Sports Rulings",
-    "tease": "Historic presidential talks in Bolivia and Tesla's wild claims"
-   }
-  ]
- },
- {
   "date": "2026-10-17",
   "stories": [
    {
@@ -186,6 +141,51 @@
     "topic": "What to Watch",
     "headline": "Crucial Israeli Vote and Brazilian Run-Off Approach",
     "tease": "Crucial national votes and diplomatic tests loom across the coming week"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-20",
+  "stories": [
+   {
+    "topic": "Europe",
+    "headline": "France Imposes Curfews Amid Spreading Unrest",
+    "tease": "Curfews take hold across French cities as rioters burn public buildings."
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Supertanker Explodes South of Hormuz Strait",
+    "tease": "A supertanker carrying millions of barrels explodes off Hormuz."
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Kyiv and Washington Clash Over Peace Talks",
+    "tease": "Zelenskyy lands in Norway amid growing friction with Washington."
+   },
+   {
+    "topic": "Markets",
+    "headline": "Sovereign Debt Risks and AI Deals Reshape Markets",
+    "tease": "Distressed bond yields signal rising anxiety across global credit."
+   },
+   {
+    "topic": "Canada",
+    "headline": "Alberta Decisively Rejects Independence in Provincial Vote",
+    "tease": "Alberta voters reject separation in a decisive boost for Ottawa."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Bail Denied in Espionage Case and Boeing Jet Cleared",
+    "tease": "Federal judge blocks bail for accused artificial intelligence spy."
+   },
+   {
+    "topic": "Space",
+    "headline": "Japan Launches Bold Mission to Martian Moon",
+    "tease": "Japan launches an unprecedented mission to retrieve Martian soil."
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Oslo Diplomacy and Israel's Crucial Election Ahead",
+    "tease": "Key peace missions and an Israeli vote lead the days ahead."
    }
   ]
  }
