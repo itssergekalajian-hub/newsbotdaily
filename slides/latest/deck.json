@@ -1,47 +1,55 @@
 {
- "cover": "Nationwide riots shake France while massive drone strikes hit Russian oil refineries",
- "cover_scene": "A burning Parisian avenue obscured by heavy tear gas and riot police facing silhouettes of protesters against distant refinery fires",
+ "cover": "Escalating Gulf tanker strikes and widespread French riots rattle global security",
+ "cover_scene": "A split composition showing an oil tanker burning fiercely at sea against dark smoke beside a silhouetted European city street illuminated by protest flares.",
  "slides": [
   {
+   "region": "Middle East",
+   "photo": 13,
+   "art": "drones_refinery",
+   "scene": "A commercial oil tanker engulfed in flames and thick black smoke drifting across the narrow waters of the Strait of Hormuz at dusk.",
+   "headline": "Tankers Hit in Persian Gulf Mine Blasts",
+   "body": "An oil tanker caught fire after striking a naval mine in the Strait of Hormuz, followed by Iranian claims of a third vessel ablaze. The attacks drove global oil prices higher, stoking fears of widespread shipping disruptions."
+  },
+  {
    "region": "Europe",
-   "photo": null,
+   "photo": 8,
    "art": "riot_police",
-   "scene": "A Parisian boulevard at dusk choked with tear gas and burning barricades, riot police forming a wall of shields against turbulent crowds with French tricolor flags visible",
-   "headline": "Over 1,800 arrested in France riots",
-   "body": "Violent protests over living costs and social security erupted across French cities, leading to widespread looting and more than 1,800 arrests. President Emmanuel Macron condemned the unrest, while authorities struggle to restore order following extensive urban destruction."
+   "scene": "French riot police holding protective shields facing a smoky Parisian boulevard illuminated by burning barricades and emergency lights.",
+   "headline": "Mass Riots and Arrests Grip French Cities",
+   "body": "French police detained nearly 2,400 people following widespread riots and looting sparked by soaring living costs and global oil spikes. President Emmanuel Macron rejected his interior minister's resignation, vowing a severe crackdown to restore order nationwide."
   },
   {
    "region": "Eastern Europe",
-   "photo": null,
-   "art": "drones_refinery",
-   "scene": "Industrial fuel storage tanks engulfed in massive fireballs under night sky filled with flashing anti-aircraft fire and drone trails",
-   "headline": "Ukraine strikes St Petersburg oil refineries",
-   "body": "Ukraine launched a barrage of over 1,000 drones across Russian territory, igniting large fires at critical oil facilities in Saint Petersburg. The attack killed at least one person, marking a deep strategic escalation against Moscow's energy infrastructure."
-  },
-  {
-   "region": "Middle East",
-   "photo": null,
-   "art": "city_ruins",
-   "scene": "A fortified government district under high alert with distant smoke plumes rising across a desert metropolis landscape",
-   "headline": "Saudi Arabia issues high-rise shelter warnings",
-   "body": "Saudi authorities ordered skyscraper workers home following heightened security threats from Yemen's Houthis. The advisory follows intensified border clashes, including the crash of a Saudi military helicopter in Najran that killed two crew members."
+   "photo": 18,
+   "art": "missile_strike",
+   "scene": "Plumes of dark smoke rising over an urban skyline following ballistic missile strikes on industrial and power installations under a gray sky.",
+   "headline": "Russian Ballistic Missiles Strike Kyiv Energy Grid",
+   "body": "Russian ballistic missiles struck critical infrastructure in Kyiv, killing one person and injuring eight others while damaging a metro station. Ukrainian officials warned that severe United States limits on intelligence sharing are actively hindering timely missile warnings."
   },
   {
    "region": "Americas",
    "photo": null,
    "art": "city_fire",
-   "scene": "Emergency response vehicles with flashing sirens surrounding smoking barrack facilities at a remote Canadian military installation under gray skies",
-   "headline": "Fatal blaze at Canadian military base",
-   "body": "A major incident and fire broke out at Canadian Forces Base Wainwright in Alberta, causing multiple confirmed deaths and injuries. Defense officials launched an investigation into the cause as emergency teams contained extensive structural damage."
+   "scene": "Emergency response vehicles with flashing red beacons surrounding a blackened, burning military barrack structure on a vast base compound.",
+   "headline": "Four Dead in Canadian Military Base Fire",
+   "body": "A fast-moving fire at a Canadian military base in Alberta killed four service members and left dozens injured. The blaze overwhelmed local medical facilities with casualties, prompting an urgent investigation into the rapidly spreading fire's cause."
+  },
+  {
+   "region": "Africa",
+   "photo": 2,
+   "art": null,
+   "scene": "Healthcare workers in high-visibility vests and gloves administering hand sanitizer to local residents at an outdoor field checkpoint.",
+   "headline": "Ebola Outbreak Expands Across DR Congo",
+   "body": "The fast-moving Ebola outbreak in the Democratic Republic of Congo has spread to an eighth province. Health authorities are rushing medical personnel and containment supplies to the new region to prevent uncontrolled viral transmission."
   },
   {
    "region": "Asia",
    "photo": null,
-   "art": "protest_night",
-   "scene": "An ornate Indian temple complex surrounded by vast disarray and emergency stretchers following a massive surge in Kolkata under festive floodlights",
-   "headline": "Deadly Kolkata stampede kills 19 people",
-   "body": "A severe crowd crush at a religious gathering in Kolkata left at least 19 devotees dead and dozens injured. Emergency responders rushed victims to hospitals, reigniting scrutiny over safety protocols during large public gatherings across India."
+   "art": "tech_ai",
+   "scene": "Rows of glowing server racks inside an advanced computing center emitting high-tech blue light against clean industrial architecture.",
+   "headline": "China GDP Beats Forecasts via AI Boom",
+   "body": "China's economic growth accelerated past expectations last quarter, powered by an export surge in artificial intelligence hardware and technology. Robust global demand for advanced components successfully offset persistent domestic headwinds across real estate and consumer spending."
   }
  ],
- "date": "2026-10-18"
+ "date": "2026-10-19"
 }
