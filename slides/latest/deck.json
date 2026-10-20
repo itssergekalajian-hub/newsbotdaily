@@ -1,55 +1,47 @@
 {
- "cover": "Escalating Gulf tanker strikes and widespread French riots rattle global security",
- "cover_scene": "A split composition showing an oil tanker burning fiercely at sea against dark smoke beside a silhouetted European city street illuminated by protest flares.",
+ "cover": "Gulf tanker explosion, nationwide French unrest, and sample return mission shake global headlines",
+ "cover_scene": "A split composition featuring a burning oil tanker on darkened ocean waters alongside smoke rising over historic European rooftops under an ominous night sky.",
  "slides": [
   {
    "region": "Middle East",
-   "photo": 13,
-   "art": "drones_refinery",
-   "scene": "A commercial oil tanker engulfed in flames and thick black smoke drifting across the narrow waters of the Strait of Hormuz at dusk.",
-   "headline": "Tankers Hit in Persian Gulf Mine Blasts",
-   "body": "An oil tanker caught fire after striking a naval mine in the Strait of Hormuz, followed by Iranian claims of a third vessel ablaze. The attacks drove global oil prices higher, stoking fears of widespread shipping disruptions."
+   "photo": null,
+   "art": "naval_strait",
+   "scene": "A massive oil tanker engulfed in flames and dense black smoke south of the Strait of Hormuz at night, naval patrol vessels patrolling the perimeter in rough seas.",
+   "headline": "Supertanker Explodes Near Strait of Hormuz",
+   "body": "A supertanker carrying over two million barrels of crude oil exploded south of the Strait of Hormuz after striking a naval mine. Iranian forces reported the vessel had turned off tracking systems, escalating fears over shipping security."
   },
   {
    "region": "Europe",
-   "photo": 8,
+   "photo": 1,
    "art": "riot_police",
-   "scene": "French riot police holding protective shields facing a smoky Parisian boulevard illuminated by burning barricades and emergency lights.",
-   "headline": "Mass Riots and Arrests Grip French Cities",
-   "body": "French police detained nearly 2,400 people following widespread riots and looting sparked by soaring living costs and global oil spikes. President Emmanuel Macron rejected his interior minister's resignation, vowing a severe crackdown to restore order nationwide."
-  },
-  {
-   "region": "Eastern Europe",
-   "photo": 18,
-   "art": "missile_strike",
-   "scene": "Plumes of dark smoke rising over an urban skyline following ballistic missile strikes on industrial and power installations under a gray sky.",
-   "headline": "Russian Ballistic Missiles Strike Kyiv Energy Grid",
-   "body": "Russian ballistic missiles struck critical infrastructure in Kyiv, killing one person and injuring eight others while damaging a metro station. Ukrainian officials warned that severe United States limits on intelligence sharing are actively hindering timely missile warnings."
+   "scene": "Riot police holding protective shields facing a burning vehicle on a wide boulevard in central Paris, smoke billowing toward classical stone facades.",
+   "headline": "France Imposes Curfews Amid Nationwide Riots",
+   "body": "French officials declared overnight curfews in Paris, Nice, and other cities after intense protests and rioting destroyed Limoges town hall. Authorities vowed an unrelenting police crackdown as Donald Trump publicly linked the civil unrest to French immigration policies."
   },
   {
    "region": "Americas",
-   "photo": null,
-   "art": "city_fire",
-   "scene": "Emergency response vehicles with flashing red beacons surrounding a blackened, burning military barrack structure on a vast base compound.",
-   "headline": "Four Dead in Canadian Military Base Fire",
-   "body": "A fast-moving fire at a Canadian military base in Alberta killed four service members and left dozens injured. The blaze overwhelmed local medical facilities with casualties, prompting an urgent investigation into the rapidly spreading fire's cause."
-  },
-  {
-   "region": "Africa",
-   "photo": 2,
-   "art": null,
-   "scene": "Healthcare workers in high-visibility vests and gloves administering hand sanitizer to local residents at an outdoor field checkpoint.",
-   "headline": "Ebola Outbreak Expands Across DR Congo",
-   "body": "The fast-moving Ebola outbreak in the Democratic Republic of Congo has spread to an eighth province. Health authorities are rushing medical personnel and containment supplies to the new region to prevent uncontrolled viral transmission."
+   "photo": 25,
+   "art": "election",
+   "scene": "A wooden ballot box placed in a quiet Canadian municipal hall, flanked by the national maple leaf flag and provincial crests under overhead lights.",
+   "headline": "Alberta Decisively Rejects Separatist Independence Referendum",
+   "body": "Voters in Alberta overwhelmingly rejected a referendum proposal to separate from Canada. The decisive defeat halts the oil-rich province's immediate push for sovereignty, handing federal authorities a major political victory while leaving regional political divides unresolved."
   },
   {
    "region": "Asia",
+   "photo": 22,
+   "art": "rocket_launch",
+   "scene": "A towering Japanese space rocket lifting off through thick exhaust plumes from an oceanfront launch pad into starry black space toward Mars.",
+   "headline": "Japan Launches Martian Moon Sample Return",
+   "body": "Japan successfully launched a historic mission to land on Phobos, the largest moon of Mars, to collect pristine rock and soil. Scientists aim to return the extraterrestrial samples to Earth to decipher the early origins of our solar system."
+  },
+  {
+   "region": "Sports",
    "photo": null,
-   "art": "tech_ai",
-   "scene": "Rows of glowing server racks inside an advanced computing center emitting high-tech blue light against clean industrial architecture.",
-   "headline": "China GDP Beats Forecasts via AI Boom",
-   "body": "China's economic growth accelerated past expectations last quarter, powered by an export surge in artificial intelligence hardware and technology. Robust global demand for advanced components successfully offset persistent domestic headwinds across real estate and consumer spending."
+   "art": "football_night",
+   "scene": "Two massive European soccer stadiums viewed under bright stadium floodlights at dusk, empty executive seats overlooking pristine green pitches.",
+   "headline": "Barcelona Severs Relations With Real Madrid",
+   "body": "Barcelona president Joan Laporta announced the club has cut all official ties with rivals Real Madrid, calling the feud a direct confrontation. Laporta criticized Madrid's involvement in the Negreira refereeing court case, dramatically souring relations between Spain's two biggest clubs."
   }
  ],
- "date": "2026-10-19"
+ "date": "2026-10-20"
 }
