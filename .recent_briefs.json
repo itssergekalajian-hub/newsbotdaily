@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-14",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Cargo Ship Sinks in Persian Gulf Waters",
-    "tease": "A commercial vessel sinks after coming under fire in the Persian Gulf"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Massive Bombardment Cuts Ukrainian Power Grid",
-    "tease": "Russian strikes cut electricity for hundreds of thousands across Ukraine"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Violent Student Protests Enflame Tirana",
-    "tease": "Flames erupt inside Albania's Education Ministry as clashes spread"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Chip Rout Deepens as Inflation Ticks Up",
-    "tease": "Tech stocks slide to sixteen month lows as inflation bites"
-   },
-   {
-    "topic": "Artificial Intelligence",
-    "headline": "OpenAI Worker Arrested Over Conference Wiretap",
-    "tease": "An OpenAI employee is arrested after planting conference room bugs"
-   },
-   {
-    "topic": "Cybersecurity",
-    "headline": "North Korean IT Ring Infiltrates US Firms",
-    "tease": "North Korean operatives infiltrate dozens of domestic corporations remotely"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Developments and Regional News",
-    "tease": "El Salvador considers conditional release for thousands of prisoners"
-   },
-   {
-    "topic": "Medicine",
-    "headline": "Retinal Chip Restores Sight in Trial",
-    "tease": "A subretinal microchip restores sight in a breakthrough clinical procedure"
-   }
-  ]
- },
- {
   "date": "2026-10-16",
   "stories": [
    {
@@ -181,6 +136,56 @@
     "topic": "What to Watch",
     "headline": "Decisive Elections and Crucial European Protests Ahead",
     "tease": "Crucial diplomatic visits and high stakes elections define the coming week."
+   }
+  ]
+ },
+ {
+  "date": "2026-10-19",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Tanker Blasts Inflame Strait of Hormuz Crisis",
+    "tease": "Tanker strikes and naval mines inflame the critical Strait of Hormuz"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Kyiv Bombarded as Washington Rift Widens",
+    "tease": "Deadly missile strikes pound Kyiv as allied intelligence disputes escalate"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Violent Riots Overwhelmed French Cities",
+    "tease": "Mass arrests sweep France as cost of living riots overwhelm cities"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Tech Stocks Rebound as Crude Lingers High",
+    "tease": "Wall Street rebounds on tech buying despite elevated global crude"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Autonomous AI Agents Breach Major Manufacturers",
+    "tease": "Hackers deploy automated AI agents against industrial giants"
+   },
+   {
+    "topic": "United States",
+    "headline": "Judicial Clashes and Legal Controversies Mount",
+    "tease": "Supreme Court clears 9/11 trials as Trump subpoena faces pushback"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Incidents Outbreaks and Heated Debates",
+    "tease": "Deadly base fire and international incidents make headlines around the world"
+   },
+   {
+    "topic": "Football",
+    "headline": "Mourinho Defends Güler Amid La Liga Storm",
+    "tease": "José Mourinho defends Arda Güler amid mounting on-pitch scrutiny"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Crucial Israeli Vote and Brazilian Run-Off Approach",
+    "tease": "Crucial national votes and diplomatic tests loom across the coming week"
    }
   ]
  }
