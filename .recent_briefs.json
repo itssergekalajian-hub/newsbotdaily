@@ -1,55 +1,5 @@
 [
  {
-  "date": "2026-10-17",
-  "stories": [
-   {
-    "topic": "Europe",
-    "headline": "Riots Explode Across France Over Living Costs",
-    "tease": "Violent riots shake France as hundreds of thousands seize city streets"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Hormuz Shipping Crisis Deepens Amid New Strikes",
-    "tease": "Tanker mine explosions shut vital shipping routes through Persian Gulf"
-   },
-   {
-    "topic": "Diplomacy",
-    "headline": "Settlers Assault European Diplomats in West Bank",
-    "tease": "Masked West Bank settlers beat visiting European diplomatic envoy"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Trump Pauses Sanctions as Zelensky Rallies Europe",
-    "tease": "Trump halts Russian sanctions while Zelensky pleads for European backing"
-   },
-   {
-    "topic": "United States",
-    "headline": "White House Shakeup and Bitter Midterm Battles",
-    "tease": "White House communications chief ousted after five turbulent days"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Tech Equities Tumble as Silver Drops Sharply",
-    "tease": "Global tech rout deepens while silver plunges fifty percent"
-   },
-   {
-    "topic": "Football",
-    "headline": "Haaland and Maresca Power Historic Premier Starts",
-    "tease": "Haaland brace secures victory as Maresca writes Premier League history"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Protests Tragedies and Historic Pontiff Recovery",
-    "tease": "The Pope leaves hospital as regional clashes expand worldwide"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Critical Days Ahead for Ukraine Gulf and Markets",
-    "tease": "Key global tests await world leaders in the week ahead"
-   }
-  ]
- },
- {
   "date": "2026-10-18",
   "stories": [
    {
@@ -186,6 +136,56 @@
     "topic": "What to Watch",
     "headline": "Oslo Diplomacy and Israel's Crucial Election Ahead",
     "tease": "Key peace missions and an Israeli vote lead the days ahead."
+   }
+  ]
+ },
+ {
+  "date": "2026-10-21",
+  "stories": [
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Moscow Frees American Stephen Hubbard Amid Diplomacy",
+    "tease": "Moscow frees an imprisoned American teacher as high-stakes diplomacy restarts"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Gulf Security Deteriorates as Western Nations Respond",
+    "tease": "Western nations rush defenses to the Gulf as regional threats multiply"
+   },
+   {
+    "topic": "Business and Tech",
+    "headline": "Musk Evaluates Mega Merger Between Tesla and SpaceX",
+    "tease": "Elon Musk moves to unite Tesla and SpaceX under one corporate roof"
+   },
+   {
+    "topic": "Europe",
+    "headline": "France Faces Backlash and Protests Over Unrest",
+    "tease": "Macron strikes back against foreign commentary over escalating French unrest"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Inflation and Geopolitics Reshape Global Market Outlook",
+    "tease": "Surging fuel costs lift inflation as tech shares rally"
+   },
+   {
+    "topic": "United States",
+    "headline": "Campaign Battles Intensify in Final Weeks Before Midterms",
+    "tease": "Trump approval sinks to thirty-six percent amid bitter midterm fighting"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Ebola in Nigeria web flaw and Champions League",
+    "tease": "Nigeria detects Ebola while internet infrastructure scrambles over major flaw"
+   },
+   {
+    "topic": "Vatican",
+    "headline": "Pope Leo Needs No Further Cancer Care",
+    "tease": "And finally, a clean bill of health for the Pope"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "High-Stakes Peace Talks and Midterm Elections Loom",
+    "tease": "Key dates ahead for diplomacy elections and budgets"
    }
   ]
  }
