@@ -1,47 +1,39 @@
 {
- "cover": "Diplomatic shifts shake Europe while deadly disease breaches West African borders",
- "cover_scene": "A split composition showing the Kremlin towers bathed in twilight alongside medical quarantine tents set up on dusty African soil.",
+ "cover": "Gulf shipping burns under fire while missile strikes shake Kyiv",
+ "cover_scene": "Thick black plumes of smoke rise over commercial tankers in a narrow shipping strait under an ominous crimson sunset.",
  "slides": [
-  {
-   "region": "Europe",
-   "photo": null,
-   "art": "summit_hall",
-   "scene": "A grand neoclassical hall with polished floors, Russian and American flags standing behind empty chairs at a diplomatic table.",
-   "headline": "Moscow signals willingness to reopen talks",
-   "body": "Russia released imprisoned American Stephen Hubbard as US envoy Steve Witkoff visited Moscow with a peace framework. The Kremlin signaled readiness to hold three-way talks involving Ukraine and Washington by mid-November, though analysts caution a major breakthrough remains unlikely."
-  },
   {
    "region": "Middle East",
    "photo": null,
-   "art": "fighter_jets",
-   "scene": "British fighter jets soaring over desert airfields lined with radars and Patriot battery installations under a hazy sunset.",
-   "headline": "Britain deploys warplanes to protect Riyadh",
-   "body": "The United Kingdom deployed combat aircraft to Saudi Arabia to defend the kingdom against persistent missile and drone strikes launched by Houthi forces. The deployment comes amid escalating regional tensions that have prompted US missions to prepare ordered departures."
+   "art": "naval_strait",
+   "scene": "Several large oil tankers ablaze in the narrow waters of the Persian Gulf as naval vessels maneuver through heavy smoke.",
+   "headline": "Tankers Struck in Strategic Gulf Strait",
+   "body": "Multiple oil tankers caught fire or suffered severe damage across the Persian Gulf and Strait of Hormuz amid escalating military actions. Iranian forces claimed strikes on passing vessels while regional drone attacks simultaneously hit Saudi Arabian transit infrastructure."
   },
   {
-   "region": "Africa",
-   "photo": 13,
+   "region": "Europe",
+   "photo": null,
+   "art": "missile_strike",
+   "scene": "Emergency response vehicles with flashing blue lights navigate a shattered boulevard in Kyiv illuminated by burning buildings after a night missile impact.",
+   "headline": "Russian Ballistic Missiles Strike Ukrainian Capital",
+   "body": "Russian ballistic missiles battered medical and transport infrastructure across Kyiv, injuring dozens including children and destroying fleets of ambulances. The barrage struck just hours after Moscow signaled tentative willingness to resume diplomatic negotiations with Washington."
+  },
+  {
+   "region": "Asia",
+   "photo": 24,
    "art": null,
-   "scene": "A secluded tropical hospital perimeter with a guarded gate, medical warning notices, and heavy storm clouds overhead.",
-   "headline": "Nigeria confirms first case of Ebola",
-   "body": "Health authorities in Nigeria confirmed the nation's first Ebola case after an infected traveler arrived from abroad. Officials scrambled contact-tracing teams to prevent secondary transmission, sparking continent-wide concern as public health networks mobilize emergency containment protocols."
+   "scene": "A reinforced concrete guard post along the Korean Demilitarized Zone with high-powered loudspeaker banks aimed across the barbed wire line.",
+   "headline": "North Korea Prepares Border Propaganda Broadcasts",
+   "body": "Pyongyang began reinstalling and readying massive loudspeaker arrays along the demilitarized border to resume psychological warfare against South Korea. The provocation follows a severe deterioration in bilateral ties despite Seoul urging immediate diplomatic de-escalation."
   },
   {
    "region": "Americas",
-   "photo": 4,
-   "art": "rocket_launch",
-   "scene": "A stainless steel aerospace rocket on an industrial launchpad adjacent to high-tech assembly buildings in the American desert.",
-   "headline": "Musk advances Tesla and SpaceX merger",
-   "body": "Special board committees were established at Tesla and SpaceX to formally evaluate combining both companies into a single conglomerate. The unprecedented consolidation would unite commercial spaceflight, satellite telecom, and electric vehicle production under one corporate roof."
-  },
-  {
-   "region": "Sports",
-   "photo": 5,
-   "art": "football_night",
-   "scene": "A massive European football arena lit by blinding stadium floodlights as celebratory banners unfurl from the upper decks.",
-   "headline": "Champions League sets all-time scoring record",
-   "body": "The newly expanded 36-team Champions League format generated a historic flood of goals, averaging over three scores per fixture across the league phase. Despite lingering criticism regarding competitive balance, the attacking surge produced record-breaking offensive statistics across the continent."
+   "photo": null,
+   "art": "courtroom",
+   "scene": "A dark federal courtroom with mahogany benches, a raised judge bench, and scale of justice in dramatic lighting.",
+   "headline": "Judge Orders Trump Deposition in Defamation Suit",
+   "body": "A federal judge ordered Donald Trump to testify under oath in his ten billion dollar defamation lawsuit against the BBC. The legal battle stems from edited documentary coverage, forcing formal depositions as pretrial proceedings advance."
   }
  ],
- "date": "2026-10-21"
+ "date": "2026-10-22"
 }
