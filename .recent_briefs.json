@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-18",
-  "stories": [
-   {
-    "topic": "Europe",
-    "headline": "Massive Cost of Living Riots Overwhelm France",
-    "tease": "Violent riots sweep across France as over eighteen hundred people are arrested."
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Ukraine Strikes Deep Energy Targets in Russia",
-    "tease": "Ukraine launches massive drone strikes against critical Russian oil infrastructure."
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Escalating Cross Border Clashes and Political Shifts",
-    "tease": "Regional clashes escalate across Yemen and Saudi Arabia as tensions deepen."
-   },
-   {
-    "topic": "Markets",
-    "headline": "Wall Street Braces for Jittery Monday Open",
-    "tease": "Financial markets prepare to rebound following severe end of week volatility."
-   },
-   {
-    "topic": "United States",
-    "headline": "Trump Hits Campaign Trail for Midterm Elections",
-    "tease": "Donald Trump flexes executive ambition while rallying Republicans for the midterms."
-   },
-   {
-    "topic": "Football",
-    "headline": "Bayern and Arsenal Maintain Weekend Domestic Momentum",
-    "tease": "Sensational performances shift the domestic football landscape across Europe."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Pontiff Recovers and Global Incidents",
-    "tease": "Pope Leo appears publicly as tragedy hits a Canadian military base."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Decisive Elections and Crucial European Protests Ahead",
-    "tease": "Crucial diplomatic visits and high stakes elections define the coming week."
-   }
-  ]
- },
- {
   "date": "2026-10-19",
   "stories": [
    {
@@ -186,6 +141,56 @@
     "topic": "What to Watch",
     "headline": "High-Stakes Peace Talks and Midterm Elections Loom",
     "tease": "Key dates ahead for diplomacy elections and budgets"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-22",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Gulf Air Hubs And Tankers Under Attack",
+    "tease": "Seven oil tankers burn and Saudi airports struck in widening conflict."
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Kyiv Pounded By Ballistic Missiles Post Diplomacy",
+    "tease": "Missiles slam into Kyiv hours after Moscow signals diplomatic opening."
+   },
+   {
+    "topic": "Markets",
+    "headline": "Tech Giants Drag Wall Street While Crypto Retreats",
+    "tease": "Tech sell-off hits Wall Street as Bitcoin drops under eighty-two thousand."
+   },
+   {
+    "topic": "Cybersecurity",
+    "headline": "Critical Web Vulnerability Triggers Global Scramble",
+    "tease": "Major platforms rush emergency fixes for widespread server vulnerability."
+   },
+   {
+    "topic": "United States",
+    "headline": "Midterm Battles Escalate Amid Deepening Campaign Friction",
+    "tease": "Trump ordered to testify under oath in ten billion defamation case."
+   },
+   {
+    "topic": "Football",
+    "headline": "Aston Villa Stay Perfect In European Campaign",
+    "tease": "Aston Villa maintain flawless Champions League start with clean sheet."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Key Updates From Around The World",
+    "tease": "Global briefs span diplomatic borders and rising tensions."
+   },
+   {
+    "topic": "Curiosities",
+    "headline": "Busan Canal Shark Refuses Open Ocean",
+    "tease": "Celebrity shark steered out of city canal refuses to leave shore."
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Crucial Israeli Elections And Diplomatic Peace Tests",
+    "tease": "Pivotal Israeli elections and fragile peace initiatives approach next."
    }
   ]
  }
