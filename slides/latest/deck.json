@@ -1,39 +1,52 @@
 {
- "cover": "Gulf shipping burns under fire while missile strikes shake Kyiv",
- "cover_scene": "Thick black plumes of smoke rise over commercial tankers in a narrow shipping strait under an ominous crimson sunset.",
+ "cover": "Escalating regional clashes, natural disasters, and sharp geopolitical maneuvers dominate global developments",
+ "cover_scene": "A split vista showing military checkpoints in arid hills alongside emergency rescue crews searching collapsed rubble at dawn",
  "slides": [
   {
    "region": "Middle East",
    "photo": null,
-   "art": "naval_strait",
-   "scene": "Several large oil tankers ablaze in the narrow waters of the Persian Gulf as naval vessels maneuver through heavy smoke.",
-   "headline": "Tankers Struck in Strategic Gulf Strait",
-   "body": "Multiple oil tankers caught fire or suffered severe damage across the Persian Gulf and Strait of Hormuz amid escalating military actions. Iranian forces claimed strikes on passing vessels while regional drone attacks simultaneously hit Saudi Arabian transit infrastructure."
+   "art": "soldiers_trench",
+   "scene": "Heavily armed soldiers manning a fortified concrete checkpoint in the dusty hills of the West Bank at sundown",
+   "headline": "Israel Orders Lockdown Across West Bank",
+   "body": "Israeli authorities imposed a sweeping closure across the occupied West Bank after an attack killed two Israeli soldiers. Prime Minister Benjamin Netanyahu pledged an expanded military operation as troops sealed checkpoints and began demolishing structures in Hebron.",
+   "link": "https://www.theguardian.com/world"
   },
   {
    "region": "Europe",
    "photo": null,
-   "art": "missile_strike",
-   "scene": "Emergency response vehicles with flashing blue lights navigate a shattered boulevard in Kyiv illuminated by burning buildings after a night missile impact.",
-   "headline": "Russian Ballistic Missiles Strike Ukrainian Capital",
-   "body": "Russian ballistic missiles battered medical and transport infrastructure across Kyiv, injuring dozens including children and destroying fleets of ambulances. The barrage struck just hours after Moscow signaled tentative willingness to resume diplomatic negotiations with Washington."
+   "art": "summit_hall",
+   "scene": "A diplomatic briefing room with Ukrainian and American flags silhouetted against a map marking front lines",
+   "headline": "US Brokers Localized Truce in Ukraine",
+   "body": "Russia and Ukraine agreed to a localized ceasefire in the besieged southern city of Oleshky following diplomatic talks brokered by the United States. The White House credited Melania Trump with negotiating the pact for the humanitarian relief of trapped residents.",
+   "link": "https://www.dw.com"
   },
   {
    "region": "Asia",
-   "photo": 24,
-   "art": null,
-   "scene": "A reinforced concrete guard post along the Korean Demilitarized Zone with high-powered loudspeaker banks aimed across the barbed wire line.",
-   "headline": "North Korea Prepares Border Propaganda Broadcasts",
-   "body": "Pyongyang began reinstalling and readying massive loudspeaker arrays along the demilitarized border to resume psychological warfare against South Korea. The provocation follows a severe deterioration in bilateral ties despite Seoul urging immediate diplomatic de-escalation."
+   "photo": 7,
+   "art": "earthquake",
+   "scene": "Emergency responders in bright orange gear digging through shattered masonry under floodlights in mountainous Tibet",
+   "headline": "Powerful Earthquake Hits China's Tibet Region",
+   "body": "A magnitude 7.0 earthquake struck remote Tibet, killing at least 16 people and injuring dozens more. Emergency responders deployed through high-altitude terrain to assess structural devastation and rescue survivors trapped under collapsed buildings in remote mountain settlements.",
+   "link": "https://apnews.com"
   },
   {
    "region": "Americas",
-   "photo": null,
+   "photo": 1,
    "art": "courtroom",
-   "scene": "A dark federal courtroom with mahogany benches, a raised judge bench, and scale of justice in dramatic lighting.",
-   "headline": "Judge Orders Trump Deposition in Defamation Suit",
-   "body": "A federal judge ordered Donald Trump to testify under oath in his ten billion dollar defamation lawsuit against the BBC. The legal battle stems from edited documentary coverage, forcing formal depositions as pretrial proceedings advance."
+   "scene": "Voting booths adorned with red, white, and blue curtains inside a dimly lit civic gymnasium",
+   "headline": "Supreme Court Blocks Student IDs for Voting",
+   "body": "The Supreme Court granted an emergency order barring the use of college student identification cards for voting in New Hampshire. The ruling reverses lower court decisions, restricting polling place identification rules ahead of the looming November midterm elections.",
+   "link": "https://www.nbcnews.com"
+  },
+  {
+   "region": "Africa",
+   "photo": 4,
+   "art": "city_ruins",
+   "scene": "Medical staff working by flashlight in a darkened, damaged operating theatre inside a warzone hospital",
+   "headline": "RSF Paramilitaries Systematically Target Sudanese Hospitals",
+   "body": "A BBC investigation revealed that Sudan's Rapid Support Forces have systematically seized, looted, and attacked hospitals across the country. Paramilitaries turned critical healthcare centers into fortified military bases, leaving hundreds of thousands of civilians without access to life-saving medical care.",
+   "link": "https://www.bbc.com/news/world"
   }
  ],
- "date": "2026-10-22"
+ "date": "2026-10-23"
 }
