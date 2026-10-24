@@ -1,55 +1,5 @@
 [
  {
-  "date": "2026-10-19",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Tanker Blasts Inflame Strait of Hormuz Crisis",
-    "tease": "Tanker strikes and naval mines inflame the critical Strait of Hormuz"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Kyiv Bombarded as Washington Rift Widens",
-    "tease": "Deadly missile strikes pound Kyiv as allied intelligence disputes escalate"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Violent Riots Overwhelmed French Cities",
-    "tease": "Mass arrests sweep France as cost of living riots overwhelm cities"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Tech Stocks Rebound as Crude Lingers High",
-    "tease": "Wall Street rebounds on tech buying despite elevated global crude"
-   },
-   {
-    "topic": "Technology",
-    "headline": "Autonomous AI Agents Breach Major Manufacturers",
-    "tease": "Hackers deploy automated AI agents against industrial giants"
-   },
-   {
-    "topic": "United States",
-    "headline": "Judicial Clashes and Legal Controversies Mount",
-    "tease": "Supreme Court clears 9/11 trials as Trump subpoena faces pushback"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Incidents Outbreaks and Heated Debates",
-    "tease": "Deadly base fire and international incidents make headlines around the world"
-   },
-   {
-    "topic": "Football",
-    "headline": "Mourinho Defends Güler Amid La Liga Storm",
-    "tease": "José Mourinho defends Arda Güler amid mounting on-pitch scrutiny"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Crucial Israeli Vote and Brazilian Run-Off Approach",
-    "tease": "Crucial national votes and diplomatic tests loom across the coming week"
-   }
-  ]
- },
- {
   "date": "2026-10-20",
   "stories": [
    {
@@ -191,6 +141,51 @@
     "topic": "What to Watch",
     "headline": "Crucial Israeli Elections And Diplomatic Peace Tests",
     "tease": "Pivotal Israeli elections and fragile peace initiatives approach next."
+   }
+  ]
+ },
+ {
+  "date": "2026-10-23",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Crude Surges and West Bank Locked Down",
+    "tease": "Oil surges past multi-month highs as Middle East escalation spreads"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Local Truce Brokered as Battlefield Grinds",
+    "tease": "A single-city ceasefire takes hold amid fierce pipeline combat"
+   },
+   {
+    "topic": "United States",
+    "headline": "DOJ Midterm Lawsuits and Federal Indictments",
+    "tease": "Justice Department moves to halt Alaska Senate certification"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Dow Drops While Safe Havens Surge",
+    "tease": "Treasuries rally sharply as equities slide on inflation fears"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Paris Shooting Sparks Unrest Ahead of Protests",
+    "tease": "France braces for mass rallies following a fatal suburban shooting"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Tibet Tremor and Global Flashpoints",
+    "tease": "A powerful Tibetan earthquake leaves sixteen dead as crises widen"
+   },
+   {
+    "topic": "Curiosities",
+    "headline": "Warhound Robots and Cybernetic Canines",
+    "tease": "And finally tonight, the military creates robotic and bioengineered hounds"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Ceasefire Deadlines Midterm Countdowns and Clashes",
+    "tease": "What to watch in the critical days and weeks ahead"
    }
   ]
  }
