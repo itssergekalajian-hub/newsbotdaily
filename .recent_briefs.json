@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-20",
-  "stories": [
-   {
-    "topic": "Europe",
-    "headline": "France Imposes Curfews Amid Spreading Unrest",
-    "tease": "Curfews take hold across French cities as rioters burn public buildings."
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Supertanker Explodes South of Hormuz Strait",
-    "tease": "A supertanker carrying millions of barrels explodes off Hormuz."
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Kyiv and Washington Clash Over Peace Talks",
-    "tease": "Zelenskyy lands in Norway amid growing friction with Washington."
-   },
-   {
-    "topic": "Markets",
-    "headline": "Sovereign Debt Risks and AI Deals Reshape Markets",
-    "tease": "Distressed bond yields signal rising anxiety across global credit."
-   },
-   {
-    "topic": "Canada",
-    "headline": "Alberta Decisively Rejects Independence in Provincial Vote",
-    "tease": "Alberta voters reject separation in a decisive boost for Ottawa."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Bail Denied in Espionage Case and Boeing Jet Cleared",
-    "tease": "Federal judge blocks bail for accused artificial intelligence spy."
-   },
-   {
-    "topic": "Space",
-    "headline": "Japan Launches Bold Mission to Martian Moon",
-    "tease": "Japan launches an unprecedented mission to retrieve Martian soil."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Oslo Diplomacy and Israel's Crucial Election Ahead",
-    "tease": "Key peace missions and an Israeli vote lead the days ahead."
-   }
-  ]
- },
- {
   "date": "2026-10-21",
   "stories": [
    {
@@ -186,6 +141,56 @@
     "topic": "What to Watch",
     "headline": "Ceasefire Deadlines Midterm Countdowns and Clashes",
     "tease": "What to watch in the critical days and weeks ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-24",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Diplomats Evacuate as Gulf Conflict Escalates",
+    "tease": "Washington orders embassy evacuations across the Middle East amid growing regional conflict fears."
+   },
+   {
+    "topic": "West Bank",
+    "headline": "Netanyahu Orders Raids After Deadly Checkpoint Attack",
+    "tease": "Israel locks down the West Bank following deadly clashes near Hebron."
+   },
+   {
+    "topic": "Europe",
+    "headline": "Mass Protests and Violence Grip French Cities",
+    "tease": "Riot police and tear gas flood French streets as mass protests turn violent."
+   },
+   {
+    "topic": "Markets",
+    "headline": "Crude Surge Hits Dow as Crypto Drops",
+    "tease": "Spike in crude futures rattles Wall Street as Bitcoin tumbles below eighty thousand."
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Ukrainian Drones Strike Siberia as Starlink Recovers",
+    "tease": "Ukrainian deep strikes hit Siberian targets as front line satellite links restore."
+   },
+   {
+    "topic": "United States",
+    "headline": "Justice Department Moves to Halt Alaska Senate Certificati",
+    "tease": "Trump administration faces major lawsuits after intervening in Alaska's Senate race."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Key Developments From Around the World",
+    "tease": "Diplomatic summits, biosecurity investments, and health alerts from around the world."
+   },
+   {
+    "topic": "Football",
+    "headline": "Julián Álvarez Fires Atlético to Sixth Straight Win",
+    "tease": "And finally, Julián Álvarez stays red hot to keep Atlético Madrid flying."
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Crucial Israeli Vote and Brazil Runoff Ahead",
+    "tease": "Critical international elections and diplomatic deadlines define the coming week."
    }
   ]
  }
