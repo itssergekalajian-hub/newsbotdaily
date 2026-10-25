@@ -1,47 +1,39 @@
 {
- "cover": "Escalating regional clashes in the Middle East and mass unrest across Europe",
- "cover_scene": "A split composition showing smoke rising over an arid coastline with warships offshore while riot police face tear gas on grand European boulevards.",
+ "cover": "Historic electoral upsets and cross-border missile strikes reshape global political fault lines",
+ "cover_scene": "A ballot box rests upon a fractured stone map of the world against a stormy twilight sky, surrounded by scattered voting slips and distant smoke.",
  "slides": [
   {
-   "region": "Middle East",
-   "photo": null,
-   "art": "missile_strike",
-   "scene": "Missile trails streak through the night sky over coastal radar installations along the Strait of Hormuz, with warships silhouetted against fire on the water.",
-   "headline": "Regional escalation intensifies across Middle East flashpoints",
-   "body": "The United States evacuated diplomats from multiple regional posts amid rising tensions with Iran. Simultaneously, Houthi forces launched missile strikes into Saudi Arabia and Aden, while Israel ordered major military raids across the West Bank."
+   "region": "Europe",
+   "photo": 25,
+   "art": "election",
+   "scene": "A crowded Belgrade boulevard filled with youth holding aloft Serbian flags beneath overcast skies, surrounding a monumental parliament building.",
+   "headline": "Vučić Concedes Defeat in Snap Serbian Election",
+   "body": "Serbian President Aleksandar Vučić conceded defeat in snap parliamentary elections following record voter turnout. A galvanized student protest movement led the opposition breakthrough, effectively unseating the long-ruling establishment after nearly two years of widespread demonstrations."
   },
   {
-   "region": "Europe",
-   "photo": 4,
-   "art": "riot_police",
-   "scene": "Riot police with protective shields and batons advance through thick plumes of white tear gas along a grand Paris avenue during dusk protests.",
-   "headline": "Mass protests and clashes erupt across France",
-   "body": "French authorities deployed 70,000 security personnel nationwide as hundreds of thousands marched over rising living costs. The demonstrations turned volatile after dark, leading to tear gas deployments and nearly 1,000 arrests in Paris and other cities."
+   "region": "Middle East",
+   "photo": 22,
+   "art": "missile_strike",
+   "scene": "Air defense interceptors leave curving smoke trails in the night sky over a sprawling modern desert metropolis.",
+   "headline": "Yemeni Strikes Target Deep Inside Saudi Arabia",
+   "body": "Yemeni forces launched coordinated missile and drone strikes hitting airports and oil facilities across Saudi Arabia. Riyadh intercepted incoming salvos as debris injured two people, sending Saudi and Egyptian financial markets tumbling while regional escalation concerns mounted."
   },
   {
    "region": "Americas",
    "photo": null,
    "art": "election",
-   "scene": "A polling precinct interior showing voting booths under harsh fluorescent lights, with legal brief folders and ballot boxes resting on a central table.",
-   "headline": "Trump administration sues over Alaska Senate election",
-   "body": "The US Department of Justice filed a federal lawsuit seeking to halt the certification of Alaska's Senate race over ballot confusion concerns. Democratic groups immediately filed countersuits, arguing the move disenfranchises voters just ahead of the national midterms."
+   "scene": "A woman raises her hands before an enormous crowd waving Venezuelan flags in a sunlit plaza in Caracas.",
+   "headline": "Opposition Leader María Corina Machado Returns to Venezuela",
+   "body": "Venezuelan opposition leader María Corina Machado made a surprise return from nearly a year in exile, reuniting with supporters in Caracas. Her return challenges state authorities following contested national elections and intensifies domestic pressure for democratic restoration."
   },
   {
-   "region": "Asia",
-   "photo": 16,
-   "art": "summit_hall",
-   "scene": "An armored train crosses an expansive border bridge at sunrise, flanked by Chinese and North Korean flags flapping in cold mountain winds.",
-   "headline": "Kim Jong Un arrives in China for talks",
-   "body": "North Korean leader Kim Jong Un traveled into China for high-level diplomatic meetings with Beijing officials. The cross-border visit follows his recent directive to North Korean armed forces to aggressively expand and strengthen national military capabilities."
-  },
-  {
-   "region": "Africa",
+   "region": "Sports",
    "photo": null,
-   "art": null,
-   "scene": "Medical isolation tents pitched outside an East African clinic under an overcast sky, with health workers in yellow biohazard suits standing guard.",
-   "headline": "Kenya confirms second fatal Ebola virus infection",
-   "body": "Kenyan health authorities confirmed that a 65-year-old woman died from Ebola, marking the country's second fatality linked to the disease. The patient was a relative of the first victim, prompting emergency contact tracing to halt wider local spread."
+   "art": "football_night",
+   "scene": "A crowded football stadium illuminated by floodlights under a clear night sky, with players celebrating on the pitch.",
+   "headline": "Real Madrid Tops Barcelona in Thrilling El Clásico",
+   "body": "Real Madrid defeated Barcelona 2-1 away, becoming the first team to beat their rivals in La Liga this season. The result tightened the league title race as teenage star Lamine Yamal and Kylian Mbappé squared off."
   }
  ],
- "date": "2026-10-24"
+ "date": "2026-10-25"
 }
