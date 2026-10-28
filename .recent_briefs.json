@@ -1,55 +1,5 @@
 [
  {
-  "date": "2026-10-22",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Gulf Air Hubs And Tankers Under Attack",
-    "tease": "Seven oil tankers burn and Saudi airports struck in widening conflict."
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Kyiv Pounded By Ballistic Missiles Post Diplomacy",
-    "tease": "Missiles slam into Kyiv hours after Moscow signals diplomatic opening."
-   },
-   {
-    "topic": "Markets",
-    "headline": "Tech Giants Drag Wall Street While Crypto Retreats",
-    "tease": "Tech sell-off hits Wall Street as Bitcoin drops under eighty-two thousand."
-   },
-   {
-    "topic": "Cybersecurity",
-    "headline": "Critical Web Vulnerability Triggers Global Scramble",
-    "tease": "Major platforms rush emergency fixes for widespread server vulnerability."
-   },
-   {
-    "topic": "United States",
-    "headline": "Midterm Battles Escalate Amid Deepening Campaign Friction",
-    "tease": "Trump ordered to testify under oath in ten billion defamation case."
-   },
-   {
-    "topic": "Football",
-    "headline": "Aston Villa Stay Perfect In European Campaign",
-    "tease": "Aston Villa maintain flawless Champions League start with clean sheet."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Key Updates From Around The World",
-    "tease": "Global briefs span diplomatic borders and rising tensions."
-   },
-   {
-    "topic": "Curiosities",
-    "headline": "Busan Canal Shark Refuses Open Ocean",
-    "tease": "Celebrity shark steered out of city canal refuses to leave shore."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Crucial Israeli Elections And Diplomatic Peace Tests",
-    "tease": "Pivotal Israeli elections and fragile peace initiatives approach next."
-   }
-  ]
- },
- {
   "date": "2026-10-23",
   "stories": [
    {
@@ -186,6 +136,51 @@
     "topic": "What to Watch",
     "headline": "Crucial Israeli Vote and Big Tech Earnings Ahead",
     "tease": "High-stakes elections and mega-cap earnings dominate the coming week."
+   }
+  ]
+ },
+ {
+  "date": "2026-10-27",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Israelis Vote in Deadlocked High-Stakes Election",
+    "tease": "Israel votes in record numbers as exit polls signal total deadlock"
+   },
+   {
+    "topic": "United States",
+    "headline": "Justice Department Indicts Former FBI Director Again",
+    "tease": "Former FBI chief James Comey faces new national defense charges"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Truce Opens Localized Evacuations in Ukraine",
+    "tease": "A brief truce brings aid as regional sabotage fears rise"
+   },
+   {
+    "topic": "Latin America",
+    "headline": "Brazilian Senator Abandons Push to Annul Election",
+    "tease": "Flávio Bolsonaro drops election challenge following Lula victory"
+   },
+   {
+    "topic": "Markets",
+    "headline": "AI Startup Anthropic Files for Historic Market Debut",
+    "tease": "Anthropic files for IPO as tech sector sees massive restructuring"
+   },
+   {
+    "topic": "Football",
+    "headline": "Harry Kane Claims 2026 Men's Ballon d'Or",
+    "tease": "Harry Kane wins his first Ballon d'Or trophy in Paris"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Brief News Updates From Across the Globe",
+    "tease": "Quick updates on UK cost-of-living measures and international news"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Upcoming Election Results and Central Bank Decisions",
+    "tease": "Key events coming up this week across world markets and politics"
    }
   ]
  }
