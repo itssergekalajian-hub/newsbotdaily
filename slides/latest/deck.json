@@ -1,39 +1,55 @@
 {
- "cover": "Historic electoral upsets and cross-border missile strikes reshape global political fault lines",
- "cover_scene": "A ballot box rests upon a fractured stone map of the world against a stormy twilight sky, surrounded by scattered voting slips and distant smoke.",
+ "cover": "Israel holds critical elections as regional conflict escalates and global tensions rise",
+ "cover_scene": "A globe illuminated by dramatic spotlighting with polling boxes, air defense missiles, and international assembly flags surrounding it in a dark aesthetic.",
  "slides": [
   {
-   "region": "Europe",
-   "photo": 25,
+   "region": "Middle East",
+   "photo": 21,
    "art": "election",
-   "scene": "A crowded Belgrade boulevard filled with youth holding aloft Serbian flags beneath overcast skies, surrounding a monumental parliament building.",
-   "headline": "Vučić Concedes Defeat in Snap Serbian Election",
-   "body": "Serbian President Aleksandar Vučić conceded defeat in snap parliamentary elections following record voter turnout. A galvanized student protest movement led the opposition breakthrough, effectively unseating the long-ruling establishment after nearly two years of widespread demonstrations."
+   "scene": "A bustling polling station in Jerusalem with voters placing paper ballots into a central blue voting box under bright harsh indoor lights.",
+   "headline": "Israel holds high-stakes national election",
+   "body": "Voters across Israel cast ballots in a pivotal national election marked by decades-high early turnout. Prime Minister Benjamin Netanyahu and political rivals face off amid intense internal divisions and ongoing regional security conflicts."
   },
   {
-   "region": "Middle East",
-   "photo": 22,
-   "art": "missile_strike",
-   "scene": "Air defense interceptors leave curving smoke trails in the night sky over a sprawling modern desert metropolis.",
-   "headline": "Yemeni Strikes Target Deep Inside Saudi Arabia",
-   "body": "Yemeni forces launched coordinated missile and drone strikes hitting airports and oil facilities across Saudi Arabia. Riyadh intercepted incoming salvos as debris injured two people, sending Saudi and Egyptian financial markets tumbling while regional escalation concerns mounted."
+   "region": "Europe",
+   "photo": 20,
+   "art": "summit_hall",
+   "scene": "European and NATO flags fluttering in front of a modern glass alliance headquarters in Brussels under a clear blue sky.",
+   "headline": "European NATO powers commit to increased defence",
+   "body": "Leaders from major European NATO nations pledged to assume a larger role in continental security while reaffirming their core alliance with the United States. The move comes during widespread debates over transatlantic defense responsibilities."
   },
   {
    "region": "Americas",
+   "photo": 1,
+   "art": "courtroom",
+   "scene": "A wooden gavel resting on a leather-bound law book inside a grand marble federal courthouse hall.",
+   "headline": "DOJ brings new charges against James Comey",
+   "body": "The US Department of Justice filed a third set of criminal charges against former FBI Director James Comey. Reports indicate the national defense-related indictment involves alleged disclosures of classified information to the media in 2016."
+  },
+  {
+   "region": "Africa",
    "photo": null,
-   "art": "election",
-   "scene": "A woman raises her hands before an enormous crowd waving Venezuelan flags in a sunlit plaza in Caracas.",
-   "headline": "Opposition Leader María Corina Machado Returns to Venezuela",
-   "body": "Venezuelan opposition leader María Corina Machado made a surprise return from nearly a year in exile, reuniting with supporters in Caracas. Her return challenges state authorities following contested national elections and intensifies domestic pressure for democratic restoration."
+   "art": "city_ruins",
+   "scene": "A desolate, dusty landscape in Sudan with silhouette figures walking past empty food distribution tents under a stark setting sun.",
+   "headline": "Western powers warn of Sudan famine risk",
+   "body": "Western nations warned per BBC that millions face acute hunger and famine in Sudan. Ongoing civil war, severe drought, and critical aid funding cuts continue to aggravate the humanitarian crisis across the region."
+  },
+  {
+   "region": "Asia",
+   "photo": null,
+   "art": "tech_ai",
+   "scene": "A vast, glowing data centre corridor filled with server racks glowing with green and blue circuit-board light patterns.",
+   "headline": "Anthropic files for IPO driving Asian stock gains",
+   "body": "Asian markets surged following news that artificial intelligence startup Anthropic officially filed for an initial public offering. The public filing tests investor appetite for generative AI after years of soaring private valuations."
   },
   {
    "region": "Sports",
-   "photo": null,
+   "photo": 5,
    "art": "football_night",
-   "scene": "A crowded football stadium illuminated by floodlights under a clear night sky, with players celebrating on the pitch.",
-   "headline": "Real Madrid Tops Barcelona in Thrilling El Clásico",
-   "body": "Real Madrid defeated Barcelona 2-1 away, becoming the first team to beat their rivals in La Liga this season. The result tightened the league title race as teenage star Lamine Yamal and Kylian Mbappé squared off."
+   "scene": "A grand, dark auditorium stage illuminated by a single spotlight shining on a golden football trophy atop a pedestal.",
+   "headline": "Harry Kane wins 2026 Ballon d'Or",
+   "body": "Bayern Munich and England striker Harry Kane was awarded the men's Ballon d'Or trophy, edging out Kylian Mbappé. Meanwhile, Spanish midfielder Alexia Putellas secured the women's prize at the prestigious ceremony."
   }
  ],
- "date": "2026-10-25"
+ "date": "2026-10-27"
 }
