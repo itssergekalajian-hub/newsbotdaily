@@ -1,55 +1,47 @@
 {
- "cover": "Israel holds critical elections as regional conflict escalates and global tensions rise",
- "cover_scene": "A globe illuminated by dramatic spotlighting with polling boxes, air defense missiles, and international assembly flags surrounding it in a dark aesthetic.",
+ "cover": "Israel election deadlock, deadly Spain train disaster, and Fed rate pause",
+ "cover_scene": "A split composition showing an Israeli voting booth, emergency rescue lights by a damaged train, and a glowing financial trading screen under storm clouds",
  "slides": [
   {
    "region": "Middle East",
-   "photo": 21,
+   "photo": 11,
    "art": "election",
-   "scene": "A bustling polling station in Jerusalem with voters placing paper ballots into a central blue voting box under bright harsh indoor lights.",
-   "headline": "Israel holds high-stakes national election",
-   "body": "Voters across Israel cast ballots in a pivotal national election marked by decades-high early turnout. Prime Minister Benjamin Netanyahu and political rivals face off amid intense internal divisions and ongoing regional security conflicts."
+   "scene": "A blue voting booth bearing the flag of Israel inside a dimly lit polling station with scattered ballot papers",
+   "headline": "Israel Election Ends in Deadlock as Netanyahu Leads",
+   "body": "Partial results in Israel's general election show Prime Minister Benjamin Netanyahu's right-wing bloc leading, but falling short of the 61-seat Knesset majority. Former military chief Gadi Eisenkot's opposition remains locked in a stalemate, risking further political impasse."
   },
   {
    "region": "Europe",
-   "photo": 20,
-   "art": "summit_hall",
-   "scene": "European and NATO flags fluttering in front of a modern glass alliance headquarters in Brussels under a clear blue sky.",
-   "headline": "European NATO powers commit to increased defence",
-   "body": "Leaders from major European NATO nations pledged to assume a larger role in continental security while reaffirming their core alliance with the United States. The move comes during widespread debates over transatlantic defense responsibilities."
+   "photo": null,
+   "art": "city_fire",
+   "scene": "Emergency response vehicles with flashing blue lights beside overturned high-speed train carriages on tracks under a dark twilight sky",
+   "headline": "Deadly Train Collision in Spain Kills Dozens",
+   "body": "At least 68 people died and over 100 were injured after two high-speed trains collided south of Madrid in Toledo province. Spanish transport officials attributed the disaster to an unexpected tracking error as rescue operations continue."
   },
   {
    "region": "Americas",
-   "photo": 1,
-   "art": "courtroom",
-   "scene": "A wooden gavel resting on a leather-bound law book inside a grand marble federal courthouse hall.",
-   "headline": "DOJ brings new charges against James Comey",
-   "body": "The US Department of Justice filed a third set of criminal charges against former FBI Director James Comey. Reports indicate the national defense-related indictment involves alleged disclosures of classified information to the media in 2016."
-  },
-  {
-   "region": "Africa",
    "photo": null,
-   "art": "city_ruins",
-   "scene": "A desolate, dusty landscape in Sudan with silhouette figures walking past empty food distribution tents under a stark setting sun.",
-   "headline": "Western powers warn of Sudan famine risk",
-   "body": "Western nations warned per BBC that millions face acute hunger and famine in Sudan. Ongoing civil war, severe drought, and critical aid funding cuts continue to aggravate the humanitarian crisis across the region."
+   "art": "markets_down",
+   "scene": "A dark central bank press hall featuring microphone stands on a wooden podium before American flags",
+   "headline": "US Federal Reserve Holds Interest Rates Steady",
+   "body": "The Federal Reserve voted in a split decision to keep benchmark interest rates at 3.75% to 4.00%. Policymakers cited persistent inflation pressures across the U.S. economy while leaving options open for future rate adjustments."
   },
   {
    "region": "Asia",
    "photo": null,
    "art": "tech_ai",
-   "scene": "A vast, glowing data centre corridor filled with server racks glowing with green and blue circuit-board light patterns.",
-   "headline": "Anthropic files for IPO driving Asian stock gains",
-   "body": "Asian markets surged following news that artificial intelligence startup Anthropic officially filed for an initial public offering. The public filing tests investor appetite for generative AI after years of soaring private valuations."
+   "scene": "Glowing semiconductor silicon wafers glowing under neon blue lights inside an automated cleanroom factory",
+   "headline": "SK Hynix Shares Surge After Record Profit",
+   "body": "South Korean chipmaker SK Hynix saw its shares jump over 8% following a record third-quarter operating profit. The surge was driven by massive global demand for high-bandwidth artificial intelligence memory components."
   },
   {
-   "region": "Sports",
-   "photo": 5,
-   "art": "football_night",
-   "scene": "A grand, dark auditorium stage illuminated by a single spotlight shining on a golden football trophy atop a pedestal.",
-   "headline": "Harry Kane wins 2026 Ballon d'Or",
-   "body": "Bayern Munich and England striker Harry Kane was awarded the men's Ballon d'Or trophy, edging out Kylian Mbappé. Meanwhile, Spanish midfielder Alexia Putellas secured the women's prize at the prestigious ceremony."
+   "region": "Africa",
+   "photo": null,
+   "art": "assembly_podium",
+   "scene": "A large international conference hall with African and Russian flags on a wide stage under bright spotlighting",
+   "headline": "Putin Pitches Russia as African Partner in Moscow",
+   "body": "Russian President Vladimir Putin told African leaders at the Russia-Africa Summit that Moscow represents their best non-colonial partner, per Al Jazeera. The statement comes as Russia attempts to counter Western influence across the continent."
   }
  ],
- "date": "2026-10-27"
+ "date": "2026-10-28"
 }
