@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-23",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Crude Surges and West Bank Locked Down",
-    "tease": "Oil surges past multi-month highs as Middle East escalation spreads"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Local Truce Brokered as Battlefield Grinds",
-    "tease": "A single-city ceasefire takes hold amid fierce pipeline combat"
-   },
-   {
-    "topic": "United States",
-    "headline": "DOJ Midterm Lawsuits and Federal Indictments",
-    "tease": "Justice Department moves to halt Alaska Senate certification"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Dow Drops While Safe Havens Surge",
-    "tease": "Treasuries rally sharply as equities slide on inflation fears"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Paris Shooting Sparks Unrest Ahead of Protests",
-    "tease": "France braces for mass rallies following a fatal suburban shooting"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Tibet Tremor and Global Flashpoints",
-    "tease": "A powerful Tibetan earthquake leaves sixteen dead as crises widen"
-   },
-   {
-    "topic": "Curiosities",
-    "headline": "Warhound Robots and Cybernetic Canines",
-    "tease": "And finally tonight, the military creates robotic and bioengineered hounds"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Ceasefire Deadlines Midterm Countdowns and Clashes",
-    "tease": "What to watch in the critical days and weeks ahead"
-   }
-  ]
- },
- {
   "date": "2026-10-24",
   "stories": [
    {
@@ -181,6 +136,51 @@
     "topic": "What to Watch",
     "headline": "Upcoming Election Results and Central Bank Decisions",
     "tease": "Key events coming up this week across world markets and politics"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-28",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Israel Election Ends in Gridlock as Coalition Talks Loom",
+    "tease": "Israel faces political deadlock as election results yield no clear winner"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Deadly High Speed Train Collision Leaves Dozens Dead in Sp",
+    "tease": "Catastrophic train crash in Spain leaves dozens dead as rescue operations continue"
+   },
+   {
+    "topic": "United Kingdom",
+    "headline": "Chancellor Rachel Reeves Unveils 2026 Fiscal Budget",
+    "tease": "UK Chancellor delivers first major budget addressing economic pressures and youth pay"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Federal Reserve Holds Interest Rates Steady at Four Percen",
+    "tease": "Federal Reserve pauses interest rate adjustments despite persistent inflation pressures"
+   },
+   {
+    "topic": "United States",
+    "headline": "Grand Jury Declines to Indict Former White House Aide",
+    "tease": "Federal grand jury rejects Justice Department indictment against Cassidy Hutchinson"
+   },
+   {
+    "topic": "Latin America",
+    "headline": "Flávio Bolsonaro Arrives in Miami Following Brazil Electio",
+    "tease": "Flávio Bolsonaro travels to Florida following presidential election defeat"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Brief News Updates From Around the World",
+    "tease": "Quick updates on global technology corporate earnings and international diplomacy"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Key Election Final Counts and Central Bank Economic Data",
+    "tease": "Crucial Israeli vote results and central bank monitoring ahead"
    }
   ]
  }
