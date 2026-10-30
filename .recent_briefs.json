@@ -1,55 +1,5 @@
 [
  {
-  "date": "2026-10-24",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Diplomats Evacuate as Gulf Conflict Escalates",
-    "tease": "Washington orders embassy evacuations across the Middle East amid growing regional conflict fears."
-   },
-   {
-    "topic": "West Bank",
-    "headline": "Netanyahu Orders Raids After Deadly Checkpoint Attack",
-    "tease": "Israel locks down the West Bank following deadly clashes near Hebron."
-   },
-   {
-    "topic": "Europe",
-    "headline": "Mass Protests and Violence Grip French Cities",
-    "tease": "Riot police and tear gas flood French streets as mass protests turn violent."
-   },
-   {
-    "topic": "Markets",
-    "headline": "Crude Surge Hits Dow as Crypto Drops",
-    "tease": "Spike in crude futures rattles Wall Street as Bitcoin tumbles below eighty thousand."
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Ukrainian Drones Strike Siberia as Starlink Recovers",
-    "tease": "Ukrainian deep strikes hit Siberian targets as front line satellite links restore."
-   },
-   {
-    "topic": "United States",
-    "headline": "Justice Department Moves to Halt Alaska Senate Certificati",
-    "tease": "Trump administration faces major lawsuits after intervening in Alaska's Senate race."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Key Developments From Around the World",
-    "tease": "Diplomatic summits, biosecurity investments, and health alerts from around the world."
-   },
-   {
-    "topic": "Football",
-    "headline": "Julián Álvarez Fires Atlético to Sixth Straight Win",
-    "tease": "And finally, Julián Álvarez stays red hot to keep Atlético Madrid flying."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Crucial Israeli Vote and Brazil Runoff Ahead",
-    "tease": "Critical international elections and diplomatic deadlines define the coming week."
-   }
-  ]
- },
- {
   "date": "2026-10-25",
   "stories": [
    {
@@ -181,6 +131,46 @@
     "topic": "What to Watch",
     "headline": "Key Election Final Counts and Central Bank Economic Data",
     "tease": "Crucial Israeli vote results and central bank monitoring ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-29",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Netanyahu Bloc Leads as Counting Concludes",
+    "tease": "Benjamin Netanyahu edges ahead as counting nears completion in Israel."
+   },
+   {
+    "topic": "Latin America",
+    "headline": "Bolsonaro Claims Presidency From United States",
+    "tease": "Flávio Bolsonaro proclaims himself Brazil's rightful president after fleeing to Miami."
+   },
+   {
+    "topic": "United States",
+    "headline": "Subpoenas and Scrutiny Surround Pre-Election Manoeuvres",
+    "tease": "Federal subpoenas hit an alleged spoiler candidate campaign in Alaska."
+   },
+   {
+    "topic": "Markets",
+    "headline": "European Gas Tops One Hundred Euros",
+    "tease": "European gas prices cross a critical threshold as tech earnings diverge."
+   },
+   {
+    "topic": "Europe",
+    "headline": "Spain Mourns High Speed Crash Dead",
+    "tease": "Investigators probe communication failures behind Spain's deadly train collision."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Dispatches From Across the Globe",
+    "tease": "Brief dispatches on the other major developments across the globe."
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Israel's Certification and the Approaching Midterms",
+    "tease": "Key political deadlines and election rulings to track next."
    }
   ]
  }
