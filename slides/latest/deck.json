@@ -1,47 +1,47 @@
 {
- "cover": "Israel election deadlock, deadly Spain train disaster, and Fed rate pause",
- "cover_scene": "A split composition showing an Israeli voting booth, emergency rescue lights by a damaged train, and a glowing financial trading screen under storm clouds",
+ "cover": "Deadly rail disaster strikes Spain as political crises test Latin America and Israel",
+ "cover_scene": "A split composition showing emergency searchlights illuminating a twisted passenger train wreck beside an international negotiation chamber draped in multiple world flags.",
  "slides": [
-  {
-   "region": "Middle East",
-   "photo": 11,
-   "art": "election",
-   "scene": "A blue voting booth bearing the flag of Israel inside a dimly lit polling station with scattered ballot papers",
-   "headline": "Israel Election Ends in Deadlock as Netanyahu Leads",
-   "body": "Partial results in Israel's general election show Prime Minister Benjamin Netanyahu's right-wing bloc leading, but falling short of the 61-seat Knesset majority. Former military chief Gadi Eisenkot's opposition remains locked in a stalemate, risking further political impasse."
-  },
   {
    "region": "Europe",
    "photo": null,
    "art": "city_fire",
-   "scene": "Emergency response vehicles with flashing blue lights beside overturned high-speed train carriages on tracks under a dark twilight sky",
-   "headline": "Deadly Train Collision in Spain Kills Dozens",
-   "body": "At least 68 people died and over 100 were injured after two high-speed trains collided south of Madrid in Toledo province. Spanish transport officials attributed the disaster to an unexpected tracking error as rescue operations continue."
+   "scene": "Emergency responders and flashing sirens surround the twisted wreckage of a derailed passenger train on rural tracks under heavy twilight.",
+   "headline": "Spain Train Crash Kills Nearly Seventy",
+   "body": "A high-speed train derailment and collision in Spain left at least 68 people dead and dozens injured. Emergency responders rushed to the scene as leaked audio recordings revealed one train had been cleared onto an obstructed track."
+  },
+  {
+   "region": "Middle East",
+   "photo": null,
+   "art": "election",
+   "scene": "A polling station room with a sealed transparent ballot box in the foreground and blurred Knesset hall architecture in the background.",
+   "headline": "Netanyahu Bloc Contests Disputed Election Outcome",
+   "body": "Prime Minister Benjamin Netanyahu claimed an election lead before final tallies showed his coalition falling short of a parliamentary majority. His party alleged fraud, while opposition leaders began exploring options to form a rival government."
   },
   {
    "region": "Americas",
-   "photo": null,
-   "art": "markets_down",
-   "scene": "A dark central bank press hall featuring microphone stands on a wooden podium before American flags",
-   "headline": "US Federal Reserve Holds Interest Rates Steady",
-   "body": "The Federal Reserve voted in a split decision to keep benchmark interest rates at 3.75% to 4.00%. Policymakers cited persistent inflation pressures across the U.S. economy while leaving options open for future rate adjustments."
+   "photo": 1,
+   "art": null,
+   "scene": "A commercial jet passenger door open against an overcast Miami skyline with an air stair positioned alongside.",
+   "headline": "Flavio Bolsonaro Rejects Brazilian Election Result",
+   "body": "Defeated presidential candidate Flavio Bolsonaro fled to Miami and declared himself the rightful president-elect of Brazil, alleging the election was rigged. He pledged to lead opposition efforts from abroad as domestic leaders rejected his claims of fraud."
+  },
+  {
+   "region": "Caribbean",
+   "photo": 21,
+   "art": null,
+   "scene": "Heavily armored military vehicles kicking up dust on a rutted tropical street with local bystanders looking on.",
+   "headline": "El Salvador Deploys Troops to Haiti",
+   "body": "El Salvador sent 2,000 soldiers to Haiti to launch a rescue mission after four Salvadoran personnel were ambushed and reported missing outside Port-au-Prince. The major deployment marks an aggressive expansion of foreign security forces in the volatile Caribbean nation."
   },
   {
    "region": "Asia",
-   "photo": null,
-   "art": "tech_ai",
-   "scene": "Glowing semiconductor silicon wafers glowing under neon blue lights inside an automated cleanroom factory",
-   "headline": "SK Hynix Shares Surge After Record Profit",
-   "body": "South Korean chipmaker SK Hynix saw its shares jump over 8% following a record third-quarter operating profit. The surge was driven by massive global demand for high-bandwidth artificial intelligence memory components."
-  },
-  {
-   "region": "Africa",
-   "photo": null,
-   "art": "assembly_podium",
-   "scene": "A large international conference hall with African and Russian flags on a wide stage under bright spotlighting",
-   "headline": "Putin Pitches Russia as African Partner in Moscow",
-   "body": "Russian President Vladimir Putin told African leaders at the Russia-Africa Summit that Moscow represents their best non-colonial partner, per Al Jazeera. The statement comes as Russia attempts to counter Western influence across the continent."
+   "photo": 20,
+   "art": null,
+   "scene": "Military engineers assembling a heavy reconnaissance drone beside an olive-drab army truck in cold, mountainous border terrain.",
+   "headline": "India Approves Twenty-Two Billion Defense Expansion",
+   "body": "New Delhi cleared a massive $22 billion defense procurement package to modernize ground and air capabilities. The spending acceleration directly targets ongoing friction and border standoff readiness along the contested frontier with China."
   }
  ],
- "date": "2026-10-28"
+ "date": "2026-10-29"
 }
