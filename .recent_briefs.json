@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-25",
-  "stories": [
-   {
-    "topic": "Europe",
-    "headline": "Serbian President Concedes Defeat After Student Movement",
-    "tease": "Serbia faces political upheaval as the ruling party concedes defeat."
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Cross-Border Strikes Intensify Between Yemen and Saudi Ara",
-    "tease": "Missile exchanges shake the Persian Gulf as regional markets drop."
-   },
-   {
-    "topic": "Israel and Palestine",
-    "headline": "West Bank Checkpoints Closed Ahead of High-Stakes Election",
-    "tease": "Israel seals border crossings as political rivals challenge Netanyahu."
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Deadly Russian Drone Strikes Trigger Long-Range Ukrainian ",
-    "tease": "Deadly drone attacks hit Dnipropetrovsk as Kyiv strikes back."
-   },
-   {
-    "topic": "Markets",
-    "headline": "Earnings Fears Mount as AI Investment Payoff Stalls",
-    "tease": "Wall Street braces for earnings as big tech faces scrutiny."
-   },
-   {
-    "topic": "United States",
-    "headline": "DOJ Intervenes in Swing Elections Ahead of Midterms",
-    "tease": "The Justice Department issues election ultimatums across battleground states."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Machado Returns to Venezuela and Brazil Votes",
-    "tease": "Machado returns from exile as Brazil tallies presidential ballots."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Crucial Israeli Vote and Big Tech Earnings Ahead",
-    "tease": "High-stakes elections and mega-cap earnings dominate the coming week."
-   }
-  ]
- },
- {
   "date": "2026-10-27",
   "stories": [
    {
@@ -171,6 +126,56 @@
     "topic": "What to Watch",
     "headline": "Israel's Certification and the Approaching Midterms",
     "tease": "Key political deadlines and election rulings to track next."
+   }
+  ]
+ },
+ {
+  "date": "2026-10-30",
+  "stories": [
+   {
+    "topic": "Cybersecurity",
+    "headline": "Binance Struck by Record Digital Asset Heist",
+    "tease": "Hackers drain billions from Binance in the largest crypto heist ever recorded"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Tech Giants Plunge on AI Expenditure Fears",
+    "tease": "Big Tech stocks sink as artificial intelligence spending approaches one trillion dollars"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Israel Faces Protracted Stalemate After Inconclusive Elect",
+    "tease": "Israeli election finishes with no clear path to a governing majority"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Evacuation Corridor Opens as Kremlin Silences Novaya",
+    "tease": "Civilians flee devastated Oleshky while Moscow shutters its oldest independent newspaper"
+   },
+   {
+    "topic": "China and Asia",
+    "headline": "Xi Deepens Party Purge as Kim Arms",
+    "tease": "Beijing dismisses high-level officials while North Korea accelerates suicide drone manufacturing"
+   },
+   {
+    "topic": "United States",
+    "headline": "General Confesses Leak as Campaign Rallies Shift",
+    "tease": "Dismissed American general admits leaking classified intelligence on Iran and Ukraine"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Dispatches on Rail Inquiries and Global Protests",
+    "tease": "Investigators find traffic control errors caused the fatal Spanish derailment"
+   },
+   {
+    "topic": "Arts and Culture",
+    "headline": "Tributes Flow for Screen Icon Patrick Stewart",
+    "tease": "Celebrated stage and screen actor Sir Patrick Stewart dies aged eighty-six"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Midterm Voting Deadlines and Bank Policy Deliberations",
+    "tease": "Crucial midterm voting and Middle East coalition battles lie ahead"
    }
   ]
  }
