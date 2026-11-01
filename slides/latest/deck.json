@@ -1,47 +1,39 @@
 {
- "cover": "Deadly rail disaster strikes Spain as political crises test Latin America and Israel",
- "cover_scene": "A split composition showing emergency searchlights illuminating a twisted passenger train wreck beside an international negotiation chamber draped in multiple world flags.",
+ "cover": "Maritime attacks rattle Hormuz as Poland descends into constitutional turmoil",
+ "cover_scene": "A naval patrol boat speeds past a commercial tanker in a narrow waterway beneath a dramatic sunset while smoke rises on distant shores.",
  "slides": [
+  {
+   "region": "Middle East",
+   "photo": 23,
+   "art": "naval_strait",
+   "scene": "A commercial oil tanker sails through the narrow Strait of Hormuz flanked by rocky coastlines under a hazy orange sky, with small vessels visible nearby.",
+   "headline": "Commercial Tanker Attacked in Strait of Hormuz",
+   "body": "A commercial tanker carrying 27 Indian crew members was attacked in the vital Strait of Hormuz. The incident escalates maritime security threats across the global energy passage, while Tehran warned it will condition reopening the transit route on diplomatic terms with Washington."
+  },
   {
    "region": "Europe",
    "photo": null,
-   "art": "city_fire",
-   "scene": "Emergency responders and flashing sirens surround the twisted wreckage of a derailed passenger train on rural tracks under heavy twilight.",
-   "headline": "Spain Train Crash Kills Nearly Seventy",
-   "body": "A high-speed train derailment and collision in Spain left at least 68 people dead and dozens injured. Emergency responders rushed to the scene as leaked audio recordings revealed one train had been cleared onto an obstructed track."
-  },
-  {
-   "region": "Middle East",
-   "photo": null,
-   "art": "election",
-   "scene": "A polling station room with a sealed transparent ballot box in the foreground and blurred Knesset hall architecture in the background.",
-   "headline": "Netanyahu Bloc Contests Disputed Election Outcome",
-   "body": "Prime Minister Benjamin Netanyahu claimed an election lead before final tallies showed his coalition falling short of a parliamentary majority. His party alleged fraud, while opposition leaders began exploring options to form a rival government."
+   "art": "riot_police",
+   "scene": "Heavily equipped riot police form a defensive perimeter outside a classical European constitutional court building illuminated by emergency vehicle lights.",
+   "headline": "Poland Deploys Riot Police in Court Standoff",
+   "body": "Polish authorities deployed riot police to the Constitutional Tribunal in Warsaw following an overnight takeover of the building. The showdown erupted after President Andrzej Duda accused Prime Minister Donald Tusk's administration of orchestrating an illegal institutional coup amid deep political fissures."
   },
   {
    "region": "Americas",
-   "photo": 1,
-   "art": null,
-   "scene": "A commercial jet passenger door open against an overcast Miami skyline with an air stair positioned alongside.",
-   "headline": "Flavio Bolsonaro Rejects Brazilian Election Result",
-   "body": "Defeated presidential candidate Flavio Bolsonaro fled to Miami and declared himself the rightful president-elect of Brazil, alleging the election was rigged. He pledged to lead opposition efforts from abroad as domestic leaders rejected his claims of fraud."
+   "photo": 12,
+   "art": "soldiers_trench",
+   "scene": "Camouflaged military operators stand in a row beside Patriot missile battery launchers mounted on heavy transport trucks in a secure field.",
+   "headline": "US Approves $2.1 Billion Patriot Interceptors Sale",
+   "body": "The United States cleared a $2.1 billion foreign military sale supplying 500 Patriot missile interceptors to Ukraine. The massive munition transfer aims to counter persistent Russian aerial barrages against Ukrainian civilian infrastructure, heading next to Congress for standard review."
   },
   {
-   "region": "Caribbean",
-   "photo": 21,
-   "art": null,
-   "scene": "Heavily armored military vehicles kicking up dust on a rutted tropical street with local bystanders looking on.",
-   "headline": "El Salvador Deploys Troops to Haiti",
-   "body": "El Salvador sent 2,000 soldiers to Haiti to launch a rescue mission after four Salvadoran personnel were ambushed and reported missing outside Port-au-Prince. The major deployment marks an aggressive expansion of foreign security forces in the volatile Caribbean nation."
-  },
-  {
-   "region": "Asia",
-   "photo": 20,
-   "art": null,
-   "scene": "Military engineers assembling a heavy reconnaissance drone beside an olive-drab army truck in cold, mountainous border terrain.",
-   "headline": "India Approves Twenty-Two Billion Defense Expansion",
-   "body": "New Delhi cleared a massive $22 billion defense procurement package to modernize ground and air capabilities. The spending acceleration directly targets ongoing friction and border standoff readiness along the contested frontier with China."
+   "region": "Sports",
+   "photo": null,
+   "art": "football_night",
+   "scene": "An open-air stadium glowing under floodlights in Dakar with energetic crowds celebrating the lighting of a youth athletic torch against an evening sky.",
+   "headline": "Senegal Launches Africa's First Olympic Competition",
+   "body": "Senegal officially opened the Youth Olympic Games in Dakar, marking the first time any Olympic sporting event is hosted on the African continent. The historic multisport tournament gathers elite young global competitors to challenge traditional boundaries in international athletics."
   }
  ],
- "date": "2026-10-29"
+ "date": "2026-10-31"
 }
