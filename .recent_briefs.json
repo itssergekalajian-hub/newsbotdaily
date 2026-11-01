@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-27",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Israelis Vote in Deadlocked High-Stakes Election",
-    "tease": "Israel votes in record numbers as exit polls signal total deadlock"
-   },
-   {
-    "topic": "United States",
-    "headline": "Justice Department Indicts Former FBI Director Again",
-    "tease": "Former FBI chief James Comey faces new national defense charges"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Truce Opens Localized Evacuations in Ukraine",
-    "tease": "A brief truce brings aid as regional sabotage fears rise"
-   },
-   {
-    "topic": "Latin America",
-    "headline": "Brazilian Senator Abandons Push to Annul Election",
-    "tease": "Flávio Bolsonaro drops election challenge following Lula victory"
-   },
-   {
-    "topic": "Markets",
-    "headline": "AI Startup Anthropic Files for Historic Market Debut",
-    "tease": "Anthropic files for IPO as tech sector sees massive restructuring"
-   },
-   {
-    "topic": "Football",
-    "headline": "Harry Kane Claims 2026 Men's Ballon d'Or",
-    "tease": "Harry Kane wins his first Ballon d'Or trophy in Paris"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Brief News Updates From Across the Globe",
-    "tease": "Quick updates on UK cost-of-living measures and international news"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Upcoming Election Results and Central Bank Decisions",
-    "tease": "Key events coming up this week across world markets and politics"
-   }
-  ]
- },
- {
   "date": "2026-10-28",
   "stories": [
    {
@@ -176,6 +131,46 @@
     "topic": "What to Watch",
     "headline": "Midterm Voting Deadlines and Bank Policy Deliberations",
     "tease": "Crucial midterm voting and Middle East coalition battles lie ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-31",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Tanker Attacked in Strait of Hormuz",
+    "tease": "A commercial tanker is attacked in the strategic Strait of Hormuz"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Polish Crisis Deepens as Court Confrontation Escalates",
+    "tease": "Riot police deploy to Warsaw as Poland's constitutional standoff erupts"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Patriot Interceptors Cleared and Emotional Reunions Begin",
+    "tease": "Washington approves two billion dollars in Patriot missiles for Kyiv"
+   },
+   {
+    "topic": "United States",
+    "headline": "Court Battles Reshape Midterm Election Battlefield",
+    "tease": "Judges intervene in federal election disputes just days before voting"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Tech Giants Tumble as AI Infrastructure Fears Spread",
+    "tease": "Wall Street slides as costly AI commitments rattle investors"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Worldwide Rallies and Spacecraft Re-entry Alerts",
+    "tease": "Protests sweep major capitals while a defunct satellite descends"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "American Midterms and Baltic Security Discussions",
+    "tease": "Crucial midterm voting headlines the week ahead"
    }
   ]
  }
