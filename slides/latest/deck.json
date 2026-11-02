@@ -1,39 +1,47 @@
 {
- "cover": "Maritime attacks rattle Hormuz as Poland descends into constitutional turmoil",
- "cover_scene": "A naval patrol boat speeds past a commercial tanker in a narrow waterway beneath a dramatic sunset while smoke rises on distant shores.",
+ "cover": "Gulf shipping comes under fire as political unrest grips major capitals worldwide",
+ "cover_scene": "A commercial tanker navigates a dark, misty maritime strait under dramatic storm clouds as distant coastal flares burn along the horizon.",
  "slides": [
   {
    "region": "Middle East",
-   "photo": 23,
+   "photo": 21,
    "art": "naval_strait",
-   "scene": "A commercial oil tanker sails through the narrow Strait of Hormuz flanked by rocky coastlines under a hazy orange sky, with small vessels visible nearby.",
-   "headline": "Commercial Tanker Attacked in Strait of Hormuz",
-   "body": "A commercial tanker carrying 27 Indian crew members was attacked in the vital Strait of Hormuz. The incident escalates maritime security threats across the global energy passage, while Tehran warned it will condition reopening the transit route on diplomatic terms with Washington."
+   "scene": "A massive liquefied natural gas carrier transits the Persian Gulf under heavy grey skies, shadowed by military patrol vessels.",
+   "headline": "Persian Gulf Tanker Struck by Unidentified Projectiles",
+   "body": "The Qatari liquefied natural gas carrier Al Mayeda sustained material damage after being struck by unidentified objects in the Persian Gulf. The strike highlights escalating threats to vital energy shipping lanes as regional tensions continue to mount."
   },
   {
    "region": "Europe",
-   "photo": null,
+   "photo": 16,
    "art": "riot_police",
-   "scene": "Heavily equipped riot police form a defensive perimeter outside a classical European constitutional court building illuminated by emergency vehicle lights.",
-   "headline": "Poland Deploys Riot Police in Court Standoff",
-   "body": "Polish authorities deployed riot police to the Constitutional Tribunal in Warsaw following an overnight takeover of the building. The showdown erupted after President Andrzej Duda accused Prime Minister Donald Tusk's administration of orchestrating an illegal institutional coup amid deep political fissures."
+   "scene": "A dense Parisian boulevard packed with demonstrators under autumn trees as French flags flutter and riot police hold defensive lines.",
+   "headline": "Mass Protests Against Rising Living Costs Shake Europe",
+   "body": "Demonstrators filled streets across France and Germany to voice opposition against surging living expenses and government policies, leading to clashes with police. Authorities in major cities deployed security forces to curb unauthorized marches and widespread property destruction."
   },
   {
    "region": "Americas",
-   "photo": 12,
-   "art": "soldiers_trench",
-   "scene": "Camouflaged military operators stand in a row beside Patriot missile battery launchers mounted on heavy transport trucks in a secure field.",
-   "headline": "US Approves $2.1 Billion Patriot Interceptors Sale",
-   "body": "The United States cleared a $2.1 billion foreign military sale supplying 500 Patriot missile interceptors to Ukraine. The massive munition transfer aims to counter persistent Russian aerial barrages against Ukrainian civilian infrastructure, heading next to Congress for standard review."
+   "photo": null,
+   "art": "election",
+   "scene": "A row of illuminated American voting booths inside a quiet hall, draped with American state banners ahead of election day.",
+   "headline": "Candidates Mount Final Push Ahead of Critical Midterms",
+   "body": "Political campaigns intensified nationwide get-out-the-vote efforts across critical battleground states during the final weekend before the 2026 midterm elections. Candidates focused heavily on undecided voters and early turnout margins amid contentious intra-party splits and high-stakes legal battles."
+  },
+  {
+   "region": "Eastern Europe",
+   "photo": null,
+   "art": "drones_refinery",
+   "scene": "Plumes of dense black smoke rising from burning industrial storage tanks at an oil refinery at night, illuminated by orange fire.",
+   "headline": "Ukrainian Drones Strike Major Russian Oil Refinery",
+   "body": "Ukrainian drones successfully struck an oil refinery in Kstovo within Russia's Nizhny Novgorod Oblast, sparking a major fire at the industrial facility. The attack comes as Ukraine's General Staff reported record-high Russian monthly casualties during intense front-line combat."
   },
   {
    "region": "Sports",
    "photo": null,
    "art": "football_night",
-   "scene": "An open-air stadium glowing under floodlights in Dakar with energetic crowds celebrating the lighting of a youth athletic torch against an evening sky.",
-   "headline": "Senegal Launches Africa's First Olympic Competition",
-   "body": "Senegal officially opened the Youth Olympic Games in Dakar, marking the first time any Olympic sporting event is hosted on the African continent. The historic multisport tournament gathers elite young global competitors to challenge traditional boundaries in international athletics."
+   "scene": "A packed floodlit English football stadium at night with players in red and yellow jerseys battling near the goal under rain.",
+   "headline": "Arsenal Go Top with Win at Liverpool",
+   "body": "Arsenal secured their first victory at Anfield since 2012, beating Liverpool to claim the top spot in the Premier League. The narrow away victory moves them three points clear of title rivals Manchester City."
   }
  ],
- "date": "2026-10-31"
+ "date": "2026-11-01"
 }
