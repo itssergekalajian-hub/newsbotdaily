@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-10-28",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Israel Election Ends in Gridlock as Coalition Talks Loom",
-    "tease": "Israel faces political deadlock as election results yield no clear winner"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Deadly High Speed Train Collision Leaves Dozens Dead in Sp",
-    "tease": "Catastrophic train crash in Spain leaves dozens dead as rescue operations continue"
-   },
-   {
-    "topic": "United Kingdom",
-    "headline": "Chancellor Rachel Reeves Unveils 2026 Fiscal Budget",
-    "tease": "UK Chancellor delivers first major budget addressing economic pressures and youth pay"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Federal Reserve Holds Interest Rates Steady at Four Percen",
-    "tease": "Federal Reserve pauses interest rate adjustments despite persistent inflation pressures"
-   },
-   {
-    "topic": "United States",
-    "headline": "Grand Jury Declines to Indict Former White House Aide",
-    "tease": "Federal grand jury rejects Justice Department indictment against Cassidy Hutchinson"
-   },
-   {
-    "topic": "Latin America",
-    "headline": "Flávio Bolsonaro Arrives in Miami Following Brazil Electio",
-    "tease": "Flávio Bolsonaro travels to Florida following presidential election defeat"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Brief News Updates From Around the World",
-    "tease": "Quick updates on global technology corporate earnings and international diplomacy"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Key Election Final Counts and Central Bank Economic Data",
-    "tease": "Crucial Israeli vote results and central bank monitoring ahead"
-   }
-  ]
- },
- {
   "date": "2026-10-29",
   "stories": [
    {
@@ -171,6 +126,46 @@
     "topic": "What to Watch",
     "headline": "American Midterms and Baltic Security Discussions",
     "tease": "Crucial midterm voting headlines the week ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-01",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Gulf Tankers Struck Amid Regional Confrontation",
+    "tease": "Maritime strikes target critical Gulf energy routes as confrontations escalate"
+   },
+   {
+    "topic": "United States",
+    "headline": "Courts and Crossovers Shake Midterm Races",
+    "tease": "Federal court rebuffs midterm challenge while party lines crack in Michigan"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Binance Covers Stolen Billions After Exploit",
+    "tease": "Crypto giant reimburses users after record six billion dollar breach"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Record Russian Casualties as Drones Strike",
+    "tease": "Kyiv strikes Russian refinery as Moscow reports record frontline casualties"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Cost of Living Rallies Turn Violent",
+    "tease": "Demonstrations spiral into clashes and looting across European capitals"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Brief News Updates Across the Globe",
+    "tease": "Turkey restricts teenage social media as global dispatches unfold"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Midterm Elections and High Stakes Ballots",
+    "tease": "Tuesday's American midterms lead the week's defining global decisions"
    }
   ]
  }
