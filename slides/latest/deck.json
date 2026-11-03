@@ -1,47 +1,52 @@
 {
- "cover": "Gulf shipping comes under fire as political unrest grips major capitals worldwide",
- "cover_scene": "A commercial tanker navigates a dark, misty maritime strait under dramatic storm clouds as distant coastal flares burn along the horizon.",
+ "cover": "Cyber chaos strikes European infrastructure and war alerts as global tensions surge",
+ "cover_scene": "A split composition showing digital warning screens flashing red across dark city skylines in Europe and naval warships positioned in a foggy strait.",
  "slides": [
   {
-   "region": "Middle East",
-   "photo": 21,
-   "art": "naval_strait",
-   "scene": "A massive liquefied natural gas carrier transits the Persian Gulf under heavy grey skies, shadowed by military patrol vessels.",
-   "headline": "Persian Gulf Tanker Struck by Unidentified Projectiles",
-   "body": "The Qatari liquefied natural gas carrier Al Mayeda sustained material damage after being struck by unidentified objects in the Persian Gulf. The strike highlights escalating threats to vital energy shipping lanes as regional tensions continue to mount."
+   "region": "Europe",
+   "photo": 23,
+   "art": "tech_ai",
+   "scene": "Rows of commercial supermarket freezers with frost melting away under harsh grocery aisle lighting across an empty European store.",
+   "headline": "Widespread European Supermarket Fridges Hit by Cyberattack",
+   "body": "Hackers targeted commercial refrigeration systems across Europe, causing freezer temperatures to soar up to fifty degrees Celsius and spoiling vast food supplies at retailers like Ikea. Operators in multiple countries are scrambling to secure climate networks and assess mounting food waste.",
+   "rank": 1
   },
   {
-   "region": "Europe",
-   "photo": 16,
-   "art": "riot_police",
-   "scene": "A dense Parisian boulevard packed with demonstrators under autumn trees as French flags flutter and riot police hold defensive lines.",
-   "headline": "Mass Protests Against Rising Living Costs Shake Europe",
-   "body": "Demonstrators filled streets across France and Germany to voice opposition against surging living expenses and government policies, leading to clashes with police. Authorities in major cities deployed security forces to curb unauthorized marches and widespread property destruction."
+   "region": "Middle East",
+   "photo": null,
+   "art": "naval_strait",
+   "scene": "Naval frigates and a commercial oil tanker navigating the narrow waters of the Strait of Hormuz with Iranian and Qatari flags visible.",
+   "headline": "Strait of Hormuz Proposal Awaits US Response",
+   "body": "Iranian Foreign Minister Abbas Araghchi confirmed ongoing talks mediated by Qatar regarding a two-day initiative for the Strait of Hormuz. Implementation of any maritime transit agreement now hinges entirely on an official decision from the United States government.",
+   "rank": 2
   },
   {
    "region": "Americas",
    "photo": null,
-   "art": "election",
-   "scene": "A row of illuminated American voting booths inside a quiet hall, draped with American state banners ahead of election day.",
-   "headline": "Candidates Mount Final Push Ahead of Critical Midterms",
-   "body": "Political campaigns intensified nationwide get-out-the-vote efforts across critical battleground states during the final weekend before the 2026 midterm elections. Candidates focused heavily on undecided voters and early turnout margins amid contentious intra-party splits and high-stakes legal battles."
+   "art": "markets_up",
+   "scene": "A crowded Wall Street trading floor glowing green under massive overhead financial ticker boards showing rising stock indexes.",
+   "headline": "Wall Street Rebounds After Five Trillion Drop",
+   "body": "Major American stock indexes rallied after suffering a five trillion dollar sell-off sparked by artificial intelligence valuation fears. Lower crude oil prices and bargain hunting helped stabilize equities as investors await critical corporate earnings and upcoming economic data.",
+   "rank": 3
   },
   {
-   "region": "Eastern Europe",
+   "region": "Asia",
    "photo": null,
-   "art": "drones_refinery",
-   "scene": "Plumes of dense black smoke rising from burning industrial storage tanks at an oil refinery at night, illuminated by orange fire.",
-   "headline": "Ukrainian Drones Strike Major Russian Oil Refinery",
-   "body": "Ukrainian drones successfully struck an oil refinery in Kstovo within Russia's Nizhny Novgorod Oblast, sparking a major fire at the industrial facility. The attack comes as Ukraine's General Staff reported record-high Russian monthly casualties during intense front-line combat."
+   "art": "tech_ai",
+   "scene": "Futuristic glass research facilities in Seoul glowing with blue circuit patterns against a nighttime metropolitan backdrop.",
+   "headline": "South Korea Commits Billions to Artificial Intelligence",
+   "body": "The South Korean government announced a multibillion-dollar investment package dedicated to strengthening its domestic artificial intelligence sector. Officials designed the aggressive funding strategy to secure the nation's position as a dominant global leader in next-generation computing.",
+   "rank": 4
   },
   {
-   "region": "Sports",
+   "region": "Africa",
    "photo": null,
-   "art": "football_night",
-   "scene": "A packed floodlit English football stadium at night with players in red and yellow jerseys battling near the goal under rain.",
-   "headline": "Arsenal Go Top with Win at Liverpool",
-   "body": "Arsenal secured their first victory at Anfield since 2012, beating Liverpool to claim the top spot in the Premier League. The narrow away victory moves them three points clear of title rivals Manchester City."
+   "art": "assembly_podium",
+   "scene": "A modern stadium in Dakar, Senegal illuminated under evening skies with flags of African nations flying above.",
+   "headline": "Senegal Hosts Africa First Olympic Games",
+   "body": "Senegal welcomed delegates and athletes as it prepares to host Africa's first Olympic event through the Youth Olympic Games, per Al Jazeera. Olympic officials highlighted the historic milestone as a transformative development for African sporting infrastructure and global recognition.",
+   "rank": 5
   }
  ],
- "date": "2026-11-01"
+ "date": "2026-11-02"
 }
