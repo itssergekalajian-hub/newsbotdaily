@@ -807,8 +807,12 @@ def summarize(posts: list[dict], day: dt.date,
     # The budget is now ~an hour of patience: a bulletin arriving late beats
     # one not arriving, and the runner's time is free.
     for attempt in range(24):
-        r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
-                          headers=headers, json=body, timeout=300)
+       r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
+                              headers={"x-goog-api-key": GEMINI_KEY,
+                                       "Content-Type": "application/json"},
+                              json=body, timeout=300)
+            if r.ok:
+                break
         if r.ok:
             break
         if r.status_code == 404:
