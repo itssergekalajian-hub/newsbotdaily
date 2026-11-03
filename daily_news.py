@@ -806,16 +806,25 @@ def summarize(posts: list[dict], day: dt.date,
     # evening where EVERY generation was 503 or 429, and the night died.
     # The budget is now ~an hour of patience: a bulletin arriving late beats
     # one not arriving, and the runner's time is free.
-    for attempt in range(24):
-       r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
-                              headers={"x-goog-api-key": GEMINI_KEY,
-                                       "Content-Type": "application/json"},
-                              json=body, timeout=300)
+   for attempt in range(24):
+            try:
+                r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
+                                  headers={"x-goog-api-key": GEMINI_KEY,
+                                           "Content-Type": "application/json"},
+                                  json=body, timeout=300)
+            except requests.exceptions.RequestException as exc:
+                wait = min(20 * 2 ** (attempt // 2), 300)
+                print(f"connection dropped ({exc.__class__.__name__}) on {model} – waiting {wait}s")
+                if alternates and tried < len(alternates) and attempt % 2 == 1:
+                    model = alternates[tried]
+                    tried += 1
+                    print(f"switching to alternate model: {model}")
+                time.sleep(wait)
+                continue
+
             if r.ok:
                 break
-        if r.ok:
-            break
-        if r.status_code == 404:
+            if r.status_code == 404:
             # A listed model can still be retired at the endpoint — run 241
             # died when the rotation reached gemini-2.5-flash, which the API
             # lists but no longer serves. A dead name is never worth the run:
