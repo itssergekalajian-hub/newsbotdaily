@@ -1,45 +1,5 @@
 [
  {
-  "date": "2026-10-29",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Netanyahu Bloc Leads as Counting Concludes",
-    "tease": "Benjamin Netanyahu edges ahead as counting nears completion in Israel."
-   },
-   {
-    "topic": "Latin America",
-    "headline": "Bolsonaro Claims Presidency From United States",
-    "tease": "Flávio Bolsonaro proclaims himself Brazil's rightful president after fleeing to Miami."
-   },
-   {
-    "topic": "United States",
-    "headline": "Subpoenas and Scrutiny Surround Pre-Election Manoeuvres",
-    "tease": "Federal subpoenas hit an alleged spoiler candidate campaign in Alaska."
-   },
-   {
-    "topic": "Markets",
-    "headline": "European Gas Tops One Hundred Euros",
-    "tease": "European gas prices cross a critical threshold as tech earnings diverge."
-   },
-   {
-    "topic": "Europe",
-    "headline": "Spain Mourns High Speed Crash Dead",
-    "tease": "Investigators probe communication failures behind Spain's deadly train collision."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Dispatches From Across the Globe",
-    "tease": "Brief dispatches on the other major developments across the globe."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Israel's Certification and the Approaching Midterms",
-    "tease": "Key political deadlines and election rulings to track next."
-   }
-  ]
- },
- {
   "date": "2026-10-30",
   "stories": [
    {
@@ -166,6 +126,46 @@
     "topic": "What to Watch",
     "headline": "Midterm Elections and High Stakes Ballots",
     "tease": "Tuesday's American midterms lead the week's defining global decisions"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-02",
+  "stories": [
+   {
+    "topic": "Cybersecurity",
+    "headline": "European Supermarket Refrigerators Spoiled in Cyberattack",
+    "tease": "Hackers target commercial refrigerators, destroying massive food supplies across Europe"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Iran and Qatar Negotiate Hormuz Shipping Terms",
+    "tease": "Tehran hinges a proposal for the Strait of Hormuz on Washington's response"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Emergency Alert Apps Hacked with Nuclear Warnings",
+    "tease": "False nuclear attack alerts trigger panic as air warning systems are breached"
+   },
+   {
+    "topic": "United States",
+    "headline": "Trump Leads Rallies as Campaign Hits Final Push",
+    "tease": "Donald Trump holds swing state rallies during final campaign push"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Wall Street Recovers Trillions Following Tech Sell-Off",
+    "tease": "US stocks rebound as crude oil drops and crypto markets stabilize"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Brief News Updates Across the Globe",
+    "tease": "Quick updates from France, Germany, Iran, and global technology developments"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "American Midterms and Global Energy Diplomacy Ahead",
+    "tease": "Key midterm elections and high-stakes Persian Gulf diplomatic decisions approach"
    }
   ]
  }
