@@ -5,7 +5,7 @@ Beirut time), rewrites it into one explained bulletin, narrates it with an AI
 voice, and posts text + voice note + presenter video to @midworlddaily just
 after local midnight.
 
-Cost: **$0** — Gemini Flash free tier + edge-tts (no key) + GitHub Actions free minutes.
+Cost: **$0** — Gemini Flash free tier + edge-tts/gTTS (no key) + GitHub Actions free minutes.
 
 ---
 
@@ -60,12 +60,15 @@ python daily_news.py
 | `TIMEZONE` | `Asia/Beirut` | EET/EEST; DST handled automatically |
 | `TARGET_DATE` | *(empty)* | `2030-02-01` to rebuild one specific day |
 | `VOICE` | `en-US-AndrewMultilingualNeural` | `edge-tts --list-voices` for 300+ others |
+| `GTTS_LANG` | `en` | gTTS language used if edge-tts fails (e.g. `ar` for Arabic) |
 | `MAKE_VIDEO` | `1` | `0` = voice note only |
 | `GEMINI_MODEL` | `gemini-2.5-flash` | any free-tier Flash model |
 | `PRESENTER_IMAGE` | `presenter.png` | background/anchor still |
 
 Arabic bulletin: set `VOICE=ar-LB-LaylaNeural` (or `ar-EG-SalmaNeural`) and add
 "Write the bulletin in Arabic." to the rules inside `PROMPT`.
+If edge-tts fails, narration falls back to gTTS; set `GTTS_LANG=ar` for Arabic
+fallback audio.
 
 ## Notes
 

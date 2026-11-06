@@ -30,6 +30,7 @@ import edge_tts
 import edge_tts.communicate
 import requests
 from bs4 import BeautifulSoup
+from gtts import gTTS
 
 import video
 
@@ -59,6 +60,7 @@ MODEL = os.getenv("GEMINI_MODEL", "").strip()      # empty = auto-detect
 # Brian is edge's warmest, most conversational voice — the closest the free
 # tier gets to a person talking to a person
 VOICE = os.getenv("VOICE", "en-US-BrianMultilingualNeural")
+GTTS_LANG = os.getenv("GTTS_LANG", "en")
 # above neutral for broadcast urgency — a brisk read holds attention where a
 # leisurely one drifts; +6% is still comfortably intelligible
 RATE = os.getenv("VOICE_RATE", "+6%")
@@ -807,24 +809,24 @@ def summarize(posts: list[dict], day: dt.date,
     # The budget is now ~an hour of patience: a bulletin arriving late beats
     # one not arriving, and the runner's time is free.
     for attempt in range(24):
-            try:
-                r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
-                                  headers={"x-goog-api-key": GEMINI_KEY,
-                                           "Content-Type": "application/json"},
-                                  json=body, timeout=300)
-            except requests.exceptions.RequestException as exc:
-                wait = min(20 * 2 ** (attempt // 2), 300)
-                print(f"connection dropped ({exc.__class__.__name__}) on {model} – waiting {wait}s")
-                if alternates and tried < len(alternates) and attempt % 2 == 1:
-                    model = alternates[tried]
-                    tried += 1
-                    print(f"switching to alternate model: {model}")
-                time.sleep(wait)
-                continue
+        try:
+            r = requests.post(f"{GEMINI_ROOT}/models/{model}:generateContent",
+                              headers={"x-goog-api-key": GEMINI_KEY,
+                                       "Content-Type": "application/json"},
+                              json=body, timeout=300)
+        except requests.exceptions.RequestException as exc:
+            wait = min(20 * 2 ** (attempt // 2), 300)
+            print(f"connection dropped ({exc.__class__.__name__}) on {model} – waiting {wait}s")
+            if alternates and tried < len(alternates) and attempt % 2 == 1:
+                model = alternates[tried]
+                tried += 1
+                print(f"switching to alternate model: {model}")
+            time.sleep(wait)
+            continue
 
-            if r.ok:
-                break
-            if r.status_code == 404:
+        if r.ok:
+            break
+        if r.status_code == 404:
             # A listed model can still be retired at the endpoint — run 241
             # died when the rotation reached gemini-2.5-flash, which the API
             # lists but no longer serves. A dead name is never worth the run:
@@ -1060,8 +1062,17 @@ def _cues_for(sentence: str, start: float, span: float) -> list[tuple]:
     return cues
 
 
+def _speak_gtts(text: str, mp3_path: str) -> None:
+    gTTS(text=text, lang=GTTS_LANG).save(mp3_path)
+
+
 async def _speak(text: str, mp3_path: str) -> None:
-    await edge_tts.Communicate(text, VOICE, rate=RATE, pitch=PITCH).save(mp3_path)
+    try:
+        await edge_tts.Communicate(text, VOICE, rate=RATE, pitch=PITCH).save(mp3_path)
+    except Exception as e:
+        print(f"    edge-tts failed ({str(e)[:120]}) — using gTTS",
+              file=sys.stderr)
+        await asyncio.to_thread(_speak_gtts, text, mp3_path)
 
 
 def _gap_after(sentence: str) -> float:
