@@ -1,52 +1,47 @@
 {
- "cover": "Cyber chaos strikes European infrastructure and war alerts as global tensions surge",
- "cover_scene": "A split composition showing digital warning screens flashing red across dark city skylines in Europe and naval warships positioned in a foggy strait.",
+ "cover": "Political Shakeups in Washington, Global Tech Stocks Plunge, and a South American Resignation",
+ "cover_scene": "A split composition showing a glowing Capitol dome on one side and a red financial ticker plunging over global city skylines on the other side.",
  "slides": [
+  {
+   "region": "Americas",
+   "photo": 13,
+   "art": "summit_hall",
+   "scene": "A grand mahogany executive office framed by American flags and presidential seals, lit by soft interior lamps.",
+   "headline": "Stephen Miller Named White House Chief of Staff",
+   "body": "U.S. President Donald Trump appointed senior adviser Stephen Miller as White House chief of staff following Republican midterm losses. Miller replaces Susie Wiles as the administration recalibrates its legislative agenda and executive leadership moving forward."
+  },
+  {
+   "region": "Latin America",
+   "photo": null,
+   "art": "election",
+   "scene": "A quiet government plaza at dusk before a illuminated presidential palace, Paraguayan flags fluttering on poles under a moody sky.",
+   "headline": "Paraguay President Santiago Peña Resigns After Banking Crisis",
+   "body": "Paraguayan President Santiago Peña stepped down following a political crisis triggered by the Ueno Bank collapse. Constitutional successors are navigating the government transition while Congress considers formal proceedings."
+  },
   {
    "region": "Europe",
    "photo": 23,
-   "art": "tech_ai",
-   "scene": "Rows of commercial supermarket freezers with frost melting away under harsh grocery aisle lighting across an empty European store.",
-   "headline": "Widespread European Supermarket Fridges Hit by Cyberattack",
-   "body": "Hackers targeted commercial refrigeration systems across Europe, causing freezer temperatures to soar up to fifty degrees Celsius and spoiling vast food supplies at retailers like Ikea. Operators in multiple countries are scrambling to secure climate networks and assess mounting food waste.",
-   "rank": 1
-  },
-  {
-   "region": "Middle East",
-   "photo": null,
-   "art": "naval_strait",
-   "scene": "Naval frigates and a commercial oil tanker navigating the narrow waters of the Strait of Hormuz with Iranian and Qatari flags visible.",
-   "headline": "Strait of Hormuz Proposal Awaits US Response",
-   "body": "Iranian Foreign Minister Abbas Araghchi confirmed ongoing talks mediated by Qatar regarding a two-day initiative for the Strait of Hormuz. Implementation of any maritime transit agreement now hinges entirely on an official decision from the United States government.",
-   "rank": 2
-  },
-  {
-   "region": "Americas",
-   "photo": null,
-   "art": "markets_up",
-   "scene": "A crowded Wall Street trading floor glowing green under massive overhead financial ticker boards showing rising stock indexes.",
-   "headline": "Wall Street Rebounds After Five Trillion Drop",
-   "body": "Major American stock indexes rallied after suffering a five trillion dollar sell-off sparked by artificial intelligence valuation fears. Lower crude oil prices and bargain hunting helped stabilize equities as investors await critical corporate earnings and upcoming economic data.",
-   "rank": 3
+   "art": "riot_police",
+   "scene": "Riot police with shields standing outside a massive modern technological facility at dusk under dramatic stormy light.",
+   "headline": "Protesters Breach Microsoft Data Center Construction in Amsterdam",
+   "body": "Demonstrators breached the perimeter of a Microsoft data center construction site in the Netherlands, drawing a heavy riot police response. European data center projects face growing public resistance over heavy energy and water consumption."
   },
   {
    "region": "Asia",
-   "photo": null,
-   "art": "tech_ai",
-   "scene": "Futuristic glass research facilities in Seoul glowing with blue circuit patterns against a nighttime metropolitan backdrop.",
-   "headline": "South Korea Commits Billions to Artificial Intelligence",
-   "body": "The South Korean government announced a multibillion-dollar investment package dedicated to strengthening its domestic artificial intelligence sector. Officials designed the aggressive funding strategy to secure the nation's position as a dominant global leader in next-generation computing.",
-   "rank": 4
+   "photo": 16,
+   "art": "markets_down",
+   "scene": "A modern Asian financial exchange floor surrounded by large digital screens glowing red with falling stock charts.",
+   "headline": "Asian Markets Plunge Following Global Tech Sell-Off",
+   "body": "Major Asian stock indices fell sharply as fallout from Wall Street hit regional markets. Shares of major tech firms including SK Hynix, Samsung, and TSMC dropped significantly amid growing investor concern over artificial intelligence infrastructure costs."
   },
   {
    "region": "Africa",
    "photo": null,
-   "art": "assembly_podium",
-   "scene": "A modern stadium in Dakar, Senegal illuminated under evening skies with flags of African nations flying above.",
-   "headline": "Senegal Hosts Africa First Olympic Games",
-   "body": "Senegal welcomed delegates and athletes as it prepares to host Africa's first Olympic event through the Youth Olympic Games, per Al Jazeera. Olympic officials highlighted the historic milestone as a transformative development for African sporting infrastructure and global recognition.",
-   "rank": 5
+   "art": "courtroom",
+   "scene": "A dark wooden courtroom desk with a wooden gavel resting beside scales of justice, soft light casting long shadows.",
+   "headline": "Nigerian Court Disqualifies Key Opposition Candidate Before Election",
+   "body": "A Nigerian court barred a prominent opposition candidate from competing in the upcoming presidential election. The ruling reshapes the political landscape just months before voters head to the polls."
   }
  ],
- "date": "2026-11-02"
+ "date": "2026-11-06"
 }
