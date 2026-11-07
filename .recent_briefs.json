@@ -1,55 +1,5 @@
 [
  {
-  "date": "2026-10-30",
-  "stories": [
-   {
-    "topic": "Cybersecurity",
-    "headline": "Binance Struck by Record Digital Asset Heist",
-    "tease": "Hackers drain billions from Binance in the largest crypto heist ever recorded"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Tech Giants Plunge on AI Expenditure Fears",
-    "tease": "Big Tech stocks sink as artificial intelligence spending approaches one trillion dollars"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Israel Faces Protracted Stalemate After Inconclusive Elect",
-    "tease": "Israeli election finishes with no clear path to a governing majority"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Evacuation Corridor Opens as Kremlin Silences Novaya",
-    "tease": "Civilians flee devastated Oleshky while Moscow shutters its oldest independent newspaper"
-   },
-   {
-    "topic": "China and Asia",
-    "headline": "Xi Deepens Party Purge as Kim Arms",
-    "tease": "Beijing dismisses high-level officials while North Korea accelerates suicide drone manufacturing"
-   },
-   {
-    "topic": "United States",
-    "headline": "General Confesses Leak as Campaign Rallies Shift",
-    "tease": "Dismissed American general admits leaking classified intelligence on Iran and Ukraine"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Dispatches on Rail Inquiries and Global Protests",
-    "tease": "Investigators find traffic control errors caused the fatal Spanish derailment"
-   },
-   {
-    "topic": "Arts and Culture",
-    "headline": "Tributes Flow for Screen Icon Patrick Stewart",
-    "tease": "Celebrated stage and screen actor Sir Patrick Stewart dies aged eighty-six"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Midterm Voting Deadlines and Bank Policy Deliberations",
-    "tease": "Crucial midterm voting and Middle East coalition battles lie ahead"
-   }
-  ]
- },
- {
   "date": "2026-10-31",
   "stories": [
    {
@@ -166,6 +116,46 @@
     "topic": "What to Watch",
     "headline": "American Midterms and Global Energy Diplomacy Ahead",
     "tease": "Key midterm elections and high-stakes Persian Gulf diplomatic decisions approach"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-06",
+  "stories": [
+   {
+    "topic": "United States",
+    "headline": "Trump Names Miller After Midterm Blow",
+    "tease": "Trump names Stephen Miller chief of staff after midterm defeats."
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Trump Issues Direct Destruction Warning to Iran",
+    "tease": "Trump warns decisions on Iran will become clear shortly."
+   },
+   {
+    "topic": "Markets",
+    "headline": "Global Tech Rout Wipes Hundreds of Billions",
+    "tease": "Tech stocks suffer worst single day since twenty twenty."
+   },
+   {
+    "topic": "Automotive",
+    "headline": "Tesla to Halt Cybertruck Production by Twenty Twenty Seven",
+    "tease": "Tesla phases out polarizing Cybertruck to prioritize robotics."
+   },
+   {
+    "topic": "Latin America",
+    "headline": "Paraguay President Resigns Over Major Bank Collapse",
+    "tease": "Paraguay's president resigns following a major banking crisis."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Capital Sentences Commuted and European Sites Breached",
+    "tease": "News briefs from California to Europe and West Virginia."
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Recount Battles and Airspace Tensions Ahead",
+    "tease": "Legal fights and geopolitical flashpoints to track next."
    }
   ]
  }
