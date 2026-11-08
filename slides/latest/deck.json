@@ -1,47 +1,39 @@
 {
- "cover": "Political Shakeups in Washington, Global Tech Stocks Plunge, and a South American Resignation",
- "cover_scene": "A split composition showing a glowing Capitol dome on one side and a red financial ticker plunging over global city skylines on the other side.",
+ "cover": "Global political shakeups, Middle East strikes, and major European unrest mark the day",
+ "cover_scene": "A split composition showing dramatic global events, including a political hall in South America, airstrikes over a European city, and a warship navigating waters in the Middle East under heavy clouds",
  "slides": [
   {
    "region": "Americas",
-   "photo": 13,
-   "art": "summit_hall",
-   "scene": "A grand mahogany executive office framed by American flags and presidential seals, lit by soft interior lamps.",
-   "headline": "Stephen Miller Named White House Chief of Staff",
-   "body": "U.S. President Donald Trump appointed senior adviser Stephen Miller as White House chief of staff following Republican midterm losses. Miller replaces Susie Wiles as the administration recalibrates its legislative agenda and executive leadership moving forward."
+   "photo": 15,
+   "art": "courtroom",
+   "scene": "A presidential office in Asuncion with a Paraguayan flag behind a vacant desk as security officers stand outside in bright daylight",
+   "headline": "Paraguay President Peña Ousted and Arrested",
+   "body": "Paraguay's Senate impeached and ousted President Santiago Peña following the sudden collapse of a national bank. Vice President Pedro Alliana was rapidly sworn in as head of state while Peña was placed under arrest."
   },
   {
-   "region": "Latin America",
+   "region": "Middle East",
    "photo": null,
-   "art": "election",
-   "scene": "A quiet government plaza at dusk before a illuminated presidential palace, Paraguayan flags fluttering on poles under a moody sky.",
-   "headline": "Paraguay President Santiago Peña Resigns After Banking Crisis",
-   "body": "Paraguayan President Santiago Peña stepped down following a political crisis triggered by the Ueno Bank collapse. Constitutional successors are navigating the government transition while Congress considers formal proceedings."
+   "art": "naval_strait",
+   "scene": "Coastal highlands looking down on the Bab al-Mandeb Strait, with small military outposts overlooking passing cargo ships under a hazy sky",
+   "headline": "Yemeni Forces Seize Heights Near Strategic Strait",
+   "body": "Yemeni armed forces captured strategic heights overlooking the Bab al-Mandeb Strait from Saudi-backed troops. The advance places key maritime trade routes under direct observation amid intensifying regional strikes and ongoing conflict."
   },
   {
    "region": "Europe",
-   "photo": 23,
-   "art": "riot_police",
-   "scene": "Riot police with shields standing outside a massive modern technological facility at dusk under dramatic stormy light.",
-   "headline": "Protesters Breach Microsoft Data Center Construction in Amsterdam",
-   "body": "Demonstrators breached the perimeter of a Microsoft data center construction site in the Netherlands, drawing a heavy riot police response. European data center projects face growing public resistance over heavy energy and water consumption."
+   "photo": 22,
+   "art": "city_fire",
+   "scene": "Firefighters in Kyiv working at night to extinguish flames at a damaged power facility, emergency lights glowing through smoke",
+   "headline": "Russian Airstrikes Hit Kyiv Ahead of Talks",
+   "body": "Russia launched a wave of airstrikes targeting Kyiv's power infrastructure, causing blackouts and water shortages. Emergency crews responded to damaged sites across the capital as Ukraine prepares for upcoming trilateral diplomatic talks."
   },
   {
-   "region": "Asia",
-   "photo": 16,
-   "art": "markets_down",
-   "scene": "A modern Asian financial exchange floor surrounded by large digital screens glowing red with falling stock charts.",
-   "headline": "Asian Markets Plunge Following Global Tech Sell-Off",
-   "body": "Major Asian stock indices fell sharply as fallout from Wall Street hit regional markets. Shares of major tech firms including SK Hynix, Samsung, and TSMC dropped significantly amid growing investor concern over artificial intelligence infrastructure costs."
-  },
-  {
-   "region": "Africa",
+   "region": "Asia-Pacific",
    "photo": null,
-   "art": "courtroom",
-   "scene": "A dark wooden courtroom desk with a wooden gavel resting beside scales of justice, soft light casting long shadows.",
-   "headline": "Nigerian Court Disqualifies Key Opposition Candidate Before Election",
-   "body": "A Nigerian court barred a prominent opposition candidate from competing in the upcoming presidential election. The ruling reshapes the political landscape just months before voters head to the polls."
+   "art": "election",
+   "scene": "A polling station in Wellington with election workers processing ballot boxes under bright indoor lights during a tense vote tally",
+   "headline": "New Zealand Election Ends Without Clear Majority",
+   "body": "Preliminary results from New Zealand's general election showed no political party securing a clear parliamentary majority. The tight race leaves the country facing weeks of coalition negotiations to form a functioning government."
   }
  ],
- "date": "2026-11-06"
+ "date": "2026-11-07"
 }
