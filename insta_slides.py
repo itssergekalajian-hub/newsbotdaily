@@ -189,8 +189,20 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
     headers = {"x-goog-api-key": dn.GEMINI_KEY,
                "Content-Type": "application/json"}
     for attempt in range(14):
-        r = requests.post(f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
-                          headers=headers, json=body, timeout=180)
+        try:
+            r = requests.post(
+                f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
+                headers=headers, json=body, timeout=180)
+        except requests.exceptions.RequestException as exc:
+            wait = min(15 * 2 ** (attempt // 2), 240)
+            print(f"connection dropped ({exc.__class__.__name__}) on {model} "
+                  f"— waiting {wait}s")
+            if alternates and tried < len(alternates) and attempt % 2 == 1:
+                model = alternates[tried]
+                tried += 1
+                print(f"switching to alternate model: {model}")
+            time.sleep(wait)
+            continue
         if r.ok:
             break
         if r.status_code == 404 and tried < len(alternates):

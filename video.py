@@ -5,14 +5,8 @@ Everything is ffmpeg — no GPU, no paid service.
 
 Two constraints shape this module.
 
-First: NO Ken Burns. `zoompan` rounds its window position to whole pixels, so a
-slow drift holds the frame still for ten-odd frames and then snaps a pixel
-sideways. Measured on a real bulletin, most consecutive frames differed by 0.00
-and then one by 1.07 — that reads as a shake, not a drift, and slowing it down
-only lengthens the freeze between jumps. Real bulletins use locked-off cameras
-anyway, so each scene holds a still framing and the movement comes from cutting
-between framings and from graphics that travel fast enough for whole-pixel
-steps to be invisible.
+Story photos receive a gradual, centered Ken Burns push-in in `render_scene`;
+story video remains at its original framing.
 
 Second: `drawbox` evaluates its geometry once, at filter setup, so anything
 drawn with it is frozen for the whole clip. Moving elements are therefore
@@ -536,7 +530,8 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  headline: str, brand: str, date_text: str, ticker: str,
                  variant: int, elapsed: float, total: float, out: str,
                  backdrop: str | None = None, credit: str = "",
-                 anchor_video: str | None = None, badge: str = "") -> None:
+                 anchor_video: str | None = None, badge: str = "",
+                 backdrop_is_image: bool = False) -> None:
     """One topic.
 
     When the story has its own footage or photograph, that fills the screen
@@ -627,7 +622,16 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                       file=sys.stderr)
         # a touch of shade under the bar gives the credit line contrast; the
         # lower-third scrim is drawn in chrome()
-        bg = f"[0:v]drawbox=x=0:y=0:w=iw:h=180:color=black@0.28:t=fill[bg]"
+        if backdrop_is_image:
+            final_frame = max(int(seconds * FPS) - 1, 1)
+            zoom = f"min(1+0.08*on/{final_frame}\\,1.08)"
+            motion = (f"zoompan=z='{zoom}'"
+                      f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+                      f":d=1:s={W}x{H}:fps={FPS},")
+        else:
+            motion = ""
+        bg = (f"[0:v]{motion}drawbox=x=0:y=0:w=iw:h=180:"
+              f"color=black@0.28:t=fill[bg]")
         bar = (f"[bg][3:v]overlay=x='W*(({elapsed}+t)/{max(total, 1)}-1)'"
                f":y=H-8:eval=frame[bgp]")
         # the cam slides in from the right and parks top-right below the bar

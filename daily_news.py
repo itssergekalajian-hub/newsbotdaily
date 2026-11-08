@@ -1673,10 +1673,12 @@ def build(brief: dict, day: dt.date, work: str,
 
     print("finding footage:")
     backdrops: list[str | None] = []
+    still_backdrops: list[bool] = []
     credits: list[str] = []
     for i, seg in enumerate(segments):
         got = segment_media(seg, posts, work, f"m{i}", spans[i])
         backdrop = None
+        is_still = False
         if got:
             raws, credit, isvid = got
             # Turn the raw assets into a full-frame backdrop: real footage filled
@@ -1692,6 +1694,7 @@ def build(brief: dict, day: dt.date, work: str,
                 else:
                     backdrop = video.make_backdrop_multi(
                         work, raws, f"bd{i}.mp4", spans[i], i)
+                    is_still = True
                     kind = "photo" if len(raws) == 1 else f"{len(raws)} photos"
                 print(f"  {i + 1}. {seg['topic']} <- {credit} ({kind})")
             except Exception as e:
@@ -1701,6 +1704,7 @@ def build(brief: dict, day: dt.date, work: str,
         else:
             credit = ""
         backdrops.append(backdrop)
+        still_backdrops.append(is_still)
         credits.append(credit)
 
     anchor = ANCHOR_VIDEO if os.path.exists(ANCHOR_VIDEO) else None
@@ -1761,6 +1765,7 @@ def build(brief: dict, day: dt.date, work: str,
                            seg.get("headline", ""), BRAND, date_text, ticker,
                            i, elapsed, total, out, backdrop=backdrops[i],
                            credit=credits[i], anchor_video=anchor,
+                           backdrop_is_image=still_backdrops[i],
                            badge="TOP STORY" if i == 0 else "")
         elapsed += spans[i]
         parts.append(out)
