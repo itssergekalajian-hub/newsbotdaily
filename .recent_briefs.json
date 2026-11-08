@@ -1,45 +1,5 @@
 [
  {
-  "date": "2026-10-31",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Tanker Attacked in Strait of Hormuz",
-    "tease": "A commercial tanker is attacked in the strategic Strait of Hormuz"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Polish Crisis Deepens as Court Confrontation Escalates",
-    "tease": "Riot police deploy to Warsaw as Poland's constitutional standoff erupts"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Patriot Interceptors Cleared and Emotional Reunions Begin",
-    "tease": "Washington approves two billion dollars in Patriot missiles for Kyiv"
-   },
-   {
-    "topic": "United States",
-    "headline": "Court Battles Reshape Midterm Election Battlefield",
-    "tease": "Judges intervene in federal election disputes just days before voting"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Tech Giants Tumble as AI Infrastructure Fears Spread",
-    "tease": "Wall Street slides as costly AI commitments rattle investors"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Worldwide Rallies and Spacecraft Re-entry Alerts",
-    "tease": "Protests sweep major capitals while a defunct satellite descends"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "American Midterms and Baltic Security Discussions",
-    "tease": "Crucial midterm voting headlines the week ahead"
-   }
-  ]
- },
- {
   "date": "2026-11-01",
   "stories": [
    {
@@ -156,6 +116,56 @@
     "topic": "What to Watch",
     "headline": "Recount Battles and Airspace Tensions Ahead",
     "tease": "Legal fights and geopolitical flashpoints to track next."
+   }
+  ]
+ },
+ {
+  "date": "2026-11-07",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Eisenkot Given Mandate as Regional Strikes Widen",
+    "tease": "Israel faces political upheaval while regional clashes expand across the Gulf"
+   },
+   {
+    "topic": "United States",
+    "headline": "Trump Installs Hardliner Miller Following Midterm Losses",
+    "tease": "Donald Trump installs Stephen Miller to drive an aggressive West Wing agenda"
+   },
+   {
+    "topic": "Latin America",
+    "headline": "Paraguay President Peña Arrested After Senate Impeachment",
+    "tease": "Paraguay's president is impeached and placed under arrest following a banking crash"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Kyiv Power Grid Struck Ahead of Talks",
+    "tease": "Russian strikes batter Kyiv's energy infrastructure ahead of high stakes negotiations"
+   },
+   {
+    "topic": "Europe",
+    "headline": "France Gripped by Riots Over Debt Strain",
+    "tease": "Massive street unrest grips France as mounting debt squeezes public finances"
+   },
+   {
+    "topic": "Markets",
+    "headline": "OpenAI Valuation Surges as Anthropic Prepares IPO",
+    "tease": "OpenAI captures fresh billions while regulators tighten rules on tech and crypto"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global News Roundup for Saturday November Seventh",
+    "tease": "Brief stories around the globe from elections to severe winter storms"
+   },
+   {
+    "topic": "Football",
+    "headline": "Real Madrid Sweep Valencia in Dominant Display",
+    "tease": "Real Madrid cruise past Valencia to secure an eighth consecutive victory"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Trilateral Peace Talks and Coalition Deadlines Ahead",
+    "tease": "Upcoming peace negotiations and political coalition countdowns around the world"
    }
   ]
  }
