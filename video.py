@@ -555,7 +555,11 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
 
     subs = ""
     if srt and os.path.exists(srt) and os.path.getsize(srt) > 20:
-        subs = f",subtitles='{srt}'"
+        subs = (
+            f",subtitles='{srt}':force_style="
+            "'Alignment=2,MarginV=240,Fontsize=22,"
+            "PrimaryColour=&H00FFFFFF,OutlineColour=&H80000000,"
+            "BorderStyle=1,Outline=2,Shadow=1'")
 
     def chrome(show_credit: bool) -> str:
         c = [
