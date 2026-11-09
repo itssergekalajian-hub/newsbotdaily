@@ -1,39 +1,39 @@
 {
- "cover": "Global political shakeups, Middle East strikes, and major European unrest mark the day",
- "cover_scene": "A split composition showing dramatic global events, including a political hall in South America, airstrikes over a European city, and a warship navigating waters in the Middle East under heavy clouds",
+ "cover": "Global tension escalates from Middle East clashes to European unrest and political shifts",
+ "cover_scene": "A split composition depicting military air defenses over a desert horizon on one side and a dramatic European city square with emergency lights on the other.",
  "slides": [
-  {
-   "region": "Americas",
-   "photo": 15,
-   "art": "courtroom",
-   "scene": "A presidential office in Asuncion with a Paraguayan flag behind a vacant desk as security officers stand outside in bright daylight",
-   "headline": "Paraguay President Peña Ousted and Arrested",
-   "body": "Paraguay's Senate impeached and ousted President Santiago Peña following the sudden collapse of a national bank. Vice President Pedro Alliana was rapidly sworn in as head of state while Peña was placed under arrest."
-  },
   {
    "region": "Middle East",
    "photo": null,
-   "art": "naval_strait",
-   "scene": "Coastal highlands looking down on the Bab al-Mandeb Strait, with small military outposts overlooking passing cargo ships under a hazy sky",
-   "headline": "Yemeni Forces Seize Heights Near Strategic Strait",
-   "body": "Yemeni armed forces captured strategic heights overlooking the Bab al-Mandeb Strait from Saudi-backed troops. The advance places key maritime trade routes under direct observation amid intensifying regional strikes and ongoing conflict."
+   "art": "missile_strike",
+   "scene": "Air defense systems firing interceptor missiles into a night sky over a modern desert city skyline, with glowing trails interlocked in the darkness.",
+   "headline": "Saudi Arabia Intercepts Houthi Missiles Over Riyadh",
+   "body": "Saudi air defenses intercepted multiple ballistic missiles and drones targeting Riyadh and the Eastern Province. Falling debris caused minor damage to a Saudi Aramco tower as regional fighting between coalition forces and Houthis intensifies."
   },
   {
    "region": "Europe",
-   "photo": 22,
+   "photo": 4,
    "art": "city_fire",
-   "scene": "Firefighters in Kyiv working at night to extinguish flames at a damaged power facility, emergency lights glowing through smoke",
-   "headline": "Russian Airstrikes Hit Kyiv Ahead of Talks",
-   "body": "Russia launched a wave of airstrikes targeting Kyiv's power infrastructure, causing blackouts and water shortages. Emergency crews responded to damaged sites across the capital as Ukraine prepares for upcoming trilateral diplomatic talks."
+   "scene": "Emergency response vehicles with flashing blue lights parked in a grand historic European cobblestone town square, red police tape cordoning off the area.",
+   "headline": "Six Killed in Mass Shooting in Krakow",
+   "body": "A gunman opened fire in the historic main square of Krakow, Poland, killing six people. Emergency services cordoned off the tourist hub as police launched a major investigation to identify the suspect and establish a motive."
   },
   {
-   "region": "Asia-Pacific",
+   "region": "Americas",
    "photo": null,
-   "art": "election",
-   "scene": "A polling station in Wellington with election workers processing ballot boxes under bright indoor lights during a tense vote tally",
-   "headline": "New Zealand Election Ends Without Clear Majority",
-   "body": "Preliminary results from New Zealand's general election showed no political party securing a clear parliamentary majority. The tight race leaves the country facing weeks of coalition negotiations to form a functioning government."
+   "art": "assembly_podium",
+   "scene": "A grand legislative chamber with wooden desks and American flags lit from high windows as lawmakers gather.",
+   "headline": "Democrats Win Congress Majorities and Prepare Oversight",
+   "body": "Following midterm election victories securing majorities in the Senate and House, Democrats are preparing aggressive oversight probes into the Trump administration starting in January. The Justice Department warned it may launch counter-investigations into participating lawmakers."
+  },
+  {
+   "region": "Africa",
+   "photo": null,
+   "art": "city_ruins",
+   "scene": "Passenger train cars tilted off damaged rails near a rural embankment under a hazy sky, rescue teams gathered along the tracks.",
+   "headline": "Fatal Train Collision South of Cairo Kills Seven",
+   "body": "Two passenger trains collided in Giza province, Egypt, causing carriages to derail and leaving at least seven people dead and over 100 injured. President Abdel Fattah al-Sisi ordered an immediate investigation into the disaster."
   }
  ],
- "date": "2026-11-07"
+ "date": "2026-11-08"
 }
