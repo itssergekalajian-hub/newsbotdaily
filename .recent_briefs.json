@@ -1,45 +1,5 @@
 [
  {
-  "date": "2026-11-01",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Gulf Tankers Struck Amid Regional Confrontation",
-    "tease": "Maritime strikes target critical Gulf energy routes as confrontations escalate"
-   },
-   {
-    "topic": "United States",
-    "headline": "Courts and Crossovers Shake Midterm Races",
-    "tease": "Federal court rebuffs midterm challenge while party lines crack in Michigan"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Binance Covers Stolen Billions After Exploit",
-    "tease": "Crypto giant reimburses users after record six billion dollar breach"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Record Russian Casualties as Drones Strike",
-    "tease": "Kyiv strikes Russian refinery as Moscow reports record frontline casualties"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Cost of Living Rallies Turn Violent",
-    "tease": "Demonstrations spiral into clashes and looting across European capitals"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Brief News Updates Across the Globe",
-    "tease": "Turkey restricts teenage social media as global dispatches unfold"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Midterm Elections and High Stakes Ballots",
-    "tease": "Tuesday's American midterms lead the week's defining global decisions"
-   }
-  ]
- },
- {
   "date": "2026-11-02",
   "stories": [
    {
@@ -166,6 +126,51 @@
     "topic": "What to Watch",
     "headline": "Trilateral Peace Talks and Coalition Deadlines Ahead",
     "tease": "Upcoming peace negotiations and political coalition countdowns around the world"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-08",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Airstrikes and Political Reshuffles Escalating Regionally",
+    "tease": "Direct strikes and coalition politics threaten new escalation across the Middle East"
+   },
+   {
+    "topic": "United States",
+    "headline": "Democrats Prepare Oversight Following Midterm Majorities",
+    "tease": "Democrats prepare aggressive subpoenas while Trump demands new federal investigations"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Power Infrastructure Targeted Ahead of UAE Talks",
+    "tease": "Massive strikes cut power to six hundred thousand Ukrainians ahead of peace talks"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Unrest Sweeps France While Manhunt Follows Krakow Attack",
+    "tease": "French police clash with protesters while Polish authorities secure historic Krakow square"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Equities Move in Lockstep as Cybertruck Line Dismantles",
+    "tease": "Stocks move in tight synchronization as Tesla adds shifts to end Cybertruck production"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Brief Updates From Transport and International News",
+    "tease": "A train collision in Egypt and bank arrests in Paraguay cap today's regional news"
+   },
+   {
+    "topic": "Football",
+    "headline": "Sunderland Shock Chelsea as Güler Hits Madrid Milestone",
+    "tease": "Sunderland escape Premier League bottom while Arda Güler hits ten goal involvements"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Diplomatic Summits and Coalition Deadlines Heading Into Ne",
+    "tease": "Diplomatic talks in the Emirates lead a crucial week of headlines"
    }
   ]
  }
