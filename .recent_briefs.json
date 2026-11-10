@@ -1,45 +1,5 @@
 [
  {
-  "date": "2026-11-02",
-  "stories": [
-   {
-    "topic": "Cybersecurity",
-    "headline": "European Supermarket Refrigerators Spoiled in Cyberattack",
-    "tease": "Hackers target commercial refrigerators, destroying massive food supplies across Europe"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Iran and Qatar Negotiate Hormuz Shipping Terms",
-    "tease": "Tehran hinges a proposal for the Strait of Hormuz on Washington's response"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Emergency Alert Apps Hacked with Nuclear Warnings",
-    "tease": "False nuclear attack alerts trigger panic as air warning systems are breached"
-   },
-   {
-    "topic": "United States",
-    "headline": "Trump Leads Rallies as Campaign Hits Final Push",
-    "tease": "Donald Trump holds swing state rallies during final campaign push"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Wall Street Recovers Trillions Following Tech Sell-Off",
-    "tease": "US stocks rebound as crude oil drops and crypto markets stabilize"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Brief News Updates Across the Globe",
-    "tease": "Quick updates from France, Germany, Iran, and global technology developments"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "American Midterms and Global Energy Diplomacy Ahead",
-    "tease": "Key midterm elections and high-stakes Persian Gulf diplomatic decisions approach"
-   }
-  ]
- },
- {
   "date": "2026-11-06",
   "stories": [
    {
@@ -171,6 +131,51 @@
     "topic": "What to Watch",
     "headline": "Diplomatic Summits and Coalition Deadlines Heading Into Ne",
     "tease": "Diplomatic talks in the Emirates lead a crucial week of headlines"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-09",
+  "stories": [
+   {
+    "topic": "United States",
+    "headline": "Massie Introduces Hegseth Impeachment Resolution",
+    "tease": "Defense Secretary Pete Hegseth faces an impeachment showdown in Congress."
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Cross-Border Strikes Strain Iran Nuclear Diplomacy",
+    "tease": "Deadly drone strikes cut power across Iraqi Kurdistan as tensions rise."
+   },
+   {
+    "topic": "Israel",
+    "headline": "Eisenkot Opens Broad Coalition Government Negotiations",
+    "tease": "Gadi Eisenkot launches high-stakes talks to form Israel's government."
+   },
+   {
+    "topic": "Markets",
+    "headline": "Nvidia Plunges as Huang Affair Triggers Probe",
+    "tease": "Nvidia shares sink following an executive espionage investigation."
+   },
+   {
+    "topic": "Europe",
+    "headline": "France Blames Tehran for Supermarket Cyberattacks",
+    "tease": "Paris accuses Iranian forces of sabotaging French supermarket supply chains."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Industrial Disaster in Turkey and Border Wall Rulings",
+    "tease": "Quick updates from around the globe this Monday."
+   },
+   {
+    "topic": "Sport",
+    "headline": "Nine Hours Lost at Sea Ends in Miraculous Pacific Rescue",
+    "tease": "Two fishermen pull a lost cruise pianist from the open ocean."
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Trilateral Peace Negotiations and Tight Ultimatum Deadline",
+    "tease": "Key summits and votes to follow throughout the week."
    }
   ]
  }
