@@ -1,39 +1,47 @@
 {
- "cover": "Global tension escalates from Middle East clashes to European unrest and political shifts",
- "cover_scene": "A split composition depicting military air defenses over a desert horizon on one side and a dramatic European city square with emergency lights on the other.",
+ "cover": "Escalating regional clashes and political upheaval test global stability",
+ "cover_scene": "A split composition showing an industrial refinery blazing against a twilight sky beside a tense legislative assembly hall flanked by national flags.",
  "slides": [
   {
    "region": "Middle East",
-   "photo": null,
-   "art": "missile_strike",
-   "scene": "Air defense systems firing interceptor missiles into a night sky over a modern desert city skyline, with glowing trails interlocked in the darkness.",
-   "headline": "Saudi Arabia Intercepts Houthi Missiles Over Riyadh",
-   "body": "Saudi air defenses intercepted multiple ballistic missiles and drones targeting Riyadh and the Eastern Province. Falling debris caused minor damage to a Saudi Aramco tower as regional fighting between coalition forces and Houthis intensifies."
-  },
-  {
-   "region": "Europe",
-   "photo": 4,
-   "art": "city_fire",
-   "scene": "Emergency response vehicles with flashing blue lights parked in a grand historic European cobblestone town square, red police tape cordoning off the area.",
-   "headline": "Six Killed in Mass Shooting in Krakow",
-   "body": "A gunman opened fire in the historic main square of Krakow, Poland, killing six people. Emergency services cordoned off the tourist hub as police launched a major investigation to identify the suspect and establish a motive."
+   "photo": 16,
+   "art": "drones_refinery",
+   "scene": "A massive energy processing facility engulfed in towering flames and thick smoke beneath a dark night sky in northern Iraq.",
+   "headline": "Drone strike shuts Iraqi gas field and sparks blackout",
+   "body": "Iranian drone strikes struck the Khor Mor gas field in Iraqi Kurdistan, halting energy production immediately. The assault triggered widespread power outages affecting over seventy percent of the region, threatening electricity stability as wider Persian Gulf hostilities intensify."
   },
   {
    "region": "Americas",
-   "photo": null,
-   "art": "assembly_podium",
-   "scene": "A grand legislative chamber with wooden desks and American flags lit from high windows as lawmakers gather.",
-   "headline": "Democrats Win Congress Majorities and Prepare Oversight",
-   "body": "Following midterm election victories securing majorities in the Senate and House, Democrats are preparing aggressive oversight probes into the Trump administration starting in January. The Justice Department warned it may launch counter-investigations into participating lawmakers."
+   "photo": 33,
+   "art": "courtroom",
+   "scene": "The imposing neoclassical pillars of the United States Capitol under dramatic overcast skies, flanked by American flags.",
+   "headline": "House lawmaker moves to impeach Pete Hegseth",
+   "body": "Republican Representative Thomas Massie introduced eight articles of impeachment against Defense Secretary Pete Hegseth, forcing an imminent House vote. Massie accuses Hegseth of abuse of power and conducting unauthorized military operations, including an undeclared conflict with Iran."
   },
   {
-   "region": "Africa",
+   "region": "Europe",
+   "photo": 36,
+   "art": "tech_ai",
+   "scene": "Rows of empty glass-door grocery refrigerators glowing in cold neon light inside a quiet, shadowed French supermarket.",
+   "headline": "France accuses Iranian forces of supermarket cyberattacks",
+   "body": "French authorities formally blamed Iran's Revolutionary Guard for orchestrating cyberattacks that disabled refrigeration across nationwide supermarket chains, spoiling tons of food. Paris announced judicial proceedings and targeted sanctions as European intelligence confronts expanding hybrid warfare on civilian infrastructure."
+  },
+  {
+   "region": "Asia",
+   "photo": 40,
+   "art": "tech_ai",
+   "scene": "A sprawling microchip fabrication cleanroom filled with automated robotic machinery glowing beneath sharp sterile lighting.",
+   "headline": "Nvidia CEO affair probe triggers stock tumble",
+   "body": "Nvidia shares plummeted over four percent after CEO Jensen Huang admitted to a relationship with a purported Chinese spy. The company launched an internal inquiry into potential foreign espionage risks, prompting Huang to abruptly cancel major artificial intelligence conference appearances."
+  },
+  {
+   "region": "South America",
    "photo": null,
-   "art": "city_ruins",
-   "scene": "Passenger train cars tilted off damaged rails near a rural embankment under a hazy sky, rescue teams gathered along the tracks.",
-   "headline": "Fatal Train Collision South of Cairo Kills Seven",
-   "body": "Two passenger trains collided in Giza province, Egypt, causing carriages to derail and leaving at least seven people dead and over 100 injured. President Abdel Fattah al-Sisi ordered an immediate investigation into the disaster."
+   "art": "summit_hall",
+   "scene": "An outdoor altar adorned with flowers facing a sea of worshippers waving Argentine and Vatican flags in Buenos Aires.",
+   "headline": "Pope Francis returns to native Argentina",
+   "body": "Pope Francis arrived in Buenos Aires, marking his first papal trip home since his 2013 election. The pontiff faces delicate political terrain with President Javier Milei while holding public liturgies just weeks after undergoing lung cancer surgery."
   }
  ],
- "date": "2026-11-08"
+ "date": "2026-11-09"
 }
