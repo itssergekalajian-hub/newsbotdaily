@@ -1,45 +1,5 @@
 [
  {
-  "date": "2026-11-06",
-  "stories": [
-   {
-    "topic": "United States",
-    "headline": "Trump Names Miller After Midterm Blow",
-    "tease": "Trump names Stephen Miller chief of staff after midterm defeats."
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Trump Issues Direct Destruction Warning to Iran",
-    "tease": "Trump warns decisions on Iran will become clear shortly."
-   },
-   {
-    "topic": "Markets",
-    "headline": "Global Tech Rout Wipes Hundreds of Billions",
-    "tease": "Tech stocks suffer worst single day since twenty twenty."
-   },
-   {
-    "topic": "Automotive",
-    "headline": "Tesla to Halt Cybertruck Production by Twenty Twenty Seven",
-    "tease": "Tesla phases out polarizing Cybertruck to prioritize robotics."
-   },
-   {
-    "topic": "Latin America",
-    "headline": "Paraguay President Resigns Over Major Bank Collapse",
-    "tease": "Paraguay's president resigns following a major banking crisis."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Capital Sentences Commuted and European Sites Breached",
-    "tease": "News briefs from California to Europe and West Virginia."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Recount Battles and Airspace Tensions Ahead",
-    "tease": "Legal fights and geopolitical flashpoints to track next."
-   }
-  ]
- },
- {
   "date": "2026-11-07",
   "stories": [
    {
@@ -176,6 +136,51 @@
     "topic": "What to Watch",
     "headline": "Trilateral Peace Negotiations and Tight Ultimatum Deadline",
     "tease": "Key summits and votes to follow throughout the week."
+   }
+  ]
+ },
+ {
+  "date": "2026-11-10",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Trump Declares Open Iran War Effectively Over",
+    "tease": "Donald Trump declares the military confrontation with Iran is effectively over"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Constructive First Day for Abu Dhabi Talks",
+    "tease": "Negotiators convene in Abu Dhabi as frontline drone fighting rages"
+   },
+   {
+    "topic": "United States",
+    "headline": "Pentagon Chief Pete Hegseth Faces Impeachment",
+    "tease": "Pentagon chief Pete Hegseth faces an escalating congressional impeachment fight"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Trump Confirms FBI Probe Into Nvidia Boss",
+    "tease": "The FBI investigates Nvidia's chief executive over an alleged spy affair"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Hot Inflation Sparks Federal Reserve Rate Fears",
+    "tease": "Hot inflation figures raise the specter of aggressive interest rate hikes"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Corporate Restructuring and Regulatory Warnings",
+    "tease": "Qantas cuts hundreds of jobs to fund artificial intelligence expansion"
+   },
+   {
+    "topic": "Football",
+    "headline": "Bournemouth Defender James Hill Earns England Call",
+    "tease": "Bournemouth defender James Hill receives his first senior England call-up"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Crucial Trilateral Diplomacy and Coalition Deadlines",
+    "tease": "Diplomatic summits and critical political votes define the days ahead"
    }
   ]
  }
