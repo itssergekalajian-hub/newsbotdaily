@@ -1,47 +1,47 @@
 {
- "cover": "Escalating regional clashes and political upheaval test global stability",
- "cover_scene": "A split composition showing an industrial refinery blazing against a twilight sky beside a tense legislative assembly hall flanked by national flags.",
+ "cover": "Diplomatic talks begin in Abu Dhabi as Middle East conflict shifts",
+ "cover_scene": "An imposing international negotiation table flanked by American, Ukrainian, and Russian flags inside an Abu Dhabi conference hall under soft morning light",
  "slides": [
   {
    "region": "Middle East",
-   "photo": 16,
-   "art": "drones_refinery",
-   "scene": "A massive energy processing facility engulfed in towering flames and thick smoke beneath a dark night sky in northern Iraq.",
-   "headline": "Drone strike shuts Iraqi gas field and sparks blackout",
-   "body": "Iranian drone strikes struck the Khor Mor gas field in Iraqi Kurdistan, halting energy production immediately. The assault triggered widespread power outages affecting over seventy percent of the region, threatening electricity stability as wider Persian Gulf hostilities intensify."
-  },
-  {
-   "region": "Americas",
-   "photo": 33,
-   "art": "courtroom",
-   "scene": "The imposing neoclassical pillars of the United States Capitol under dramatic overcast skies, flanked by American flags.",
-   "headline": "House lawmaker moves to impeach Pete Hegseth",
-   "body": "Republican Representative Thomas Massie introduced eight articles of impeachment against Defense Secretary Pete Hegseth, forcing an imminent House vote. Massie accuses Hegseth of abuse of power and conducting unauthorized military operations, including an undeclared conflict with Iran."
+   "photo": null,
+   "art": "summit_hall",
+   "scene": "Delegates seated along an expansive wooden summit table inside a modern Abu Dhabi palace hall with ornate arched windows",
+   "headline": "Russia and Ukraine Open Abu Dhabi Talks",
+   "body": "Russian and Ukrainian officials convened in Abu Dhabi for US-mediated negotiations following Donald Trump's signal that a settlement is possible. The delegations are discussing a new security framework to de-escalate the war after months of stalled diplomacy."
   },
   {
    "region": "Europe",
-   "photo": 36,
+   "photo": 17,
    "art": "tech_ai",
-   "scene": "Rows of empty glass-door grocery refrigerators glowing in cold neon light inside a quiet, shadowed French supermarket.",
-   "headline": "France accuses Iranian forces of supermarket cyberattacks",
-   "body": "French authorities formally blamed Iran's Revolutionary Guard for orchestrating cyberattacks that disabled refrigeration across nationwide supermarket chains, spoiling tons of food. Paris announced judicial proceedings and targeted sanctions as European intelligence confronts expanding hybrid warfare on civilian infrastructure."
+   "scene": "A Parisian government ministry room illuminated by television camera lights with French and European Union flags standing behind an empty podium",
+   "headline": "France Pledges Retaliation Over Iranian Cyberattack",
+   "body": "The French government vowed a firm response after attributing a major cyberattack on supermarket refrigeration infrastructure to Iranian state actors. Officials condemned the breach of critical food supply networks and are preparing formal retaliatory measures."
+  },
+  {
+   "region": "Americas",
+   "photo": 29,
+   "art": "assembly_podium",
+   "scene": "The illuminated dome of the United States Capitol at night behind the empty mahogany dais of a congressional chamber",
+   "headline": "Pentagon Chief Hegseth Faces Impeachment Effort",
+   "body": "US Defense Secretary Pete Hegseth faces an impeachment bid in Congress, placing the Pentagon chief under intense legislative scrutiny. Lawmakers have initiated proceedings amid mounting political friction in Washington, setting up a high-stakes standoff on Capitol Hill."
   },
   {
    "region": "Asia",
-   "photo": 40,
-   "art": "tech_ai",
-   "scene": "A sprawling microchip fabrication cleanroom filled with automated robotic machinery glowing beneath sharp sterile lighting.",
-   "headline": "Nvidia CEO affair probe triggers stock tumble",
-   "body": "Nvidia shares plummeted over four percent after CEO Jensen Huang admitted to a relationship with a purported Chinese spy. The company launched an internal inquiry into potential foreign espionage risks, prompting Huang to abruptly cancel major artificial intelligence conference appearances."
+   "photo": null,
+   "art": "markets_up",
+   "scene": "A bustling East Asian container shipping port at sunset with towering cranes loading cargo vessels flying Chinese flags",
+   "headline": "China Trade Growth Surges Past Forecasts",
+   "body": "China reported a 35.2% jump in October exports and a 41.6% rise in imports, easily beating market expectations. While surging imports narrowed the monthly surplus, China's annual trade surplus topped $1 trillion, underscoring resilient global manufacturing demand."
   },
   {
-   "region": "South America",
-   "photo": null,
-   "art": "summit_hall",
-   "scene": "An outdoor altar adorned with flowers facing a sea of worshippers waving Argentine and Vatican flags in Buenos Aires.",
-   "headline": "Pope Francis returns to native Argentina",
-   "body": "Pope Francis arrived in Buenos Aires, marking his first papal trip home since his 2013 election. The pontiff faces delicate political terrain with President Javier Milei while holding public liturgies just weeks after undergoing lung cancer surgery."
+   "region": "Sports",
+   "photo": 24,
+   "art": "football_night",
+   "scene": "A modern European football stadium glittering under night floodlights with a polished silver trophy on a central pedestal amidst falling confetti",
+   "headline": "UEFA Expands Women Champions League Prize Fund",
+   "body": "UEFA unveiled an 18.2 million euro prize pot for the 2026-27 Women's Champions League, alongside 7.7 million euros for qualifying rounds. The governing body will also distribute millions in solidarity payments to national football associations to boost the sport."
   }
  ],
- "date": "2026-11-09"
+ "date": "2026-11-10"
 }
