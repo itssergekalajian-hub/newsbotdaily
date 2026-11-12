@@ -1,47 +1,55 @@
 {
- "cover": "Diplomatic talks begin in Abu Dhabi as Middle East conflict shifts",
- "cover_scene": "An imposing international negotiation table flanked by American, Ukrainian, and Russian flags inside an Abu Dhabi conference hall under soft morning light",
+ "cover": "Diplomatic pushes, military shakeups, and political resignations reshape global affairs",
+ "cover_scene": "A split view of global capitals under dramatic skies, featuring diplomatic conference tables, military headquarters, and government domes.",
  "slides": [
+  {
+   "region": "Europe",
+   "photo": null,
+   "art": "summit_hall",
+   "scene": "US, Russian, and Ukrainian flags displayed around a formal negotiation table in a grand hall, illuminated by soft amber lighting.",
+   "headline": "US Envoys Plan Peace Talks After Abu Dhabi Summit",
+   "body": "US special envoys Jared Kushner and Steve Witkoff will meet separately with Vladimir Putin and Volodymyr Zelenskyy following talks in Abu Dhabi. Negotiation teams agreed on a large-scale prisoner exchange despite lacking a major peace breakthrough."
+  },
   {
    "region": "Middle East",
    "photo": null,
-   "art": "summit_hall",
-   "scene": "Delegates seated along an expansive wooden summit table inside a modern Abu Dhabi palace hall with ornate arched windows",
-   "headline": "Russia and Ukraine Open Abu Dhabi Talks",
-   "body": "Russian and Ukrainian officials convened in Abu Dhabi for US-mediated negotiations following Donald Trump's signal that a settlement is possible. The delegations are discussing a new security framework to de-escalate the war after months of stalled diplomacy."
-  },
-  {
-   "region": "Europe",
-   "photo": 17,
-   "art": "tech_ai",
-   "scene": "A Parisian government ministry room illuminated by television camera lights with French and European Union flags standing behind an empty podium",
-   "headline": "France Pledges Retaliation Over Iranian Cyberattack",
-   "body": "The French government vowed a firm response after attributing a major cyberattack on supermarket refrigeration infrastructure to Iranian state actors. Officials condemned the breach of critical food supply networks and are preparing formal retaliatory measures."
-  },
-  {
-   "region": "Americas",
-   "photo": 29,
-   "art": "assembly_podium",
-   "scene": "The illuminated dome of the United States Capitol at night behind the empty mahogany dais of a congressional chamber",
-   "headline": "Pentagon Chief Hegseth Faces Impeachment Effort",
-   "body": "US Defense Secretary Pete Hegseth faces an impeachment bid in Congress, placing the Pentagon chief under intense legislative scrutiny. Lawmakers have initiated proceedings amid mounting political friction in Washington, setting up a high-stakes standoff on Capitol Hill."
+   "art": "naval_strait",
+   "scene": "A military convoy escorting a dark sedan into a heavily fortified base at dusk, with naval vessels visible in a nearby strait.",
+   "headline": "US Treasury Secretary Relocates Over Iranian Threats",
+   "body": "US Treasury Secretary Scott Bessent moved to a secure military base following intelligence regarding Iranian threats against his life. The security measure follows similar relocations by top administration officials amid ongoing tensions with Tehran."
   },
   {
    "region": "Asia",
+   "photo": 34,
+   "art": "election",
+   "scene": "An empty wooden vice-presidential chair inside a grand legislative chamber beside an Indonesian flag, lit by a soft spotlight.",
+   "headline": "Indonesian Vice President Resigns Over Campaign Credentials",
+   "body": "Indonesian Vice-President Gibran Rakabuming Raka submitted his resignation after a Supreme Court ruling invalidated a high-school document from his 2024 campaign. The sudden departure threatens to destabilize President Prabowo Subianto's ruling coalition."
+  },
+  {
+   "region": "Americas",
+   "photo": 12,
+   "art": "assembly_podium",
+   "scene": "A wooden podium in a marble government hall under bright press lights, flanked by American flags.",
+   "headline": "US House Blocks Impeachment Bid Against Defense Chief",
+   "body": "House Republicans blocked an impeachment resolution targeting Defense Secretary Pete Hegseth over accusations of unauthorized military actions against Iran. President Trump praised the vote, halting the effort before reaching a full House floor vote."
+  },
+  {
+   "region": "Africa",
    "photo": null,
-   "art": "markets_up",
-   "scene": "A bustling East Asian container shipping port at sunset with towering cranes loading cargo vessels flying Chinese flags",
-   "headline": "China Trade Growth Surges Past Forecasts",
-   "body": "China reported a 35.2% jump in October exports and a 41.6% rise in imports, easily beating market expectations. While surging imports narrowed the monthly surplus, China's annual trade surplus topped $1 trillion, underscoring resilient global manufacturing demand."
+   "art": "city_fire",
+   "scene": "A clinical medical ward at sunset, with a silhouette of a patient stepping out into bright daylight.",
+   "headline": "Kenya Discharges Last Ebola Patient in Major Milestone",
+   "body": "Kenya discharged its final Ebola patient, per the BBC, marking a crucial step toward virus-free status. The country has initiated a mandatory 42-day countdown before health authorities can officially declare the outbreak ended."
   },
   {
    "region": "Sports",
-   "photo": 24,
+   "photo": null,
    "art": "football_night",
-   "scene": "A modern European football stadium glittering under night floodlights with a polished silver trophy on a central pedestal amidst falling confetti",
-   "headline": "UEFA Expands Women Champions League Prize Fund",
-   "body": "UEFA unveiled an 18.2 million euro prize pot for the 2026-27 Women's Champions League, alongside 7.7 million euros for qualifying rounds. The governing body will also distribute millions in solidarity payments to national football associations to boost the sport."
+   "scene": "A high-angle view of Old Trafford stadium illuminated at night under light rain.",
+   "headline": "Manchester United Advance Talks to Appoint Mauricio Pochettino",
+   "body": "Manchester United are progressing in negotiations to hire former Tottenham and Chelsea manager Mauricio Pochettino as their new head coach. Reports indicate he has emerged as the leading candidate for the vacant role."
   }
  ],
- "date": "2026-11-10"
+ "date": "2026-11-11"
 }
