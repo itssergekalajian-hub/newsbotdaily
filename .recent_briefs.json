@@ -1,55 +1,5 @@
 [
  {
-  "date": "2026-11-07",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Eisenkot Given Mandate as Regional Strikes Widen",
-    "tease": "Israel faces political upheaval while regional clashes expand across the Gulf"
-   },
-   {
-    "topic": "United States",
-    "headline": "Trump Installs Hardliner Miller Following Midterm Losses",
-    "tease": "Donald Trump installs Stephen Miller to drive an aggressive West Wing agenda"
-   },
-   {
-    "topic": "Latin America",
-    "headline": "Paraguay President Peña Arrested After Senate Impeachment",
-    "tease": "Paraguay's president is impeached and placed under arrest following a banking crash"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Kyiv Power Grid Struck Ahead of Talks",
-    "tease": "Russian strikes batter Kyiv's energy infrastructure ahead of high stakes negotiations"
-   },
-   {
-    "topic": "Europe",
-    "headline": "France Gripped by Riots Over Debt Strain",
-    "tease": "Massive street unrest grips France as mounting debt squeezes public finances"
-   },
-   {
-    "topic": "Markets",
-    "headline": "OpenAI Valuation Surges as Anthropic Prepares IPO",
-    "tease": "OpenAI captures fresh billions while regulators tighten rules on tech and crypto"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global News Roundup for Saturday November Seventh",
-    "tease": "Brief stories around the globe from elections to severe winter storms"
-   },
-   {
-    "topic": "Football",
-    "headline": "Real Madrid Sweep Valencia in Dominant Display",
-    "tease": "Real Madrid cruise past Valencia to secure an eighth consecutive victory"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Trilateral Peace Talks and Coalition Deadlines Ahead",
-    "tease": "Upcoming peace negotiations and political coalition countdowns around the world"
-   }
-  ]
- },
- {
   "date": "2026-11-08",
   "stories": [
    {
@@ -181,6 +131,51 @@
     "topic": "What to Watch",
     "headline": "Crucial Trilateral Diplomacy and Coalition Deadlines",
     "tease": "Diplomatic summits and critical political votes define the days ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-11",
+  "stories": [
+   {
+    "topic": "United States",
+    "headline": "House GOP Blocks Hegseth Impeachment Bid",
+    "tease": "House Republicans block a high-profile bid to impeach Defense Secretary Pete Hegseth"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "US Envoys Plan Meetings After Abu Dhabi Talks",
+    "tease": "US envoys prepare to meet Putin and Zelenskyy after Abu Dhabi talks end"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Tehran Signals Long Fight as Israeli Session Clashes",
+    "tease": "Tehran warns wartime negotiations could last decades as regional strikes continue"
+   },
+   {
+    "topic": "Markets",
+    "headline": "CoreWeave Earnings Rebound Tech as Yields Surge",
+    "tease": "Tech stocks rebound on CoreWeave results as bond yields approach five percent"
+   },
+   {
+    "topic": "Europe",
+    "headline": "School Bomb Hoaxes Trigger Mass Evacuations",
+    "tease": "Massive bomb threat hoaxes force school evacuations across Italy and Britain"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Briefs: Protests, Resignations, and Deals",
+    "tease": "Quick updates from Indonesia, Spain, Haiti, and Manchester"
+   },
+   {
+    "topic": "Human Interest",
+    "headline": "Baby Rescued After Being Buried Alive",
+    "tease": "Eleven-month-old baby safely rescued in South Carolina after buried ordeal"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "High-Stakes Talks and Impeachment Deadlines Ahead",
+    "tease": "Key diplomatic meetings and political deadlines to watch this week"
    }
   ]
  }
