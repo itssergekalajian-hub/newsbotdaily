@@ -107,7 +107,7 @@ def framing(presenter: str, variant: int) -> str:
 # what makes the delivery sound continuous rather than stop-start.
 TRIM = ("silenceremove=start_periods=1:start_silence=0:start_threshold=-50dB"
         ":detection=peak,areverse,"
-        "silenceremove=start_periods=1:start_silence=0:start_threshold=-50dB"
+        "silenceremove=start_periods=1:start_silence=0.15:start_threshold=-50dB"
         ":detection=peak,areverse")
 
 
@@ -143,12 +143,14 @@ def pad_audio_tail(src: str, dst: str, seconds: float) -> str:
 # The broadcast speech chain. Raw TTS comes out quiet and dynamically flat-
 # footed — peaks well below full scale, energy that sags mid-sentence — which
 # on a phone speaker reads as a weak, unfocused voice. Rolling off the rumble,
-# compressing 3:1 and normalising to a loud broadcast target (-15 LUFS) gives
-# the read the up-front presence of a transmitted signal; the music duck keys
-# off it more decisively too. Applied once per finished narration, never per
-# sentence (per-sentence normalisation would pump the level between lines).
-SPEECH = ("highpass=f=70,"
-          "acompressor=threshold=-18dB:ratio=3:attack=8:release=150:makeup=4dB,"
+# adding a gentle presence EQ, compressing 2.8:1 and normalising to a loud
+# broadcast target (-15 LUFS) gives the read the up-front presence of a
+# transmitted signal. Applied once per finished narration, never per sentence
+# (per-sentence normalisation would pump the level between lines).
+SPEECH = ("highpass=f=75,"
+          "equalizer=f=160:width_type=q:w=1.2:g=2,"
+          "equalizer=f=3800:width_type=q:w=1.4:g=1.8,"
+          "acompressor=threshold=-18dB:ratio=2.8:attack=10:release=180:makeup=3.5dB,"
           "loudnorm=I=-15:TP=-1.2:LRA=11")
 
 
@@ -567,13 +569,20 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
             f"drawbox=x=0:y=78:w=iw:h=4:color={RED}:t=fill",
             f"drawtext=fontfile={BOLD}:textfile={bf}:fontcolor=white:fontsize=34:x=45:y=22",
             f"drawtext=fontfile={REGULAR}:textfile={df}:fontcolor={PALE}:fontsize=27:x=w-tw-45:y=26",
-            # scrim so the lower third and captions stay readable over a bright frame
-            f"drawbox=x=0:y=ih-322:w=iw:h=322:color=black@0.45:t=fill",
-            # topic plate slides in over the first half second, then holds
+        ]
+        # A stepped alpha ramp gives the lower third and captions a soft
+        # gradient instead of a hard-edged solid scrim.
+        for i in range(14):
+            y = H - 322 + i * 23
+            alpha = 0.04 + i * 0.032
+            c.append(
+                f"drawbox=x=0:y={y}:w=iw:h=23:"
+                f"color=black@{alpha:.3f}:t=fill")
+        # topic plate slides in over the first half second, then holds
+        c.append(
             f"drawtext=fontfile={BOLD}:textfile={tf}:fontcolor=white:fontsize=38"
             f":box=1:boxcolor={RED}@0.96:boxborderw=22"
-            f":x='-840+min(t/0.5\\,1)*882':y=771",
-        ]
+            f":x='-840+min(t/0.5\\,1)*882':y=771")
         if bdg:
             # a small white flag above the topic plate ("TOP STORY")
             c.append(
@@ -606,6 +615,7 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
         return ",".join(c)
 
     prog = f"color=c={RED}@0.9:s={W}x8:r={FPS}:d={seconds + 1}"
+    story_prog = f"color=c={RED}@0.9:s={W}x4:r={FPS}:d={seconds + 0.1}"
 
     # 1. Immersive: full-frame story footage + anchor corner cam. The cam is
     # the LIVING anchor when an animated anchor clip exists — a looping video
@@ -628,8 +638,10 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
         # lower-third scrim is drawn in chrome()
         if backdrop_is_image:
             final_frame = max(int(seconds * FPS) - 1, 1)
-            zoom = f"min(1+0.08*on/{final_frame}\\,1.08)"
-            motion = (f"zoompan=z='{zoom}'"
+            zoom = f"min(1+0.04*on/{final_frame}\\,1.04)"
+            motion = (f"scale=3840:2160:force_original_aspect_ratio=increase:"
+                      f"flags=lanczos,crop=3840:2160,"
+                      f"zoompan=z='{zoom}'"
                       f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
                       f":d=1:s={W}x{H}:fps={FPS},")
         else:
@@ -641,13 +653,18 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
         # the cam slides in from the right and parks top-right below the bar
         cam = (f"[bgp][ins]overlay=eval=frame"
                f":x='W-min(t/0.5\\,1)*(w+36)':y=105[cam]")
-        graph = f"{ins};{bg};{bar};{cam};[cam]{chrome(True)}{subs}[v]"
+        graph = (
+            f"{ins};{bg};{bar};{cam};[cam]{chrome(True)}{subs}[decorated];"
+            f"[decorated][4:v]overlay="
+            f"x='-W+W*min(t/{max(seconds, 0.001):.3f}\\,1)'"
+            f":y=H-322:eval=frame[v]")
         try:
             run(["ffmpeg", "-y", "-loglevel", "error",
                  "-i", backdrop,
                  "-i", audio,
                  *cam_in,
                  "-f", "lavfi", "-i", prog,
+                 "-f", "lavfi", "-i", story_prog,
                  "-filter_complex", graph,
                  "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
             return
@@ -659,17 +676,24 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
     # animated anchor looped and framed when available, the still otherwise.
     bar = (f"[bg][2:v]overlay=x='W*(({elapsed}+t)/{max(total, 1)}-1)'"
            f":y=H-8:eval=frame[p]")
+    story_overlay = (
+        f"[decorated][3:v]overlay="
+        f"x='-W+W*min(t/{max(seconds, 0.001):.3f}\\,1)'"
+        f":y=H-322:eval=frame[v]")
     plain = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}"
     if anchor_video and os.path.exists(anchor_video):
         try:
             loop = anchor_loop(work, anchor_video, seconds,
                                framing(anchor_video, variant),
                                f"full{variant}.mp4")
-            graph = f"[0:v]null[bg];{bar};[p]{chrome(False)}{subs}[v]"
+            graph = (
+                f"[0:v]null[bg];{bar};[p]{chrome(False)}{subs}[decorated];"
+                f"{story_overlay}")
             run(["ffmpeg", "-y", "-loglevel", "error",
                  "-i", loop,
                  "-i", audio,
                  "-f", "lavfi", "-i", prog,
+                 "-f", "lavfi", "-i", story_prog,
                  "-filter_complex", graph,
                  "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
             return
@@ -677,12 +701,15 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
             print(f"  scene '{topic}' animated-anchor render failed "
                   f"({str(e)[:100]}) — still anchor", file=sys.stderr)
     for label, base in (("framed", framing(presenter, variant)), ("plain", plain)):
-        graph = f"[0:v]{base}[bg];{bar};[p]{chrome(False)}{subs}[v]"
+        graph = (
+            f"[0:v]{base}[bg];{bar};[p]{chrome(False)}{subs}[decorated];"
+            f"{story_overlay}")
         try:
             run(["ffmpeg", "-y", "-loglevel", "error",
                  "-loop", "1", "-framerate", str(FPS), "-i", presenter,
                  "-i", audio,
                  "-f", "lavfi", "-i", prog,
+                 "-f", "lavfi", "-i", story_prog,
                  "-filter_complex", graph,
                  "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
             return

@@ -1067,12 +1067,31 @@ def _speak_gtts(text: str, mp3_path: str) -> None:
 
 
 async def _speak(text: str, mp3_path: str) -> None:
+    last_error = None
+    for attempt in range(3):
+        try:
+            await edge_tts.Communicate(
+                text, VOICE, rate=RATE, pitch=PITCH).save(mp3_path)
+            return
+        except Exception as e:
+            last_error = e
+            if os.path.exists(mp3_path):
+                os.remove(mp3_path)
+            if attempt < 2:
+                print(f"    edge-tts attempt {attempt + 1}/3 failed "
+                      f"({str(e)[:100]}) — retrying in 3s",
+                      file=sys.stderr)
+                await asyncio.sleep(3)
+
+    print(f"    edge-tts failed after 3 attempts "
+          f"({str(last_error)[:120]}) — using gTTS",
+          file=sys.stderr)
     try:
-        await edge_tts.Communicate(text, VOICE, rate=RATE, pitch=PITCH).save(mp3_path)
-    except Exception as e:
-        print(f"    edge-tts failed ({str(e)[:120]}) — using gTTS",
-              file=sys.stderr)
         await asyncio.to_thread(_speak_gtts, text, mp3_path)
+    except Exception:
+        if os.path.exists(mp3_path):
+            os.remove(mp3_path)
+        raise
 
 
 def _gap_after(sentence: str) -> float:
@@ -1252,20 +1271,12 @@ def voice_segment(text: str, mp3_path: str, srt_path: str, work: str,
     pieces, cues, clock = [], [], 0.0
     for i, sent in enumerate(sentences):
         raw = os.path.join(work, f"{tag}_{i:03d}_raw.mp3")
-        # edge-tts drops a request now and then (NoAudioReceived, a websocket
-        # reset). One flaky sentence must never kill the whole nightly build:
-        # retry with a short pause, and as a last resort skip the sentence —
-        # a bulletin missing one line beats no bulletin at all.
-        for attempt in range(3):
-            try:
-                asyncio.run(_speak(sent, raw))
-                break
-            except Exception as e:
-                if attempt == 2:
-                    print(f"    tts failed on one sentence after 3 tries "
-                          f"({str(e)[:60]}) — skipped")
-                else:
-                    time.sleep(2 * (attempt + 1))
+        try:
+            asyncio.run(_speak(sent, raw))
+        except Exception as e:
+            print(f"    tts failed on one sentence ({str(e)[:80]}) — skipped",
+                  file=sys.stderr)
+            continue
         if not os.path.exists(raw) or os.path.getsize(raw) < 200:
             continue                          # skip anything the voice refused
         clip = os.path.join(work, f"{tag}_{i:03d}.wav")
@@ -1332,9 +1343,8 @@ CLIPS = os.getenv("SOURCE_CLIPS", "1") == "1"
 MUSIC = os.getenv("MUSIC_BED", "1") == "1"
 # a held beat after each topic and a dissolve into the next, so the bulletin
 # moves between stories the way a broadcast does rather than snapping across
-TOPIC_PAUSE = float(os.getenv("TOPIC_PAUSE", "0.8"))
-# 0.7s sits inside the 0.8s held beat, so the dissolve rides the silence and
-# the incoming picture is fully up before its narration starts
+TOPIC_PAUSE = float(os.getenv("TOPIC_PAUSE", "0.25"))
+# the dissolve rides this short held beat
 SCENE_XFADE = float(os.getenv("SCENE_XFADE", "0.7"))
 
 UA_HEADERS = {"User-Agent": "MidWorldDaily/1.0 (Telegram news digest bot)"}
@@ -1727,12 +1737,12 @@ def build(brief: dict, day: dt.date, work: str,
             line += "."
         spoken = f"Tonight: {line}" if not head_items else line
         raw = os.path.join(work, f"tease{i}_raw.mp3")
-        for attempt in range(3):
-            try:
-                asyncio.run(_speak(spoken, raw))
-                break
-            except Exception:
-                time.sleep(2 * (attempt + 1))
+        try:
+            asyncio.run(_speak(spoken, raw))
+        except Exception as e:
+            print(f"    cold-open tts failed ({str(e)[:80]}) — skipped",
+                  file=sys.stderr)
+            continue
         if not os.path.exists(raw) or os.path.getsize(raw) < 200:
             continue
         wav = os.path.join(work, f"tease{i}.wav")
