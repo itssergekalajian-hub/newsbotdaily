@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-08",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Airstrikes and Political Reshuffles Escalating Regionally",
-    "tease": "Direct strikes and coalition politics threaten new escalation across the Middle East"
-   },
-   {
-    "topic": "United States",
-    "headline": "Democrats Prepare Oversight Following Midterm Majorities",
-    "tease": "Democrats prepare aggressive subpoenas while Trump demands new federal investigations"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Power Infrastructure Targeted Ahead of UAE Talks",
-    "tease": "Massive strikes cut power to six hundred thousand Ukrainians ahead of peace talks"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Unrest Sweeps France While Manhunt Follows Krakow Attack",
-    "tease": "French police clash with protesters while Polish authorities secure historic Krakow square"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Equities Move in Lockstep as Cybertruck Line Dismantles",
-    "tease": "Stocks move in tight synchronization as Tesla adds shifts to end Cybertruck production"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Brief Updates From Transport and International News",
-    "tease": "A train collision in Egypt and bank arrests in Paraguay cap today's regional news"
-   },
-   {
-    "topic": "Football",
-    "headline": "Sunderland Shock Chelsea as Güler Hits Madrid Milestone",
-    "tease": "Sunderland escape Premier League bottom while Arda Güler hits ten goal involvements"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Diplomatic Summits and Coalition Deadlines Heading Into Ne",
-    "tease": "Diplomatic talks in the Emirates lead a crucial week of headlines"
-   }
-  ]
- },
- {
   "date": "2026-11-09",
   "stories": [
    {
@@ -176,6 +131,51 @@
     "topic": "What to Watch",
     "headline": "High-Stakes Talks and Impeachment Deadlines Ahead",
     "tease": "Key diplomatic meetings and political deadlines to watch this week"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-12",
+  "stories": [
+   {
+    "topic": "Technology",
+    "headline": "Jensen Huang Resigns as Nvidia Chief Executive",
+    "tease": "Nvidia chief Jensen Huang resigns following espionage probe and executive affairs"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "US Envoys Meet Putin in Kremlin Talks",
+    "tease": "American envoys land in Moscow for direct peace talks with Vladimir Putin"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Israeli Strike Hits Hospital in Southern Gaza",
+    "tease": "Israeli missile strike hits Khan Younis hospital as regional threats elevate"
+   },
+   {
+    "topic": "United States",
+    "headline": "Democrat Scott Colom Wins Historic Mississippi Senate Seat",
+    "tease": "Scott Colom makes history in Mississippi Senate race as Washington sees unrest"
+   },
+   {
+    "topic": "Europe",
+    "headline": "European Leaders Summit in Dublin on Security",
+    "tease": "European leaders convene in Dublin to tackle cyber threats and state sabotage"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Briefs: Markets, Trade, and Rescuers",
+    "tease": "Global market shifts and technical bugs mark today's economic headlines"
+   },
+   {
+    "topic": "Human Interest",
+    "headline": "Missing Australian Teen Rescued Alive in Bushland",
+    "tease": "A missing Australian teenager is found alive after six days lost outdoors"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Trilateral Peace Summit and High-Stakes Tech Transition",
+    "tease": "Key peace negotiations and corporate transitions ahead in the coming days"
    }
   ]
  }
