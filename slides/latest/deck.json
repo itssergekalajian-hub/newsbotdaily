@@ -1,55 +1,39 @@
 {
- "cover": "Diplomatic pushes, military shakeups, and political resignations reshape global affairs",
- "cover_scene": "A split view of global capitals under dramatic skies, featuring diplomatic conference tables, military headquarters, and government domes.",
+ "cover": "Nvidia chief resigns amid scandal while US envoys pursue Ukraine peace talks",
+ "cover_scene": "A split composition featuring glowing silicon microchips on one side and a grand diplomatic hall with foreign flags on the other under dramatic lightning",
  "slides": [
   {
-   "region": "Europe",
+   "region": "Americas",
    "photo": null,
+   "art": "tech_ai",
+   "scene": "A modern glass tech headquarters at dusk with a dark silhouette of an executive walking away, bathed in glowing green circuit lights",
+   "headline": "Nvidia CEO Jensen Huang resigns over scandal",
+   "body": "Nvidia co-founder and CEO Jensen Huang has stepped down following disclosures of extramarital relationships, including one with a woman suspected of being a Chinese spy. CFO Colette Kress takes over as interim CEO while the board seeks a permanent successor."
+  },
+  {
+   "region": "Europe",
+   "photo": 30,
    "art": "summit_hall",
-   "scene": "US, Russian, and Ukrainian flags displayed around a formal negotiation table in a grand hall, illuminated by soft amber lighting.",
-   "headline": "US Envoys Plan Peace Talks After Abu Dhabi Summit",
-   "body": "US special envoys Jared Kushner and Steve Witkoff will meet separately with Vladimir Putin and Volodymyr Zelenskyy following talks in Abu Dhabi. Negotiation teams agreed on a large-scale prisoner exchange despite lacking a major peace breakthrough."
+   "scene": "A high-stakes diplomatic delegation standing inside a gilded Kremlin negotiation hall with Russian and American flags in the background",
+   "headline": "US envoys meet Putin in Moscow for talks",
+   "body": "US mediators Jared Kushner and Steve Witkoff met Russian President Vladimir Putin in Moscow following negotiations in Abu Dhabi. Moscow agreed to include European negotiators in the next round of Ukraine peace discussions, per BBC."
   },
   {
    "region": "Middle East",
-   "photo": null,
-   "art": "naval_strait",
-   "scene": "A military convoy escorting a dark sedan into a heavily fortified base at dusk, with naval vessels visible in a nearby strait.",
-   "headline": "US Treasury Secretary Relocates Over Iranian Threats",
-   "body": "US Treasury Secretary Scott Bessent moved to a secure military base following intelligence regarding Iranian threats against his life. The security measure follows similar relocations by top administration officials amid ongoing tensions with Tehran."
-  },
-  {
-   "region": "Asia",
-   "photo": 34,
-   "art": "election",
-   "scene": "An empty wooden vice-presidential chair inside a grand legislative chamber beside an Indonesian flag, lit by a soft spotlight.",
-   "headline": "Indonesian Vice President Resigns Over Campaign Credentials",
-   "body": "Indonesian Vice-President Gibran Rakabuming Raka submitted his resignation after a Supreme Court ruling invalidated a high-school document from his 2024 campaign. The sudden departure threatens to destabilize President Prabowo Subianto's ruling coalition."
-  },
-  {
-   "region": "Americas",
-   "photo": 12,
-   "art": "assembly_podium",
-   "scene": "A wooden podium in a marble government hall under bright press lights, flanked by American flags.",
-   "headline": "US House Blocks Impeachment Bid Against Defense Chief",
-   "body": "House Republicans blocked an impeachment resolution targeting Defense Secretary Pete Hegseth over accusations of unauthorized military actions against Iran. President Trump praised the vote, halting the effort before reaching a full House floor vote."
+   "photo": 16,
+   "art": "city_ruins",
+   "scene": "Emergency responders searching through the concrete rubble of a damaged multi-story hospital building illuminated by spotlight beams at night",
+   "headline": "Israeli missile strike hits Gaza hospital",
+   "body": "An Israeli airstrike hit the surgical and intensive care wards of Nasser Hospital in Khan Younis, killing at least six people and injuring twenty others. The strike badly damaged the largest medical facility remaining in southern Gaza."
   },
   {
    "region": "Africa",
    "photo": null,
    "art": "city_fire",
-   "scene": "A clinical medical ward at sunset, with a silhouette of a patient stepping out into bright daylight.",
-   "headline": "Kenya Discharges Last Ebola Patient in Major Milestone",
-   "body": "Kenya discharged its final Ebola patient, per the BBC, marking a crucial step toward virus-free status. The country has initiated a mandatory 42-day countdown before health authorities can officially declare the outbreak ended."
-  },
-  {
-   "region": "Sports",
-   "photo": null,
-   "art": "football_night",
-   "scene": "A high-angle view of Old Trafford stadium illuminated at night under light rain.",
-   "headline": "Manchester United Advance Talks to Appoint Mauricio Pochettino",
-   "body": "Manchester United are progressing in negotiations to hire former Tottenham and Chelsea manager Mauricio Pochettino as their new head coach. Reports indicate he has emerged as the leading candidate for the vacant role."
+   "scene": "Aid workers wearing protective suits surrounding a rural medical clinic near tropical forest under heavy mist",
+   "headline": "Millions missing from Congo Ebola response",
+   "body": "Doctors Without Borders warned that millions of dollars meant for Ebola relief in the Democratic Republic of Congo have gone missing, per BBC. Medical staff face unpaid wages and critical supply shortages as the virus continues to spread."
   }
  ],
- "date": "2026-11-11"
+ "date": "2026-11-12"
 }
