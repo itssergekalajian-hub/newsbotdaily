@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-09",
-  "stories": [
-   {
-    "topic": "United States",
-    "headline": "Massie Introduces Hegseth Impeachment Resolution",
-    "tease": "Defense Secretary Pete Hegseth faces an impeachment showdown in Congress."
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Cross-Border Strikes Strain Iran Nuclear Diplomacy",
-    "tease": "Deadly drone strikes cut power across Iraqi Kurdistan as tensions rise."
-   },
-   {
-    "topic": "Israel",
-    "headline": "Eisenkot Opens Broad Coalition Government Negotiations",
-    "tease": "Gadi Eisenkot launches high-stakes talks to form Israel's government."
-   },
-   {
-    "topic": "Markets",
-    "headline": "Nvidia Plunges as Huang Affair Triggers Probe",
-    "tease": "Nvidia shares sink following an executive espionage investigation."
-   },
-   {
-    "topic": "Europe",
-    "headline": "France Blames Tehran for Supermarket Cyberattacks",
-    "tease": "Paris accuses Iranian forces of sabotaging French supermarket supply chains."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Industrial Disaster in Turkey and Border Wall Rulings",
-    "tease": "Quick updates from around the globe this Monday."
-   },
-   {
-    "topic": "Sport",
-    "headline": "Nine Hours Lost at Sea Ends in Miraculous Pacific Rescue",
-    "tease": "Two fishermen pull a lost cruise pianist from the open ocean."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Trilateral Peace Negotiations and Tight Ultimatum Deadline",
-    "tease": "Key summits and votes to follow throughout the week."
-   }
-  ]
- },
- {
   "date": "2026-11-10",
   "stories": [
    {
@@ -176,6 +131,46 @@
     "topic": "What to Watch",
     "headline": "Trilateral Peace Summit and High-Stakes Tech Transition",
     "tease": "Key peace negotiations and corporate transitions ahead in the coming days"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-13",
+  "stories": [
+   {
+    "topic": "Technology",
+    "headline": "Nvidia scandal triggers fallout inside Washington cabinet",
+    "tease": "Nvidia CEO resigns as spy allegations ignite White House rift"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Diplomats secure European seat in upcoming peace negotiati",
+    "tease": "Envoys secure European seat at upcoming Ukraine peace talks"
+   },
+   {
+    "topic": "United States",
+    "headline": "Van Hollen launches challenge for Senate leadership",
+    "tease": "Van Hollen challenges Schumer for Senate Democratic leadership"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Global Microsoft outage disrupts key worldwide services",
+    "tease": "Global Microsoft outage leaves key services disrupted worldwide"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Torrential rains flood Gaza camps as tensions escalate",
+    "tease": "Torrential Gaza floods displace thousands amid frozen peace talks"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Brief updates from cybercrime politics and entertainment",
+    "tease": "Justice Department disrupts major North Korean crypto hacking ring"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Congressional hearings and upcoming peace summits ahead",
+    "tease": "High-stakes Senate hearings and peace talks set for next week"
    }
   ]
  }
