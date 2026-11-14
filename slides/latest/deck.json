@@ -1,39 +1,39 @@
 {
- "cover": "Nvidia chief resigns amid scandal while US envoys pursue Ukraine peace talks",
- "cover_scene": "A split composition featuring glowing silicon microchips on one side and a grand diplomatic hall with foreign flags on the other under dramatic lightning",
+ "cover": "Global Tech Outages, Political Fallout, and High-Stakes Diplomacy Reshape International Affairs",
+ "cover_scene": "A glowing digital network globe illuminated in red warning lights, surrounded by international flags and silhouettes of government domes.",
  "slides": [
   {
    "region": "Americas",
-   "photo": null,
+   "photo": 26,
    "art": "tech_ai",
-   "scene": "A modern glass tech headquarters at dusk with a dark silhouette of an executive walking away, bathed in glowing green circuit lights",
-   "headline": "Nvidia CEO Jensen Huang resigns over scandal",
-   "body": "Nvidia co-founder and CEO Jensen Huang has stepped down following disclosures of extramarital relationships, including one with a woman suspected of being a Chinese spy. CFO Colette Kress takes over as interim CEO while the board seeks a permanent successor."
+   "scene": "A dimly lit Congressional hearing room with empty witness microphones positioned in front of a glowing microchip schematic.",
+   "headline": "Nvidia CEO Resigns Amid China Chip Inquiry",
+   "body": "Nvidia CEO Jensen Huang resigned abruptly following reports linking an executive at a partner firm to Chinese intelligence. U.S. lawmakers have summoned tech executives to testify regarding semiconductor export controls and potential chip smuggling to Beijing."
   },
   {
    "region": "Europe",
-   "photo": 30,
+   "photo": 14,
    "art": "summit_hall",
-   "scene": "A high-stakes diplomatic delegation standing inside a gilded Kremlin negotiation hall with Russian and American flags in the background",
-   "headline": "US envoys meet Putin in Moscow for talks",
-   "body": "US mediators Jared Kushner and Steve Witkoff met Russian President Vladimir Putin in Moscow following negotiations in Abu Dhabi. Moscow agreed to include European negotiators in the next round of Ukraine peace discussions, per BBC."
+   "scene": "A grand European diplomatic hall overlooking a rainy garden, featuring American and European flags positioned beside a central meeting table.",
+   "headline": "EU Secures Voice in Ukraine Peace Talks",
+   "body": "European leaders debated their role in upcoming Ukraine-Russia peace negotiations after U.S. envoys met with Vladimir Putin and Volodymyr Zelensky. Diplomatic officials confirmed European delegates will participate in the next trilateral summit."
   },
   {
    "region": "Middle East",
-   "photo": 16,
-   "art": "city_ruins",
-   "scene": "Emergency responders searching through the concrete rubble of a damaged multi-story hospital building illuminated by spotlight beams at night",
-   "headline": "Israeli missile strike hits Gaza hospital",
-   "body": "An Israeli airstrike hit the surgical and intensive care wards of Nasser Hospital in Khan Younis, killing at least six people and injuring twenty others. The strike badly damaged the largest medical facility remaining in southern Gaza."
+   "photo": 23,
+   "art": "flood_rescue",
+   "scene": "A submerged tent city under heavy rain, flooded pathways winding between makeshift shelters under gray storm clouds.",
+   "headline": "Severe Flooding Worsens Humanitarian Crisis in Gaza",
+   "body": "Torrential rainfall destroyed over 70,000 tents across Gaza, killing at least six people and displacing hundreds of thousands. Local authorities warn that extreme weather combined with ongoing political stalemates is worsening humanitarian conditions."
   },
   {
    "region": "Africa",
    "photo": null,
-   "art": "city_fire",
-   "scene": "Aid workers wearing protective suits surrounding a rural medical clinic near tropical forest under heavy mist",
-   "headline": "Millions missing from Congo Ebola response",
-   "body": "Doctors Without Borders warned that millions of dollars meant for Ebola relief in the Democratic Republic of Congo have gone missing, per BBC. Medical staff face unpaid wages and critical supply shortages as the virus continues to spread."
+   "art": "election",
+   "scene": "A dark voting hall with an empty wooden ballot box illuminated by a single overhead light.",
+   "headline": "South Africa's ANC Suffers Record Electoral Defeat",
+   "body": "South Africa's ruling African National Congress secured under 31 percent of the vote in local government elections, marking its worst result since 1994. Voters turned away from the party due to widespread frustration over failing public services."
   }
  ],
- "date": "2026-11-12"
+ "date": "2026-11-13"
 }
