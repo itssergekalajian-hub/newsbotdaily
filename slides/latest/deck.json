@@ -1,39 +1,47 @@
 {
- "cover": "Global Tech Outages, Political Fallout, and High-Stakes Diplomacy Reshape International Affairs",
- "cover_scene": "A glowing digital network globe illuminated in red warning lights, surrounded by international flags and silhouettes of government domes.",
+ "cover": "Aviation chaos grips the United States while diplomatic chess plays out across continents",
+ "cover_scene": "Commercial airliners grounded in silhouette under an ominous sky beside grand international negotiation halls adorned with national flags.",
  "slides": [
   {
    "region": "Americas",
-   "photo": 26,
-   "art": "tech_ai",
-   "scene": "A dimly lit Congressional hearing room with empty witness microphones positioned in front of a glowing microchip schematic.",
-   "headline": "Nvidia CEO Resigns Amid China Chip Inquiry",
-   "body": "Nvidia CEO Jensen Huang resigned abruptly following reports linking an executive at a partner firm to Chinese intelligence. U.S. lawmakers have summoned tech executives to testify regarding semiconductor export controls and potential chip smuggling to Beijing."
+   "photo": 6,
+   "art": "aviation",
+   "scene": "Dozens of passenger airliners lined up motionless on an asphalt tarmac under a gray overcast sky, with silhouettes of travelers waiting in the terminal.",
+   "headline": "FAA Grounds Flights Nationwide Over System Failure",
+   "body": "The US Federal Aviation Administration ordered a rare nationwide ground stop halting departing flights after legacy communications systems failed. Transportation Secretary Sean Duffy blamed 1980s network infrastructure, with thousands of flights canceled and recovery expected to take days."
   },
   {
    "region": "Europe",
-   "photo": 14,
+   "photo": 34,
    "art": "summit_hall",
-   "scene": "A grand European diplomatic hall overlooking a rainy garden, featuring American and European flags positioned beside a central meeting table.",
-   "headline": "EU Secures Voice in Ukraine Peace Talks",
-   "body": "European leaders debated their role in upcoming Ukraine-Russia peace negotiations after U.S. envoys met with Vladimir Putin and Volodymyr Zelensky. Diplomatic officials confirmed European delegates will participate in the next trilateral summit."
+   "scene": "A stern diplomatic meeting room flanked by Ukrainian and American flags, with maps of Eastern Europe laid out on a dark conference table.",
+   "headline": "US Floats Ukraine Donbas Concession Plan",
+   "body": "Ukrainian President Volodymyr Zelenskyy disclosed that US envoys proposed Ukrainian forces withdraw from the eastern Donbas region as a condition for joining NATO. The initiative follows diplomatic talks involving Donald Trump's representatives aimed at brokering an end to the war."
+  },
+  {
+   "region": "Asia",
+   "photo": null,
+   "art": "summit_hall",
+   "scene": "Three grand diplomatic chairs set before the national flags of the United States, China, and Russia in an ornate modern convention hall.",
+   "headline": "Trilateral Superpower Summit Scheduled for China",
+   "body": "Donald Trump, Xi Jinping, and Vladimir Putin are planning an unprecedented trilateral summit scheduled to convene in China. White House officials indicated discussions will address nuclear weapons reductions alongside wider bilateral disputes, marking a rare simultaneous gathering of the three leaders."
   },
   {
    "region": "Middle East",
-   "photo": 23,
-   "art": "flood_rescue",
-   "scene": "A submerged tent city under heavy rain, flooded pathways winding between makeshift shelters under gray storm clouds.",
-   "headline": "Severe Flooding Worsens Humanitarian Crisis in Gaza",
-   "body": "Torrential rainfall destroyed over 70,000 tents across Gaza, killing at least six people and displacing hundreds of thousands. Local authorities warn that extreme weather combined with ongoing political stalemates is worsening humanitarian conditions."
+   "photo": 10,
+   "art": "handshake",
+   "scene": "Dignitaries in formal attire exchanging signed documents inside an opulent palace flanked by Turkish and Qatari flags and an honor guard.",
+   "headline": "Turkey and Qatar Sign Mutual Defense Pact",
+   "body": "Turkey and Qatar signed a mutual defense agreement establishing a joint security framework. The pact formally commits both nations to mount a coordinated response to military threats or external attacks directed against either country."
   },
   {
    "region": "Africa",
-   "photo": null,
-   "art": "election",
-   "scene": "A dark voting hall with an empty wooden ballot box illuminated by a single overhead light.",
-   "headline": "South Africa's ANC Suffers Record Electoral Defeat",
-   "body": "South Africa's ruling African National Congress secured under 31 percent of the vote in local government elections, marking its worst result since 1994. Voters turned away from the party due to widespread frustration over failing public services."
+   "photo": 18,
+   "art": null,
+   "scene": "Military officers in green berets gathered in an official hall in Kampala, with tension evident among rows of uniformed personnel.",
+   "headline": "Ugandan Army Chief Arrests Top Generals",
+   "body": "General Muhoozi Kainerugaba, Uganda's army chief and son of President Yoweri Museveni, detained at least a dozen senior military officers. The sweeping purges follow his announcement to seek the presidency, shaking military leadership ahead of upcoming national elections."
   }
  ],
- "date": "2026-11-13"
+ "date": "2026-11-14"
 }
