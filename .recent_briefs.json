@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-10",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Trump Declares Open Iran War Effectively Over",
-    "tease": "Donald Trump declares the military confrontation with Iran is effectively over"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Constructive First Day for Abu Dhabi Talks",
-    "tease": "Negotiators convene in Abu Dhabi as frontline drone fighting rages"
-   },
-   {
-    "topic": "United States",
-    "headline": "Pentagon Chief Pete Hegseth Faces Impeachment",
-    "tease": "Pentagon chief Pete Hegseth faces an escalating congressional impeachment fight"
-   },
-   {
-    "topic": "Technology",
-    "headline": "Trump Confirms FBI Probe Into Nvidia Boss",
-    "tease": "The FBI investigates Nvidia's chief executive over an alleged spy affair"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Hot Inflation Sparks Federal Reserve Rate Fears",
-    "tease": "Hot inflation figures raise the specter of aggressive interest rate hikes"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Corporate Restructuring and Regulatory Warnings",
-    "tease": "Qantas cuts hundreds of jobs to fund artificial intelligence expansion"
-   },
-   {
-    "topic": "Football",
-    "headline": "Bournemouth Defender James Hill Earns England Call",
-    "tease": "Bournemouth defender James Hill receives his first senior England call-up"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Crucial Trilateral Diplomacy and Coalition Deadlines",
-    "tease": "Diplomatic summits and critical political votes define the days ahead"
-   }
-  ]
- },
- {
   "date": "2026-11-11",
   "stories": [
    {
@@ -171,6 +126,51 @@
     "topic": "What to Watch",
     "headline": "Congressional hearings and upcoming peace summits ahead",
     "tease": "High-stakes Senate hearings and peace talks set for next week"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-14",
+  "stories": [
+   {
+    "topic": "United States",
+    "headline": "FAA Lifts Hourslong Nationwide Ground Stop",
+    "tease": "A nationwide flight ban grounds thousands of American departures overnight."
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "US Floats Donbas Proposal in Peace Talks",
+    "tease": "Negotiators propose territorial concessions to break the ongoing Ukraine stalemate."
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Turkey and Qatar Sign Mutual Defence Pact",
+    "tease": "Turkey and Qatar finalize a binding mutual defense agreement today."
+   },
+   {
+    "topic": "Technology",
+    "headline": "Nvidia Leadership Fallout Shakes Silicon Valley",
+    "tease": "Major investors push for Jensen Huang's return following his exit."
+   },
+   {
+    "topic": "Markets",
+    "headline": "Meta Hit with Record European Fine",
+    "tease": "Italian regulators issue an eight hundred million euro privacy fine."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Brief Updates from Geopolitics Science and Health",
+    "tease": "Public health setbacks and space tests make news around the world."
+   },
+   {
+    "topic": "Technology",
+    "headline": "Tesla Opens Orders for Autonomous Cybercab",
+    "tease": "Tesla begins accepting consumer orders for its driverless vehicle."
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Trilateral Summit and Congressional Hearings Headline Week",
+    "tease": "World leaders prepare for a momentous week of high-level diplomacy."
    }
   ]
  }
