@@ -1,47 +1,39 @@
 {
- "cover": "Aviation chaos grips the United States while diplomatic chess plays out across continents",
- "cover_scene": "Commercial airliners grounded in silhouette under an ominous sky beside grand international negotiation halls adorned with national flags.",
+ "cover": "Iranian strikes hit Gulf targets as historic rocket catch stuns aerospace world",
+ "cover_scene": "A mechanical launch tower catching a massive spacecraft at dawn while naval warships patrol stormy desert waters under flare light.",
  "slides": [
   {
+   "region": "Middle East",
+   "photo": null,
+   "art": "missile_strike",
+   "scene": "Air defense interceptors blazing through the night sky over a Gulf coastline, protecting military radar domes and airbase runways from incoming cruise missiles.",
+   "headline": "Iran Targets US Military Base in Bahrain",
+   "body": "Iran launched cruise missiles and drones targeting American military airbases and radar installations in Bahrain. Bahraini air defenses intercepted several incoming aerial weapons with no major casualties reported, escalating regional tensions across the Persian Gulf corridor."
+  },
+  {
    "region": "Americas",
-   "photo": 6,
-   "art": "aviation",
-   "scene": "Dozens of passenger airliners lined up motionless on an asphalt tarmac under a gray overcast sky, with silhouettes of travelers waiting in the terminal.",
-   "headline": "FAA Grounds Flights Nationwide Over System Failure",
-   "body": "The US Federal Aviation Administration ordered a rare nationwide ground stop halting departing flights after legacy communications systems failed. Transportation Secretary Sean Duffy blamed 1980s network infrastructure, with thousands of flights canceled and recovery expected to take days."
+   "photo": 2,
+   "art": "rocket_launch",
+   "scene": "A towering steel launch gantry with giant mechanical arms cradling a massive descending rocket stage against a coastal Texas sky.",
+   "headline": "SpaceX Catches Returning Rocket with Tower Arms",
+   "body": "SpaceX successfully caught the upper stage of its Starship rocket using mechanical chopstick arms on the Texas launch tower. The milestone demonstrates heavy-lift spacecraft recovery, marking a breakthrough toward rapid and complete orbital vehicle reusability."
   },
   {
    "region": "Europe",
-   "photo": 34,
-   "art": "summit_hall",
-   "scene": "A stern diplomatic meeting room flanked by Ukrainian and American flags, with maps of Eastern Europe laid out on a dark conference table.",
-   "headline": "US Floats Ukraine Donbas Concession Plan",
-   "body": "Ukrainian President Volodymyr Zelenskyy disclosed that US envoys proposed Ukrainian forces withdraw from the eastern Donbas region as a condition for joining NATO. The initiative follows diplomatic talks involving Donald Trump's representatives aimed at brokering an end to the war."
-  },
-  {
-   "region": "Asia",
-   "photo": null,
-   "art": "summit_hall",
-   "scene": "Three grand diplomatic chairs set before the national flags of the United States, China, and Russia in an ornate modern convention hall.",
-   "headline": "Trilateral Superpower Summit Scheduled for China",
-   "body": "Donald Trump, Xi Jinping, and Vladimir Putin are planning an unprecedented trilateral summit scheduled to convene in China. White House officials indicated discussions will address nuclear weapons reductions alongside wider bilateral disputes, marking a rare simultaneous gathering of the three leaders."
-  },
-  {
-   "region": "Middle East",
-   "photo": 10,
-   "art": "handshake",
-   "scene": "Dignitaries in formal attire exchanging signed documents inside an opulent palace flanked by Turkish and Qatari flags and an honor guard.",
-   "headline": "Turkey and Qatar Sign Mutual Defense Pact",
-   "body": "Turkey and Qatar signed a mutual defense agreement establishing a joint security framework. The pact formally commits both nations to mount a coordinated response to military threats or external attacks directed against either country."
+   "photo": 40,
+   "art": "drone_refinery",
+   "scene": "A fortified border fence topped with razor wire stretching along a desolate forest line beneath heavy grey Baltic skies.",
+   "headline": "Estonia Shuts Russian Border Crossings After Sabotage",
+   "body": "Estonian authorities announced the closure of border crossings with Russia after an attempted sabotage incident targeted a drone manufacturing facility. The move follows heightened security alerts across the Baltic region regarding foreign covert intelligence operations."
   },
   {
    "region": "Africa",
-   "photo": 18,
-   "art": null,
-   "scene": "Military officers in green berets gathered in an official hall in Kampala, with tension evident among rows of uniformed personnel.",
-   "headline": "Ugandan Army Chief Arrests Top Generals",
-   "body": "General Muhoozi Kainerugaba, Uganda's army chief and son of President Yoweri Museveni, detained at least a dozen senior military officers. The sweeping purges follow his announcement to seek the presidency, shaking military leadership ahead of upcoming national elections."
+   "photo": 10,
+   "art": "election",
+   "scene": "Voters gathered near transparent ballot boxes in a brightly lit polling hall, surrounded by green and white Nigerian national bunting.",
+   "headline": "AI Disinformation Concerns Cloud Upcoming Nigerian Election",
+   "body": "Nigeria is confronting mounting alarms over artificial intelligence manipulation after suspected synthetic images surfaced in preliminary voter registers. The electoral commission faces heightened scrutiny as President Bola Tinubu prepares for a contested 2027 reelection campaign."
   }
  ],
- "date": "2026-11-14"
+ "date": "2026-11-15"
 }
