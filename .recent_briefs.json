@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-11",
-  "stories": [
-   {
-    "topic": "United States",
-    "headline": "House GOP Blocks Hegseth Impeachment Bid",
-    "tease": "House Republicans block a high-profile bid to impeach Defense Secretary Pete Hegseth"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "US Envoys Plan Meetings After Abu Dhabi Talks",
-    "tease": "US envoys prepare to meet Putin and Zelenskyy after Abu Dhabi talks end"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Tehran Signals Long Fight as Israeli Session Clashes",
-    "tease": "Tehran warns wartime negotiations could last decades as regional strikes continue"
-   },
-   {
-    "topic": "Markets",
-    "headline": "CoreWeave Earnings Rebound Tech as Yields Surge",
-    "tease": "Tech stocks rebound on CoreWeave results as bond yields approach five percent"
-   },
-   {
-    "topic": "Europe",
-    "headline": "School Bomb Hoaxes Trigger Mass Evacuations",
-    "tease": "Massive bomb threat hoaxes force school evacuations across Italy and Britain"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Briefs: Protests, Resignations, and Deals",
-    "tease": "Quick updates from Indonesia, Spain, Haiti, and Manchester"
-   },
-   {
-    "topic": "Human Interest",
-    "headline": "Baby Rescued After Being Buried Alive",
-    "tease": "Eleven-month-old baby safely rescued in South Carolina after buried ordeal"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "High-Stakes Talks and Impeachment Deadlines Ahead",
-    "tease": "Key diplomatic meetings and political deadlines to watch this week"
-   }
-  ]
- },
- {
   "date": "2026-11-12",
   "stories": [
    {
@@ -171,6 +126,51 @@
     "topic": "What to Watch",
     "headline": "Trilateral Summit and Congressional Hearings Headline Week",
     "tease": "World leaders prepare for a momentous week of high-level diplomacy."
+   }
+  ]
+ },
+ {
+  "date": "2026-11-15",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Iran Targets US Facilities in Bahrain Barrage",
+    "tease": "Aerial strikes target American military installations across Bahrain"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Kyiv Clashes with Musk Over Starshield Limits",
+    "tease": "Zelensky accuses SpaceX of hobbling frontline air defenses"
+   },
+   {
+    "topic": "Space",
+    "headline": "SpaceX Catches Returning Starship in Historic Triumph",
+    "tease": "SpaceX makes history by catching a descending Starship rocket"
+   },
+   {
+    "topic": "United States",
+    "headline": "Aviation Chaos Cascades into Third Straight Day",
+    "tease": "Flight disruptions persist nationwide following a runway collision"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Bessent Demands Outside Leadership at Nvidia",
+    "tease": "Treasury secretary demands a complete leadership overhaul at Nvidia"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Estonia Shuts Russian Border Crossings Over Sabotage",
+    "tease": "Estonia closes Russian border crossings after factory sabotage attempt"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Court Protects Potomac Golf Nigeria Checks AI",
+    "tease": "Federal court blocks park closure as art market tests billions"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Trilateral Summit and House Tech Hearings Ahead",
+    "tease": "Upcoming summitry and regulatory deadlines will define the coming week"
    }
   ]
  }
