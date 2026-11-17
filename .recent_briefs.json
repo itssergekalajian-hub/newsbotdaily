@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-12",
-  "stories": [
-   {
-    "topic": "Technology",
-    "headline": "Jensen Huang Resigns as Nvidia Chief Executive",
-    "tease": "Nvidia chief Jensen Huang resigns following espionage probe and executive affairs"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "US Envoys Meet Putin in Kremlin Talks",
-    "tease": "American envoys land in Moscow for direct peace talks with Vladimir Putin"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Israeli Strike Hits Hospital in Southern Gaza",
-    "tease": "Israeli missile strike hits Khan Younis hospital as regional threats elevate"
-   },
-   {
-    "topic": "United States",
-    "headline": "Democrat Scott Colom Wins Historic Mississippi Senate Seat",
-    "tease": "Scott Colom makes history in Mississippi Senate race as Washington sees unrest"
-   },
-   {
-    "topic": "Europe",
-    "headline": "European Leaders Summit in Dublin on Security",
-    "tease": "European leaders convene in Dublin to tackle cyber threats and state sabotage"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Briefs: Markets, Trade, and Rescuers",
-    "tease": "Global market shifts and technical bugs mark today's economic headlines"
-   },
-   {
-    "topic": "Human Interest",
-    "headline": "Missing Australian Teen Rescued Alive in Bushland",
-    "tease": "A missing Australian teenager is found alive after six days lost outdoors"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Trilateral Peace Summit and High-Stakes Tech Transition",
-    "tease": "Key peace negotiations and corporate transitions ahead in the coming days"
-   }
-  ]
- },
- {
   "date": "2026-11-13",
   "stories": [
    {
@@ -171,6 +126,41 @@
     "topic": "What to Watch",
     "headline": "Trilateral Summit and House Tech Hearings Ahead",
     "tease": "Upcoming summitry and regulatory deadlines will define the coming week"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-16",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Houthi Forces Advance Towards Key Shipping Strait",
+    "tease": "Yemeni rebel advances threaten crucial Red Sea global shipping chokepoints"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Trump Dismisses National Security Risks Around Nvidia",
+    "tease": "Donald Trump dismisses security fears as Jensen Huang plots Nvidia comeback"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Semiconductor Selloff Deepens as Global Pressures Mount",
+    "tease": "Tech stocks slide as chipmakers tumble and economic warning signs emerge"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Ukraine Targets Crimean Bridge in Record Drone Strike",
+    "tease": "Massive drone strikes hit Crimean bridge as frontline infrastructure reels"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Bank Disruptions and Commercial Rocket Disasters",
+    "tease": "Banking outages hit the United States while rockets and data breach"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "APEC Summit and Shenzhen Trilateral Headline High-Stakes W",
+    "tease": "High stakes diplomacy and market catalysts await in the days ahead"
    }
   ]
  }
