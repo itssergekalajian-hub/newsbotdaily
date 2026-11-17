@@ -1,39 +1,39 @@
 {
- "cover": "Iranian strikes hit Gulf targets as historic rocket catch stuns aerospace world",
- "cover_scene": "A mechanical launch tower catching a massive spacecraft at dawn while naval warships patrol stormy desert waters under flare light.",
+ "cover": "Houthi Red Sea advances, Crimean bridge strikes, and high-tech corporate fallout shake global capitals",
+ "cover_scene": "A split composition showing an armed patrol along an arid desert coast beside a smoky marine horizon, contrasting with glowing digital stock exchange screens.",
  "slides": [
   {
    "region": "Middle East",
-   "photo": null,
-   "art": "missile_strike",
-   "scene": "Air defense interceptors blazing through the night sky over a Gulf coastline, protecting military radar domes and airbase runways from incoming cruise missiles.",
-   "headline": "Iran Targets US Military Base in Bahrain",
-   "body": "Iran launched cruise missiles and drones targeting American military airbases and radar installations in Bahrain. Bahraini air defenses intercepted several incoming aerial weapons with no major casualties reported, escalating regional tensions across the Persian Gulf corridor."
-  },
-  {
-   "region": "Americas",
-   "photo": 2,
-   "art": "rocket_launch",
-   "scene": "A towering steel launch gantry with giant mechanical arms cradling a massive descending rocket stage against a coastal Texas sky.",
-   "headline": "SpaceX Catches Returning Rocket with Tower Arms",
-   "body": "SpaceX successfully caught the upper stage of its Starship rocket using mechanical chopstick arms on the Texas launch tower. The milestone demonstrates heavy-lift spacecraft recovery, marking a breakthrough toward rapid and complete orbital vehicle reusability."
+   "photo": 24,
+   "art": "naval_strait",
+   "scene": "Military patrol vehicles and armed soldiers move through arid desert hills overlooking a narrow maritime strait, under hazy sun.",
+   "headline": "Forces Pull Back from Bab al-Mandab Strait",
+   "body": "Saudi-backed pro-government forces in Yemen have withdrawn from positions overlooking the strategic Bab al-Mandab Strait to protect Aden. The redeployment allows advancing Houthi fighters to assert control over the vital Red Sea maritime chokepoint, risking further global trade disruption."
   },
   {
    "region": "Europe",
-   "photo": 40,
-   "art": "drone_refinery",
-   "scene": "A fortified border fence topped with razor wire stretching along a desolate forest line beneath heavy grey Baltic skies.",
-   "headline": "Estonia Shuts Russian Border Crossings After Sabotage",
-   "body": "Estonian authorities announced the closure of border crossings with Russia after an attempted sabotage incident targeted a drone manufacturing facility. The move follows heightened security alerts across the Baltic region regarding foreign covert intelligence operations."
+   "photo": null,
+   "art": "missile_strike",
+   "scene": "A massive road and rail bridge crossing a dark sea under a night sky filled with flashing explosions and drone silhouettes.",
+   "headline": "Ukraine Strikes Crimea Bridge in Massive Assault",
+   "body": "Russia reported that Ukraine targeted the strategic Crimea bridge in the conflict's largest drone strike to date. The assault, involving over 2,000 drones per BBC, hit the critical Russian supply route as air raid alerts echoed across Ukrainian cities."
   },
   {
-   "region": "Africa",
-   "photo": 10,
-   "art": "election",
-   "scene": "Voters gathered near transparent ballot boxes in a brightly lit polling hall, surrounded by green and white Nigerian national bunting.",
-   "headline": "AI Disinformation Concerns Cloud Upcoming Nigerian Election",
-   "body": "Nigeria is confronting mounting alarms over artificial intelligence manipulation after suspected synthetic images surfaced in preliminary voter registers. The electoral commission faces heightened scrutiny as President Bola Tinubu prepares for a contested 2027 reelection campaign."
+   "region": "Americas",
+   "photo": 5,
+   "art": "rocket_launch",
+   "scene": "A heavy rocket lifts off from a coastal launchpad at Cape Canaveral, billowing massive white exhaust plumes against a morning sky.",
+   "headline": "Vulcan Rocket Failure Destroys 40 Amazon Satellites",
+   "body": "A Vulcan rocket suffered an in-flight failure shortly after liftoff from Cape Canaveral, destroying its entire payload of 40 Amazon Leo satellites. The high-profile accident deals a sharp setback to Amazon's satellite deployment timeline and commercial space rivalry."
+  },
+  {
+   "region": "Asia",
+   "photo": null,
+   "art": "summit_hall",
+   "scene": "A spacious diplomatic conference hall in Shenzhen with national flags of the United States, China, and Russia arranged behind an empty table.",
+   "headline": "Beijing Prepares Groundbreaking Trilateral Superpower Summit",
+   "body": "China announced an upcoming trilateral summit in Shenzhen uniting Xi Jinping, Donald Trump, and Vladimir Putin during the APEC meeting. Washington aims to pursue discussions on nuclear arms reduction, an agenda item Beijing has previously resisted."
   }
  ],
- "date": "2026-11-15"
+ "date": "2026-11-16"
 }
