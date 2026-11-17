@@ -264,7 +264,7 @@ def _base(bg: str) -> str:
 
 # Anton: the tall condensed display face the poster format is built on —
 # committed to the repo (OFL licence) so every runner renders identically
-ANTON = os.path.join("fonts", "Anton-Regular.ttf")
+ANTON = os.path.join(video.BUNDLED_FONT_DIR, "Anton-Regular.ttf")
 
 
 def _display_font() -> str:
@@ -543,6 +543,25 @@ def target_day() -> dt.date:
     return (dt.datetime.now(dn.TZ) - dt.timedelta(hours=12)).date()
 
 
+def _download_story_photo(slide: dict, posts: list[dict], work: str,
+                          index: int) -> tuple[str, int] | None:
+    """Download the photo selected as relevant, requiring at least 800px width."""
+    pick = slide.get("photo")
+    if not isinstance(pick, int) or not 1 <= pick <= len(posts):
+        return None
+    urls = posts[pick - 1].get("images") or []
+    if not urls:
+        return None
+    raw = os.path.join(work, f"photo{index}.img")
+    try:
+        if dn._download(urls[0], raw, dn.UA, min_size=(800, 1)):
+            return raw, pick
+    except Exception as e:
+        print(f"    story photo unavailable ({str(e)[:80]}); "
+              "using branded backdrop", file=sys.stderr)
+    return None
+
+
 def render() -> None:
     day = target_day()
     deck_path = os.path.join(OUT_DIR, "deck.json")
@@ -574,27 +593,18 @@ def render() -> None:
                  bg=cover_bg)
     print(f"  slide 1: cover ({'generated' if cover_bg else 'backdrop'})")
     for i, slide in enumerate(deck["slides"]):
-        # each story gets imagery that REPRESENTS it: the matching Higgsfield
-        # catalog scene first (the channel's chosen image source), else the
-        # story's own photo, else the branded regional backdrop. Per-story
-        # Gemini generation runs only when SCENE_GEN=1 is set deliberately —
-        # the owner keeps imagery on Higgsfield.
+        # Use the visually selected source photo when it has enough resolution;
+        # otherwise retain the regional branded background.
         bg, label, graded = art_for(slide["region"]), "backdrop", False
-        gen = os.path.join(work, f"gen{i}.png")
-        cat = scene_art(slide.get("art"))
-        if (os.getenv("SCENE_GEN") == "1" and slide.get("scene")
-                and gen_scene(slide["scene"], gen)):
-            bg, label, graded = gen, "generated scene", True
-        elif cat:
-            bg, label = cat, f"catalog {slide.get('art')}"
-        else:
-            pick = slide.get("photo")
-            if isinstance(pick, int) and 1 <= pick <= len(posts):
-                urls = posts[pick - 1].get("images") or []
-                raw = os.path.join(work, f"photo{i}.img")
-                if urls and dn._download(urls[0], raw, dn.UA,
-                                         min_size=(640, 360)):
-                    bg, label, graded = raw, f"post {pick} photo", True
+        photo = _download_story_photo(slide, posts, work, i)
+        if photo:
+            bg, pick = photo
+            label, graded = f"post {pick} photo", True
+        if (not graded and os.getenv("SCENE_GEN") == "1"
+                and slide.get("scene")):
+            gen = os.path.join(work, f"gen{i}.png")
+            if gen_scene(slide["scene"], gen):
+                bg, label, graded = gen, "generated scene", True
         render_story(work, i + 1, total, slide, date_text, bg,
                      os.path.join(OUT_DIR, f"{i + 2:02d}.jpg"),
                      is_photo=graded)

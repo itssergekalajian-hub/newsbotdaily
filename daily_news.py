@@ -12,6 +12,7 @@ All free: Gemini Flash free tier, edge-tts (no key), GitHub Actions.
 
 import asyncio
 import base64
+from concurrent.futures import ThreadPoolExecutor
 import datetime as dt
 import functools
 import json
@@ -301,48 +302,67 @@ WIRE_FEEDS = (
     ("BBC", "https://feeds.bbci.co.uk/news/world/rss.xml"),
     ("Al Jazeera", "https://www.aljazeera.com/xml/rss/all.xml"),
     ("Google News", "https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en"),
+    ("DW", "https://rss.dw.com/rdf/rss-en-top"),
+    ("France24", "https://www.france24.com/en/rss"),
+    ("Sky News World", "https://feeds.skynews.com/feeds/rss/world.xml"),
+    ("Politico Europe", "https://www.politico.eu/feed/"),
+    ("CNBC", "https://www.cnbc.com/id/100003114/device/rss/rss.html"),
+    ("FXStreet", "https://xml.fxstreet.com/news/forex-news/index.xml"),
+    ("OilPrice", "https://oilprice.com/rss/main"),
+    ("SCMP World", "https://www.scmp.com/rss/5/feed"),
+    ("Naharnet Lebanon", "http://www.naharnet.com/tags/lebanon/en/feed.atom"),
 )
 
 
-def fetch_wire(day: dt.date) -> str:
-    """Same-day agency headlines, one labelled line per item.
-
-    Items older than the covered day (or dated after it, for catch-up runs
-    rebuilding yesterday) are dropped; an unparsable date keeps the item.
-    Every feed is best-effort — a dead feed costs context, never the run.
-    """
+def _fetch_wire_feed(day: dt.date, name: str, url: str) -> list[str]:
     lines: list[str] = []
-    for name, url in WIRE_FEEDS:
-        n = 0
-        try:
-            r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"},
-                             timeout=30)
-            r.raise_for_status()
-            root = ElementTree.fromstring(r.content)
-            for item in root.iter("item"):
-                title = (item.findtext("title") or "").strip()
-                if not title:
-                    continue
-                pub = item.findtext("pubDate")
-                if pub:
+    try:
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"},
+                         timeout=30)
+        r.raise_for_status()
+        root = ElementTree.fromstring(r.content)
+        items = list(root.iter("item")) + list(root.findall(".//{*}entry"))
+        for item in items:
+            title = (item.findtext("title") or item.findtext("{*}title") or "").strip()
+            if not title:
+                continue
+            pub = (item.findtext("pubDate") or item.findtext("{*}published")
+                   or item.findtext("{*}updated"))
+            if pub:
+                try:
                     try:
                         when = parsedate_to_datetime(pub).astimezone(TZ).date()
-                        if when > day or (day - when).days > 1:
-                            continue
-                    except Exception:
-                        pass
-                desc = re.sub(r"<[^>]+>", " ", item.findtext("description") or "")
-                desc = re.sub(r"\s+", " ", desc).strip()
-                line = f"- [{name}] {title}"
-                if desc and desc[:60].lower() not in title.lower():
-                    line += f" — {desc[:240]}"
-                lines.append(line)
-                n += 1
-                if n >= 25:
-                    break
-        except Exception as e:
-            print(f"wire feed {name} failed: {str(e)[:70]}", file=sys.stderr)
-        print(f"wire: {n} items from {name}")
+                    except (TypeError, ValueError):
+                        when = dt.datetime.fromisoformat(
+                            pub.strip().replace("Z", "+00:00")
+                        ).astimezone(TZ).date()
+                    if when > day or (day - when).days > 1:
+                        continue
+                except (TypeError, ValueError, OverflowError):
+                    pass
+            description = (item.findtext("description")
+                           or item.findtext("{*}summary")
+                           or item.findtext("{*}content") or "")
+            desc = re.sub(r"<[^>]+>", " ", description)
+            desc = re.sub(r"\s+", " ", desc).strip()
+            line = f"- [{name}] {title}"
+            if desc and desc[:60].lower() not in title.lower():
+                line += f" — {desc[:240]}"
+            lines.append(line)
+            if len(lines) >= 25:
+                break
+    except Exception as e:
+        print(f"wire feed {name} failed: {str(e)[:70]}", file=sys.stderr)
+    print(f"wire: {len(lines)} items from {name}")
+    return lines
+
+
+def fetch_wire(day: dt.date) -> str:
+    """Fetch same-day wire context concurrently; feed failures are best-effort."""
+    with ThreadPoolExecutor(max_workers=len(WIRE_FEEDS)) as executor:
+        results = executor.map(
+            lambda feed: _fetch_wire_feed(day, *feed), WIRE_FEEDS)
+        lines = [line for feed_lines in results for line in feed_lines]
     return "\n".join(lines)[:60_000]
 
 

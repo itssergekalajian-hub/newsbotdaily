@@ -22,9 +22,22 @@ import re
 import subprocess
 import sys
 
-FONT_DIR = "/usr/share/fonts/truetype/dejavu"
-BOLD = f"{FONT_DIR}/DejaVuSans-Bold.ttf"
-REGULAR = f"{FONT_DIR}/DejaVuSans.ttf"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BUNDLED_FONT_DIR = os.path.join(BASE_DIR, "fonts")
+_DEJAVU_DIR = "/usr/share/fonts/truetype/dejavu"
+_DEJAVU_BOLD = os.path.join(_DEJAVU_DIR, "DejaVuSans-Bold.ttf")
+_DEJAVU_REGULAR = os.path.join(_DEJAVU_DIR, "DejaVuSans.ttf")
+_ANTON = os.path.join(BUNDLED_FONT_DIR, "Anton-Regular.ttf")
+BOLD = next((path for path in (
+    os.path.join(BUNDLED_FONT_DIR, "Anton-Bold.ttf"), _ANTON,
+    _DEJAVU_BOLD,
+) if os.path.exists(path)), _DEJAVU_BOLD)
+REGULAR = next((path for path in (
+    os.path.join(BUNDLED_FONT_DIR, "Inter-Regular.ttf"),
+    os.path.join(BUNDLED_FONT_DIR, "Montserrat-Regular.ttf"),
+    _ANTON, _DEJAVU_REGULAR,
+) if os.path.exists(path)), _DEJAVU_REGULAR)
+SUBTITLE_FONT_NAME = "Anton" if os.path.exists(_ANTON) else "DejaVu Sans"
 
 W, H, FPS = 1920, 1080, 25    # Full HD: the sting and anchor are 1080p native
 NAVY = "0x0A1428"
@@ -65,6 +78,11 @@ def _textfile(work: str, name: str, text: str) -> str:
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
     return path.replace("\\", "/")
+
+
+def _filter_path(path: str) -> str:
+    """Escape a filesystem path for a quoted FFmpeg filter option."""
+    return path.replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
 
 
 def probe_size(path: str) -> tuple[int, int]:
@@ -274,17 +292,22 @@ def make_backdrop_multi(work: str, images: list[str], name: str,
 
 
 def make_video_backdrop(work: str, clip: str, name: str, seconds: float) -> str:
-    """A full-frame background from the newsroom's own footage, looped to length.
+    """A sharp centered clip over a softened, full-frame version of itself.
 
-    Real moving footage needs no synthetic drift, so it is simply filled to the
-    frame and hard-cut to the scene length (a ten-second clip still covers a
-    forty-second topic). Muted here — the bulletin has its own narration.
+    The blurred fill prevents vertical and 4:3 source video from getting black
+    bars, while the sharp foreground preserves its original aspect ratio.
     """
     out = os.path.join(work, name)
     run(["ffmpeg", "-y", "-loglevel", "error",
          "-stream_loop", "-1", "-t", f"{seconds + 0.3:.2f}", "-i", clip, "-an",
-         "-vf", (f"scale={W}:{H}:force_original_aspect_ratio=increase,"
-                 f"crop={W}:{H},setsar=1"),
+         "-filter_complex",
+         f"[0:v]split[bgsrc][fgsrc];"
+         f"[bgsrc]scale={W}:{H}:force_original_aspect_ratio=increase,"
+         f"crop={W}:{H},boxblur=25:5,eq=brightness=-0.22,setsar=1[bg];"
+         f"[fgsrc]scale={W}:{H}:force_original_aspect_ratio=decrease:"
+         f"force_divisible_by=2,setsar=1[fg];"
+         f"[bg][fg]overlay=x=(W-w)/2:y=(H-h)/2,setsar=1[v]",
+         "-map", "[v]",
          "-r", str(FPS), "-c:v", "libx264", "-preset", "veryfast",
          "-pix_fmt", "yuv420p", "-t", f"{seconds + 0.3:.2f}", out])
     return out
@@ -558,8 +581,9 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
     subs = ""
     if srt and os.path.exists(srt) and os.path.getsize(srt) > 20:
         subs = (
-            f",subtitles='{srt}':force_style="
-            "'Alignment=2,MarginV=240,Fontsize=22,"
+            f",subtitles='{_filter_path(srt)}':"
+            f"fontsdir='{_filter_path(BUNDLED_FONT_DIR)}':force_style="
+            f"'FontName={SUBTITLE_FONT_NAME},Alignment=2,MarginV=240,Fontsize=22,"
             "PrimaryColour=&H00FFFFFF,OutlineColour=&H80000000,"
             "BorderStyle=1,Outline=2,Shadow=1'")
 
