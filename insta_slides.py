@@ -5,6 +5,7 @@ Two entry points, run as separate workflow steps so the slides are committed
 
     python insta_slides.py render    — write slides/latest/*.jpg + deck.json
     python insta_slides.py publish   — post the carousel via the IG Graph API
+    python insta_slides.py check-auth — print the connected Instagram username
 
 Publishing needs two repo secrets — IG_USER_ID (the Instagram Business
 account's numeric id) and IG_ACCESS_TOKEN (a long-lived Graph API token with
@@ -730,7 +731,70 @@ def render() -> None:
     print(f"rendered {total} slides for {day}")
 
 
-GRAPH = "https://graph.facebook.com/v21.0"
+GRAPH_FACEBOOK = "https://graph.facebook.com/v21.0"
+GRAPH_INSTAGRAM = "https://graph.instagram.com/v21.0"
+
+
+def graph_base(token: str) -> str:
+    return GRAPH_INSTAGRAM if token.strip().startswith("IGAA") else GRAPH_FACEBOOK
+
+
+def _meta_response_json(response: requests.Response, operation: str) -> dict:
+    try:
+        payload = response.json()
+    except ValueError:
+        payload = {"raw_response": response.text}
+    if not response.ok:
+        print(
+            f"Meta API {operation} returned HTTP {response.status_code}: "
+            f"{json.dumps(payload, ensure_ascii=False)}",
+            file=sys.stderr,
+            flush=True,
+        )
+    return payload
+
+
+def _wait_for_container(container_id: str, token: str, graph: str) -> None:
+    url = f"{graph}/{container_id}"
+    params = {"fields": "status_code,status", "access_token": token}
+    for attempt in range(12):
+        response = requests.get(url, params=params, timeout=30)
+        payload = _meta_response_json(response, "container status")
+        error = payload.get("error")
+        if (response.status_code == 400 and isinstance(error, dict)
+                and str(error.get("code")) == "100"
+                and str(error.get("error_subcode", error.get("subcode"))) == "33"):
+            time.sleep(3)
+            return
+        response.raise_for_status()
+        status = payload.get("status_code")
+        if status == "FINISHED":
+            return
+        if status in ("ERROR", "EXPIRED"):
+            raise RuntimeError(
+                f"Instagram container {container_id} reached {status}: "
+                f"{json.dumps(payload, ensure_ascii=False)}")
+        if attempt < 11:
+            time.sleep(3)
+    raise RuntimeError(
+        f"Instagram container {container_id} did not finish after 12 polls: "
+        f"{json.dumps(payload, ensure_ascii=False)}")
+
+
+def check_auth() -> None:
+    token = os.getenv("IG_ACCESS_TOKEN", "").strip()
+    user_id = os.getenv("IG_USER_ID", "").strip()
+    if not token or not user_id:
+        raise RuntimeError("IG_ACCESS_TOKEN and IG_USER_ID must be set")
+    graph = graph_base(token)
+    response = requests.get(
+        f"{graph}/{user_id}",
+        params={"fields": "id,username", "access_token": token},
+        timeout=15,
+    )
+    payload = _meta_response_json(response, "auth check")
+    response.raise_for_status()
+    print(f"Connected Instagram account: @{payload['username']}")
 
 
 def publish() -> None:
@@ -766,41 +830,55 @@ def publish() -> None:
             "carousel caption exceeds Instagram's 2,200-character limit")
     repo = os.getenv("GITHUB_REPOSITORY", "itssergekalajian-hub/newsbotdaily")
     raw = f"https://raw.githubusercontent.com/{repo}/main/{OUT_DIR}"
+    graph = graph_base(tok)
     files = sorted(f for f in os.listdir(OUT_DIR) if f.endswith(".jpg"))
     if len(files) != MAX_SLIDES:
         raise RuntimeError(
             f"carousel has {len(files)} images; expected exactly {MAX_SLIDES}")
     children = []
     for f in files:
-        r = requests.post(f"{GRAPH}/{uid}/media",
-                          data={"image_url": f"{raw}/{f}",
-                                "is_carousel_item": "true",
-                                "access_token": tok}, timeout=60)
-        r.raise_for_status()
-        children.append(r.json()["id"])
+        response = requests.post(f"{graph}/{uid}/media",
+                                 data={"image_url": f"{raw}/{f}",
+                                       "is_carousel_item": "true",
+                                       "access_token": tok}, timeout=60)
+        payload = _meta_response_json(response, f"create child {f}")
+        response.raise_for_status()
+        children.append(payload["id"])
         print(f"  container for {f}: {children[-1]}")
 
-    r = requests.post(f"{GRAPH}/{uid}/media",
-                      data={"media_type": "CAROUSEL",
-                            "children": ",".join(children),
-                            "caption": caption,
-                            "access_token": tok}, timeout=60)
-    r.raise_for_status()
-    carousel = r.json()["id"]
+    for child in children:
+        _wait_for_container(child, tok, graph)
 
-    # containers process asynchronously; publish retries while they finish
+    response = requests.post(f"{graph}/{uid}/media",
+                             data={"media_type": "CAROUSEL",
+                                   "children": ",".join(children),
+                                   "caption": caption,
+                                   "access_token": tok}, timeout=60)
+    payload = _meta_response_json(response, "create carousel")
+    response.raise_for_status()
+    carousel = payload["id"]
+    _wait_for_container(carousel, tok, graph)
+
     for attempt in range(10):
-        r = requests.post(f"{GRAPH}/{uid}/media_publish",
-                          data={"creation_id": carousel,
-                                "access_token": tok}, timeout=60)
-        if r.ok:
-            print(f"published to Instagram: media {r.json().get('id')}")
+        response = requests.post(f"{graph}/{uid}/media_publish",
+                                 data={"creation_id": carousel,
+                                       "access_token": tok}, timeout=60)
+        payload = _meta_response_json(response, "publish carousel")
+        if payload.get("config_issue"):
+            print(f"::warning::Instagram media_publish config_issue: "
+                  f"{json.dumps(payload['config_issue'], ensure_ascii=False)}",
+                  flush=True)
+        if response.ok:
+            print(f"published to Instagram: media {payload.get('id')}")
             with open(IG_MARKER, "w") as f:
                 f.write(day)
             return
         time.sleep(15)
-    raise RuntimeError(f"carousel publish failed: {r.text[:300]}")
+    raise RuntimeError(
+        f"carousel publish failed after 10 attempts: "
+        f"{json.dumps(payload, ensure_ascii=False)}")
 
 
 if __name__ == "__main__":
-    {"render": render, "publish": publish, "probe": probe}[sys.argv[1]]()
+    {"render": render, "publish": publish, "probe": probe,
+     "check-auth": check_auth}[sys.argv[1]]()
