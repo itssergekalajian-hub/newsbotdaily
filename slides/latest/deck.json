@@ -1,63 +1,87 @@
 {
- "cover_scene_prompt": "A wide dramatic 4:5 editorial shot depicting world leaders arriving on an international red carpet airport tarmac, contrasted with the fractured spans of a colossal marine bridge over dark water and glowing microchip circuits in the background. The lighting is moody and cinematic under stormy dusk skies, highlighting global diplomacy, modern technology, and geopolitical conflict. No text or logos.",
+ "cover_scene_prompt": "A massive photorealistic Earth on a dark space horizon, glowing with electric-cyan (#00E5FF) network grid lines and fiery golden (#FFC400) shockwaves, flanked by visual motifs from today's top three stories (such as jets, vessels, or market candlesticks) and 2-3 dramatic chest-up figures representing today's biggest stories in sharp attire in the upper-middle foreground. The center subject holds a signature prop from today's standout headline. Vertical 4:5 editorial composition; no text.",
  "slides": [
   {
-   "region": "Geopolitics",
-   "headline": "DONALD TRUMP ARRIVES IN CHINA FOR A HIGH-STAKES TRILATERAL SUMMIT WITH **XI JINPING** AND **VLADIMIR PUTIN**",
-   "caption": "United States President Donald Trump has landed in Shenzhen ahead of trilateral talks with Chinese leader Xi Jinping and Russian President Vladimir Putin. Chinese leader Xi opened the APEC summit with appeals for global cooperation in artificial intelligence and free trade.",
-   "scene_prompt": "A photorealistic 4:5 editorial photo capturing a high-level diplomatic arrival on an airport tarmac in Shenzhen. A red carpet descends from a state aircraft under evening floodlights, flanked by ceremonial honor guards and diplomatic motorcades in the background. Atmospheric dusk lighting casts dramatic reflections on the tarmac. No text.",
-   "photo": 22
+   "region": "World",
+   "headline": "**DONALD TRUMP** ARRIVES IN **CHINA** FOR HISTORIC TRILATERAL TALKS WITH **XI JINPING** AND **VLADIMIR PUTIN**",
+   "caption": "President Donald Trump landed in Shenzhen ahead of trilateral talks with Xi Jinping and Vladimir Putin. Xi opened the APEC summit by urging free trade, AI partnerships, and digital economic ties.",
+   "scene_prompt": "Photorealistic editorial view of Donald Trump and Xi Jinping walking side by side down a red carpet airstrip in Shenzhen, high diplomatic protocol, security details and Chinese national flags, cinematic 4:5 composition, no text.",
+   "badge": "SHENZHEN SUMMIT",
+   "photo": 22,
+   "source_post": 22,
+   "source_url": "https://www.cnbc.com/2026/11/18/trump-xi-putin-china-apec.html"
   },
   {
    "region": "Markets",
-   "headline": "NVIDIA POSTS RECORD EARNINGS TOPPING **$100 BILLION** AND RULES OUT REINSTATING FORMER CHIEF **JENSEN HUANG**",
-   "caption": "Nvidia announced that quarterly sales doubled and crossed 100 billion dollars for the first time in company history. Interim leadership confirmed the board will not reinstate Huang following his recent resignation and revealed the firm will halt H200 chip sales in China.",
-   "scene_prompt": "A high-end corporate auditorium and executive boardroom setting with sleek dark panels, sophisticated architectural accent lighting, and presentation pedestals. Crisp atmospheric lighting highlights an empty executive leather armchair facing a luminous digital display showing abstract financial charts. No text.",
-   "photo": 12
+   "headline": "**NVIDIA** SURPASSES **$100 BILLION** IN SALES BUT FORMALLY RULES OUT REINSTATING FORMER CEO **JENSEN HUANG**",
+   "caption": "Nvidia announced quarterly sales doubled to surpass one hundred billion dollars for the first time in history. The chipmaker confirmed its board will not bring back former chief executive Jensen Huang.",
+   "scene_prompt": "High-tech corporate boardroom and semiconductor fabrication facility, illuminated green silicon wafer displays and stock market ticker boards reflecting off glass panels, editorial 4:5 lighting, no text.",
+   "badge": "$100B QUARTER",
+   "photo": 12,
+   "source_post": 12,
+   "source_url": "https://www.bbc.co.uk/news/articles/cm2kl50vkwkdo?at_medium=RSS&at_campaign=rss"
   },
   {
    "region": "World",
-   "headline": "UKRAINE SEVERELY DAMAGES CRITICAL **KERCH STRAIT BRIDGE** IN UNPRECEDENTED MISSILE STRIKE ACROSS **CRIMEA**",
-   "caption": "A major missile attack has caused the critical bridge connecting Russia and occupied Crimea to partially collapse. Ukrainian President Volodymyr Zelensky hailed the operation, describing it as an unprecedented strike planned over several weeks.",
-   "scene_prompt": "A dramatic wide shot of a massive arched concrete and steel marine bridge spanning open water, showing a collapsed road span with concrete rubble dipping toward the sea. Plumes of dark grey smoke rise slowly against a misty grey sky over the Kerch Strait. Photorealistic documentary framing with no text.",
-   "photo": 4
+   "headline": "**UKRAINE** SEVERELY DAMAGES THE STRATEGIC **KERCH STRAIT BRIDGE** IN AN UNPRECEDENTED LONG-RANGE **MISSILE ATTACK**",
+   "caption": "A missile strike caused a critical section of the Kerch Strait Bridge linking Russia to Crimea to partially collapse. Ukrainian President Volodymyr Zelensky hailed the operation as weeks in preparation.",
+   "scene_prompt": "Photorealistic dramatic wide shot of the Kerch Strait Bridge over choppy coastal waters, showing damaged bridge spans and smoke rising against a gray coastal sky, 4:5 vertical editorial frame, no text.",
+   "badge": "CRIMEA LINK HIT",
+   "photo": 4,
+   "source_post": 4,
+   "source_url": "https://www.bbc.co.uk/news/articles/cw772jk4rvmxo?at_medium=RSS&at_campaign=rss"
   },
   {
    "region": "Geopolitics",
-   "headline": "CLASSIFIED **NSA** COMMUNICATIONS NETWORK SUFFERS NATIONWIDE OUTAGE AMID BROADER US **INFRASTRUCTURE DISRUPTIONS**",
-   "caption": "A classified internal communications network operated by the National Security Agency experienced a widespread failure on Tuesday. Officials stated there is no evidence of a cyberattack, though the breakdown coincided with broad technical disruptions across aviation and banking systems.",
-   "scene_prompt": "A secure government intelligence server facility with long rows of glowing dark server racks, fiber-optic indicator cables, and subdued blue security lighting. Heavy vault doors and polished raised floors emphasize the high-security environment in an uneasy, quiet stillness. No text.",
-   "photo": 6
-  },
-  {
-   "region": "US Politics",
-   "headline": "DEMOCRAT **MARY PELTOLA** WINS ALASKA SENATE SEAT SECURING A **56-SEAT MAJORITY** FOR DEMOCRATS",
-   "caption": "Democrat Mary Peltola has unseated the Republican incumbent in Alaska, concluding the final race of the midterm elections after two weeks of tallying. The victory provides Democrats with a 56th seat in the United States Senate and caps a net gain of nine flipped seats.",
-   "scene_prompt": "An election night stage in Anchorage, Alaska, bathed in warm stage lights, with microphones arranged on a wooden podium in front of draped American state banners. Microphones stand ready for an acceptance address in an auditorium filled with soft bokeh background lights. No text.",
-   "photo": 24
-  },
-  {
-   "region": "Markets",
-   "headline": "**ANTHROPIC** TARGETS UP TO **$78 PER SHARE** VALUATION AHEAD OF HIGHLY ANTICIPATED PUBLIC OFFERING",
-   "caption": "Artificial intelligence startup Anthropic is heading toward its initial public offering with shares projected to debut between 70 and 78 dollars each. Market research issued a buy rating ahead of the listing, estimating the firm could generate over 500 billion dollars in annual revenue by 2030.",
-   "scene_prompt": "The interior of a bustling financial exchange floor bathed in blue and white trading terminal glow, with blurred broker silhouettes reviewing luminous market graphs on curved displays. Clean, modern architectural glass and steel frame the fast-paced trading environment. No text.",
-   "photo": 23
+   "headline": "A CLASSIFIED **NSA** COMMUNICATIONS NETWORK SUFFERS A MAJOR **NATIONWIDE OUTAGE** TRIGGERING WIDESPREAD DISRUPTIONS",
+   "caption": "The National Security Agency experienced an unexpected failure across its classified internal communications system. Officials stated there is no evidence indicating the technical outage was caused by a cyberattack.",
+   "scene_prompt": "Exterior telephoto shot of the National Security Agency headquarters at Fort Meade, with its dark reflective glass facade, perimeter fencing, security signage, and parked vehicles under an overcast sky, 4:5 ratio, no text.",
+   "badge": "SYSTEM OUTAGE",
+   "photo": 6,
+   "source_post": 6,
+   "source_url": "https://www.marketwatch.com/story/the-latest-tech-failure-u-s-classified-national-security-communications-network-ad271899?mod=mw_rss_topstories"
   },
   {
    "region": "Policy",
-   "headline": "WHITE HOUSE WITHDRAWS NOMINATION OF **HEIDI OVERTON** TO LEAD **FDA** AMID SENATE CONCERNS",
-   "caption": "The White House has pulled the nomination of Heidi Overton just one day before a key Senate Health Committee confirmation vote. The withdrawal followed growing legislative resistance, with key Republican senators withholding support for her appointment to lead the regulatory agency.",
-   "scene_prompt": "An empty ornate United States Senate committee room featuring mahogany witness tables, black leather chairs, formal committee dais desks, and classic architectural wooden wall paneling under soft institutional lighting. Microphones stand silent in the quiet chamber. No text.",
-   "photo": 16
+   "headline": "**DEMOCRAT MARY PELTOLA** WINS THE **ALASKA SENATE RACE** TO EXPAND THE PARTY MAJORITY TO **56 SEATS**",
+   "caption": "Mary Peltola defeated incumbent Dan Sullivan in Alaska, concluding the final race of the US midterm elections. The win marks the ninth Senate flip for Democrats, establishing a firm fifty-six seat control in the chamber.",
+   "scene_prompt": "Democrat Mary Peltola speaking confidently at a campaign podium backed by draped American flags, warm stage lighting, microphone in hand, photorealistic 4:5 editorial portrait, no text.",
+   "badge": "56-SEAT MAJORITY",
+   "photo": 24,
+   "source_post": 24,
+   "source_url": "https://www.independent.co.uk/news/world/americas/us-politics/dan-sullivan-alaska-senate-mary-peltola-b3086916.html"
+  },
+  {
+   "region": "Policy",
+   "headline": "THE **WHITE HOUSE** WITHDRAWS **HEIDI OVERTON** AS **FDA NOMINEE** AMID SHARP RESISTANCE IN THE SENATE",
+   "caption": "The administration dropped the nomination of Heidi Overton just ahead of a scheduled Senate confirmation vote. The withdrawal followed mounting bipartisan opposition and insufficient support among key lawmakers.",
+   "scene_prompt": "Senate committee hearing room with mahogany witness table, microphones, water glasses, and marble Corinthian columns in the background, sharp shallow depth of field, 4:5 vertical editorial framing, no text.",
+   "badge": "NOMINATION PULLED",
+   "photo": 16,
+   "source_post": 16,
+   "source_url": "https://thehill.com/policy/healthcare/6226487-white-house-withdraws-fda-nomination/"
+  },
+  {
+   "region": "World",
+   "headline": "AN **ACTIVIST** FACES CHARGES AFTER ALLEGEDLY DESTROYING A **$60 MILLION** US MILITARY **C-130 AIRCRAFT** IN IRELAND",
+   "caption": "A man has been charged after using an axe to vandalize a US National Guard plane parked at Shannon Airport. Prosecutors say the suspect smashed cockpit instruments, cut hydraulic lines, and contaminated fuel tanks.",
+   "scene_prompt": "A military gray C-130 Hercules transport aircraft parked on a damp commercial airport tarmac, propeller engines and fuselage detailed under a bright cloudy sky, 4:5 vertical editorial composition, no text.",
+   "badge": "$60M DAMAGE",
+   "photo": 20,
+   "source_post": 20,
+   "source_url": "https://nypost.com/2026/11/17/world-news/anti-israel-activist-allegedly-destroyed-60-million-us-military-aircraft-at-irish-airport-feds/"
   },
   {
    "region": "Markets",
-   "headline": "UK INFLATION RISES TO ONE-YEAR HIGH OF **3.6 PERCENT** AS RISING **FUEL COSTS** HIT CONSUMERS",
-   "caption": "Britain's annual inflation rate climbed to 3.6 percent in October, driven higher by rising petrol and diesel costs across the country. The uptick met economist forecasts while surging wholesale oil prices pushed up raw material and manufacturing expenses nationwide.",
-   "scene_prompt": "A photorealistic overcast street scene at a British petrol filling station, showing a customer holding a fuel pump nozzle beside an estate car. Reflections of gloomy drizzle shine on the damp tarmac under the canopy lights, creating an authentic everyday economic atmosphere. No text.",
-   "photo": 26
+   "headline": "**UK INFLATION** HITS A ONE-YEAR HIGH OF **3.6 PERCENT** AS SPIRALING **FUEL PRICES** SQUEEZE HOUSEHOLDS",
+   "caption": "Britain's annual inflation rate climbed to 3.6% in October, driven by rising costs for petrol and diesel. Elevated energy prices also increased the cost of raw materials and manufactured goods across the economy.",
+   "scene_prompt": "A customer refueling a car at a British petrol station forecourt on an overcast afternoon, fuel pump nozzles and digital price displays visible in atmospheric soft focus, 4:5 editorial composition, no text.",
+   "badge": "3.6% INFLATION",
+   "photo": 26,
+   "source_post": 26,
+   "source_url": ""
   }
  ],
  "date": "2026-11-18",
- "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nUnited States President Donald Trump has landed in Shenzhen ahead of trilateral talks with Chinese leader Xi Jinping and Russian President Vladimir Putin. Chinese leader Xi opened the APEC summit with appeals for global cooperation in artificial intelligence and free trade.\n\nNvidia announced that quarterly sales doubled and crossed 100 billion dollars for the first time in company history. Interim leadership confirmed the board will not reinstate Huang following his recent resignation and revealed the firm will halt H200 chip sales in China.\n\nA major missile attack has caused the critical bridge connecting Russia and occupied Crimea to partially collapse. Ukrainian President Volodymyr Zelensky hailed the operation, describing it as an unprecedented strike planned over several weeks.\n\nA classified internal communications network operated by the National Security Agency experienced a widespread failure on Tuesday. Officials stated there is no evidence of a cyberattack, though the breakdown coincided with broad technical disruptions across aviation and banking systems.\n\nDemocrat Mary Peltola has unseated the Republican incumbent in Alaska, concluding the final race of the midterm elections after two weeks of tallying. The victory provides Democrats with a 56th seat in the United States Senate and caps a net gain of nine flipped seats.\n\nArtificial intelligence startup Anthropic is heading toward its initial public offering with shares projected to debut between 70 and 78 dollars each. Market research issued a buy rating ahead of the listing, estimating the firm could generate over 500 billion dollars in annual revenue by 2030.\n\nThe White House has pulled the nomination of Heidi Overton just one day before a key Senate Health Committee confirmation vote. The withdrawal followed growing legislative resistance, with key Republican senators withholding support for her appointment to lead the regulatory agency.\n\nBritain's annual inflation rate climbed to 3.6 percent in October, driven higher by rising petrol and diesel costs across the country. The uptick met economist forecasts while surging wholesale oil prices pushed up raw material and manufacturing expenses nationwide."
+ "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nPresident Donald Trump landed in Shenzhen ahead of trilateral talks with Xi Jinping and Vladimir Putin. Xi opened the APEC summit by urging free trade, AI partnerships, and digital economic ties.\n\nNvidia announced quarterly sales doubled to surpass one hundred billion dollars for the first time in history. The chipmaker confirmed its board will not bring back former chief executive Jensen Huang.\n\nA missile strike caused a critical section of the Kerch Strait Bridge linking Russia to Crimea to partially collapse. Ukrainian President Volodymyr Zelensky hailed the operation as weeks in preparation.\n\nThe National Security Agency experienced an unexpected failure across its classified internal communications system. Officials stated there is no evidence indicating the technical outage was caused by a cyberattack.\n\nMary Peltola defeated incumbent Dan Sullivan in Alaska, concluding the final race of the US midterm elections. The win marks the ninth Senate flip for Democrats, establishing a firm fifty-six seat control in the chamber.\n\nThe administration dropped the nomination of Heidi Overton just ahead of a scheduled Senate confirmation vote. The withdrawal followed mounting bipartisan opposition and insufficient support among key lawmakers.\n\nA man has been charged after using an axe to vandalize a US National Guard plane parked at Shannon Airport. Prosecutors say the suspect smashed cockpit instruments, cut hydraulic lines, and contaminated fuel tanks.\n\nBritain's annual inflation rate climbed to 3.6% in October, driven by rising costs for petrol and diesel. Elevated energy prices also increased the cost of raw materials and manufactured goods across the economy.\n\n⚡ 24/7 live breaking wire & market alerts: @midworldnews (Link in bio)"
 }
