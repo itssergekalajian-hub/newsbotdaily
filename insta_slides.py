@@ -233,76 +233,18 @@ def _text_model_attempts() -> tuple[str, ...]:
     return tuple(models)
 
 
-def write_deck(posts: list[dict], day: dt.date) -> dict:
-    items = "\n\n---\n\n".join(
-        f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
-        f"{'ARTICLE LINKS: ' + ', '.join(p.get('links', [])) + chr(10) if p.get('links') else ''}"
-        f"{p['text']}"
-        for i, p in enumerate(posts, 1))
-    wire = dn.fetch_wire(day)
-    prompt = SLIDES_PROMPT.format(date=f"{day:%A, %d %B %Y}",
-                                  items=items[:300_000],
-                                  wire=wire[:30_000])
-    # the writer SEES the photos, so its "photo" picks are judged by what
-    # each picture shows — the same grounding the video bulletin uses
-    photos = dn._photo_parts(posts)
-    print(f"slide deck: {len(photos) // 2} photos attached")
-    body = {"contents": [{"parts": [{"text": prompt}] + photos}],
-            "generationConfig": {"temperature": 0.5, "maxOutputTokens": 4096,
-                                 "responseMimeType": "application/json"}}
-    headers = {"x-goog-api-key": dn.GEMINI_KEY,
-               "Content-Type": "application/json"}
-    response = None
-    last_error = "no Gemini models were available"
-    had_retryable_http_failure = False
-    backoff_index = 0
-    models = _text_model_attempts()
-    for model_index, model in enumerate(models):
-        response = None
-        try:
-            response = requests.post(
-                f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
-                headers=headers, json=body, timeout=180)
-        except requests.exceptions.RequestException as exc:
-            print(f"text model {model} failed ({exc.__class__.__name__}): {exc}",
-                  file=sys.stderr)
-            last_error = f"{model}: {exc}"
-        else:
-            if response.ok:
-                break
-            print(f"text model {model} returned {response.status_code}: "
-                  f"{response.text[:400]}", file=sys.stderr)
-            last_error = (f"{model}: HTTP {response.status_code}: "
-                          f"{response.text[:600]}")
-            status = response.status_code
-            if status == 429 or 500 <= status <= 599:
-                had_retryable_http_failure = True
-                if (model_index < len(models) - 1
-                        and backoff_index < len(MODEL_BACKOFFS)):
-                    wait = MODEL_BACKOFFS[backoff_index]
-                    backoff_index += 1
-                    print(f"trying next text model in {wait}s", file=sys.stderr)
-                    time.sleep(wait)
-    if response is not None and response.ok:
-        r = response
-    else:
-        raise DeckGenerationError(
-            f"all text generation models failed: {last_error}",
-            retryable_http_failure=had_retryable_http_failure)
-
-    raw = "\n".join(p["text"] for p in
-                    r.json()["candidates"][0]["content"]["parts"]
-                    if "text" in p)
-    deck = dn._extract_json(raw)
-    slides = [s for s in deck.get("slides", [])
-              if isinstance(s, dict) and s.get("headline")
-              and s.get("caption") and s.get("scene_prompt")]
+def _validate_generated_deck(deck: dict, posts: list[dict], day: dt.date,
+                             wire: str) -> dict:
+    slides = [slide for slide in deck.get("slides", [])
+              if isinstance(slide, dict) and slide.get("headline")
+              and slide.get("caption") and slide.get("scene_prompt")]
     slides = slides[:MAX_STORIES]
     if len(slides) != MAX_STORIES:
         raise RuntimeError(
             f"Gemini returned {len(slides)} valid stories; expected {MAX_STORIES}")
     for slide in slides:
-        slide["headline"] = re.sub(r"\s+", " ", slide["headline"]).strip().upper()
+        slide["headline"] = re.sub(
+            r"\s+", " ", slide["headline"]).strip().upper()
         emphasis = re.findall(r"\*\*(.+?)\*\*", slide["headline"])
         words = re.findall(r"\b[\w'-]+\b", slide["headline"].replace("**", ""))
         if (not 10 <= len(words) <= 18
@@ -311,10 +253,12 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
             raise RuntimeError(
                 "Gemini returned a headline outside the 10-18 word / "
                 "2-5 highlighted-span requirements")
-        paragraph = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", slide["caption"]).strip()
+        paragraph = re.sub(
+            r"^\s*(?:[-*•]|\d+[.)])\s*", "", slide["caption"]).strip()
         sentences = re.split(r"(?<=[.!?])\s+", paragraph)
         if len(sentences) != 2 or any(not sentence for sentence in sentences):
-            raise RuntimeError("Gemini returned a story caption that is not two sentences")
+            raise RuntimeError(
+                "Gemini returned a story caption that is not two sentences")
         slide["caption"] = " ".join(sentences)
         badge = re.sub(r"\s+", " ", str(slide.get("badge", ""))).strip()
         slide["badge"] = " ".join(badge.split()[:3]).upper()
@@ -341,6 +285,90 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
         + "\n\n".join(slide["caption"] for slide in slides)
     )
     return deck
+
+
+def write_deck(posts: list[dict], day: dt.date) -> dict:
+    items = "\n\n---\n\n".join(
+        f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
+        f"{'ARTICLE LINKS: ' + ', '.join(p.get('links', [])) + chr(10) if p.get('links') else ''}"
+        f"{p['text']}"
+        for i, p in enumerate(posts, 1))
+    wire = dn.fetch_wire(day)
+    prompt = SLIDES_PROMPT.format(date=f"{day:%A, %d %B %Y}",
+                                  items=items[:300_000],
+                                  wire=wire[:30_000])
+    # the writer SEES the photos, so its "photo" picks are judged by what
+    # each picture shows — the same grounding the video bulletin uses
+    photos = dn._photo_parts(posts)
+    print(f"slide deck: {len(photos) // 2} photos attached")
+    body = {"contents": [{"parts": [{"text": prompt}] + photos}],
+            "generationConfig": {"temperature": 0.5, "maxOutputTokens": 16384,
+                                 "responseMimeType": "application/json"}}
+    headers = {"x-goog-api-key": dn.GEMINI_KEY,
+               "Content-Type": "application/json"}
+    last_error = "no Gemini models were available"
+    backoff_index = 0
+    models = _text_model_attempts()
+    for model_index, model in enumerate(models):
+        try:
+            response = requests.post(
+                f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
+                headers=headers, json=body, timeout=180)
+        except requests.exceptions.RequestException as exc:
+            print(f"text model {model} failed ({exc.__class__.__name__}): {exc}",
+                  file=sys.stderr)
+            last_error = f"{model}: {exc}"
+            continue
+
+        if not response.ok:
+            last_error = (f"{model}: HTTP {response.status_code}: "
+                          f"{response.text[:600]}")
+            print(f"text model {model} returned {response.status_code}: "
+                  f"{response.text[:400]}", file=sys.stderr)
+            if (response.status_code == 429
+                    or 500 <= response.status_code <= 599):
+                if (model_index < len(models) - 1
+                        and backoff_index < len(MODEL_BACKOFFS)):
+                    wait = MODEL_BACKOFFS[backoff_index]
+                    backoff_index += 1
+                    print(f"trying next text model in {wait}s", file=sys.stderr)
+                    time.sleep(wait)
+            continue
+
+        finish_reason = "unknown"
+        try:
+            payload = response.json()
+            candidates = payload.get("candidates") or []
+            candidate = candidates[0] if candidates else {}
+            finish_reason = candidate.get("finishReason", "unknown")
+            if finish_reason == "MAX_TOKENS":
+                raise ValueError("generation finished with MAX_TOKENS")
+            parts = (candidate.get("content") or {}).get("parts") or []
+            text_parts = [
+                part["text"] for part in parts
+                if isinstance(part.get("text"), str) and part["text"].strip()
+            ]
+            raw = "\n".join(
+                part["text"] for part in parts
+                if not part.get("thought")
+                and isinstance(part.get("text"), str)
+                and part["text"].strip()
+            )
+            if not raw:
+                raw = "\n".join(text_parts)
+            if not raw:
+                raise ValueError("model returned no non-empty text parts")
+            deck = _validate_generated_deck(
+                dn._extract_json(raw), posts, day, wire)
+        except (ValueError, KeyError, TypeError, IndexError, AttributeError,
+                RuntimeError) as exc:
+            last_error = f"{model} (finishReason={finish_reason}): {exc}"
+            print(f"text model {model} failed (finishReason={finish_reason}): "
+                  f"{exc}", file=sys.stderr)
+            continue
+        return deck
+
+    raise DeckGenerationError(last_error, retryable_http_failure=True)
 
 
 def _fit_caption(caption: str, limit: int = 2180) -> str:
