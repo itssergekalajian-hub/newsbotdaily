@@ -37,7 +37,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install ffmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+        run: command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
 
       - name: Install dependencies
         run: pip install -q -r requirements.txt
