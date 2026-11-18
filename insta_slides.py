@@ -22,6 +22,7 @@ import math
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -29,7 +30,7 @@ from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageEnhance, ImageFont, ImageOps
 
 import daily_news as dn
 import video
@@ -41,12 +42,30 @@ IG_MARKER = ".last_ig"            # last day actually POSTED to Instagram
 MAX_STORIES = 8                   # Instagram Graph API caps a carousel at 10 items
 MAX_SLIDES = MAX_STORIES + 2      # cover + stories + closing follow slide
 CAPTION_HEADER = "Here's What Happened in the World in the Last 24 Hours:"
+CAPTION_FOOTER = "\u26a1 24/7 live breaking wire & market alerts: @midworldnews (Link in bio)"
 BRAND = "MIDWORLD DAILY"
 IG_HANDLE = os.getenv("IG_HANDLE", "@midworlddaily").strip() or "@midworlddaily"
 if not IG_HANDLE.startswith("@"):
     IG_HANDLE = f"@{IG_HANDLE}"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ANTON = os.path.join(video.BUNDLED_FONT_DIR, "Anton-Regular.ttf")
-YELLOW = "#FFD400"
+OBSIDIAN = "#070A0F"
+CYAN = "#00E5FF"
+SIGNAL_GOLD = "#FFC400"
+YELLOW = SIGNAL_GOLD
+TEXT_MODELS = (
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash",
+)
+TEXT_MODEL_ATTEMPTS = TEXT_MODELS + (TEXT_MODELS[0],)
+IMAGE_MODELS = (
+    "gemini-nano-banana-2.1",
+    "gemini-3.1-flash-lite-image",
+    "gemini-3.1-flash-image",
+    "gemini-2.5-flash-image",
+)
+MODEL_BACKOFFS = (5, 15, 30)
 
 REGION_ART = (
     (("sport", "football", "mma", "tennis", "basket", "olymp", "formula"),
@@ -72,11 +91,8 @@ def art_for(region: str) -> str:
     return os.path.join(TEMPLATES, "global.png")
 
 
-# The context-scene library: Higgsfield-generated editorial illustrations in
-# the fixed house look, one per news archetype, committed under
-# templates/scenes/. The writer picks the one that matches each story, so
-# every slide carries imagery that REPRESENTS its story even with no image
-# model available at render time.
+# The context-scene library provides branded fallbacks when image generation
+# and a story-specific press photo are both unavailable.
 SCENES = {
     "missile_strike": "missiles streak across a night sky over a burning city",
     "fighter_jets": "fighter jets bank over desert terrain, smoke below",
@@ -124,8 +140,13 @@ story first. The eight story slides plus a cover and closing slide make a
 10-item Instagram carousel.
 
 Return ONLY JSON, no markdown fences:
-{{"cover_scene_prompt":"One dramatic photorealistic 4:5 editorial composition
-combining the day's top three visual elements, leaders or events. No text.",
+{{"cover_scene_prompt":"A massive photorealistic Earth on a dark space horizon,
+glowing with electric-cyan (#00E5FF) network grid lines and fiery golden
+(#FFC400) shockwaves, flanked by visual motifs from today's top three stories
+(such as jets, vessels, or market candlesticks) and 2-3 dramatic chest-up
+figures representing today's biggest stories in sharp attire in the
+upper-middle foreground. The center subject holds a signature prop from
+today's standout headline. Vertical 4:5 editorial composition; no text.",
  "slides":[{{"region":"World, Markets, or another concise category",
  "headline":"A punchy, uppercase, one-sentence statement of 10-18
 words. Wrap 2-5 key names, entities, numbers or outcomes in **double asterisks**.",
@@ -133,7 +154,9 @@ words. Wrap 2-5 key names, entities, numbers or outcomes in **double asterisks**
 Keep the paragraph around 180-220 characters total. No emoji, numbering,
 bullets, headline, or source list.",
  "scene_prompt":"A specific photorealistic 4:5 editorial scene for this story,
-describing the setting, visible details and mood. No text.",
+hyper-detailed and tailored to the exact subject, vehicles, landmarks, flags,
+or technology and market hardware. No text.",
+ "badge":"A concise 2-3 word metric or status, or empty string.",
  "photo":17,
  "source_post":17,
  "source_url":"Exact article URL from the provided post links or wire context,
@@ -147,9 +170,9 @@ asterisks**. Do not use any other markdown.
 - Each caption paragraph must contain exactly two concise sentences and be
 around 180-220 characters total, understandable without reading the slide.
 Facts and numbers must come only from the posts or agency context; never invent.
-- Scene prompts are photorealistic 4:5 editorial illustrations with no text,
-letters, numbers, logos or watermarks. Avoid implying that an illustrative
-image is real documentary footage; do not depict identifiable private people.
+- Scene prompts are hyper-detailed photorealistic 4:5 composites tailored to
+the exact story subject, vehicles, landmarks, flags, or hardware. Badges are
+short 2-3 word metric/status labels or empty. Avoid unrelated decoration.
 - "photo" is the one-based number of a post whose attached photo visibly depicts
 this exact story; otherwise use null. "source_post" is the one-based post most
 directly reporting this story, preferably one with an article link. "source_url"
@@ -179,51 +202,35 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
     # each picture shows — the same grounding the video bulletin uses
     photos = dn._photo_parts(posts)
     print(f"slide deck: {len(photos) // 2} photos attached")
-    model = dn.candidate_models()[0]
-    alternates = [m for m in dn.candidate_models() if m != model]
-    tried = 0
     body = {"contents": [{"parts": [{"text": prompt}] + photos}],
             "generationConfig": {"temperature": 0.5, "maxOutputTokens": 4096,
-                                 "responseMimeType": "application/json",
-                                 "thinkingConfig": {"thinkingBudget": 0}}}
+                                 "responseMimeType": "application/json"}}
     headers = {"x-goog-api-key": dn.GEMINI_KEY,
                "Content-Type": "application/json"}
-    for attempt in range(14):
+    response = None
+    for model_index, model in enumerate(TEXT_MODEL_ATTEMPTS):
         try:
-            r = requests.post(
+            response = requests.post(
                 f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
                 headers=headers, json=body, timeout=180)
         except requests.exceptions.RequestException as exc:
-            wait = min(15 * 2 ** (attempt // 2), 240)
-            print(f"connection dropped ({exc.__class__.__name__}) on {model} "
-                  f"— waiting {wait}s")
-            if alternates and tried < len(alternates) and attempt % 2 == 1:
-                model = alternates[tried]
-                tried += 1
-                print(f"switching to alternate model: {model}")
+            print(f"text model {model} failed ({exc.__class__.__name__}): {exc}",
+                  file=sys.stderr)
+        else:
+            if response.ok:
+                break
+            print(f"text model {model} returned {response.status_code}: "
+                  f"{response.text[:400]}", file=sys.stderr)
+        if model_index < len(TEXT_MODEL_ATTEMPTS) - 1:
+            wait = MODEL_BACKOFFS[model_index]
+            print(f"trying next text model in {wait}s", file=sys.stderr)
             time.sleep(wait)
-            continue
-        if r.ok:
-            break
-        if r.status_code == 404 and tried < len(alternates):
-            model = alternates[tried]; tried += 1
-            continue
-        if r.status_code == 400 and "thinkingConfig" in str(
-                body.get("generationConfig", {})):
-            body["generationConfig"].pop("thinkingConfig", None)
-            continue
-        if r.status_code in (429, 500, 502, 503, 504):
-            if alternates and tried < len(alternates) and attempt % 2 == 1:
-                model = alternates[tried]; tried += 1
-                print(f"{r.status_code} — switching to {model}")
-                continue
-            wait = min(15 * 2 ** (attempt // 2), 240)
-            print(f"{r.status_code} — waiting {wait}s")
-            time.sleep(wait)
-            continue
-        r.raise_for_status()
+    if response is not None and response.ok:
+        r = response
     else:
-        raise RuntimeError("gemini unavailable for the slide deck")
+        last_error = (response.text[:600] if response is not None
+                      else "network request failed for every model")
+        raise RuntimeError(f"all text generation models failed: {last_error}")
 
     raw = "\n".join(p["text"] for p in
                     r.json()["candidates"][0]["content"]["parts"]
@@ -251,6 +258,8 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
         if len(sentences) != 2 or any(not sentence for sentence in sentences):
             raise RuntimeError("Gemini returned a story caption that is not two sentences")
         slide["caption"] = " ".join(sentences)
+        badge = re.sub(r"\s+", " ", str(slide.get("badge", ""))).strip()
+        slide["badge"] = " ".join(badge.split()[:3]).upper()
     deck["cover_scene_prompt"] = deck.get("cover_scene_prompt", "").strip()
     if not deck["cover_scene_prompt"]:
         raise RuntimeError("Gemini did not return a cover scene prompt")
@@ -277,20 +286,23 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
 
 
 def _fit_caption(caption: str, limit: int = 2180) -> str:
-    """Keep the fixed header and ordered story paragraphs within Instagram's limit."""
-    limit = max(limit, len(CAPTION_HEADER))
+    """Keep story paragraphs, the fixed header and funnel footer within limit."""
+    limit = max(limit, len(CAPTION_HEADER) + len(CAPTION_FOOTER) + 4)
     text = str(caption or "").strip()
     if text.startswith(CAPTION_HEADER):
         body = text[len(CAPTION_HEADER):].strip()
     else:
         body = text
+    if body.endswith(CAPTION_FOOTER):
+        body = body[:-len(CAPTION_FOOTER)].rstrip()
     paragraphs = [part.strip() for part in re.split(r"\n\s*\n", body)
                   if part.strip()]
     fitted = paragraphs[:]
 
     def assemble() -> str:
         suffix = "\n\n".join(fitted)
-        return CAPTION_HEADER + (f"\n\n{suffix}" if suffix else "")
+        prefix = CAPTION_HEADER + (f"\n\n{suffix}" if suffix else "")
+        return prefix + "\n\n" + CAPTION_FOOTER
 
     for index in sorted(range(len(fitted)),
                         key=lambda item: len(fitted[item]), reverse=True):
@@ -304,14 +316,16 @@ def _fit_caption(caption: str, limit: int = 2180) -> str:
     if len(result) <= limit:
         return result
 
-    available = limit - len(CAPTION_HEADER) - 2
+    available = (limit - len(CAPTION_HEADER) - 2
+                 - 2 - len(CAPTION_FOOTER))
     if available <= 0:
-        return CAPTION_HEADER[:limit]
+        return CAPTION_HEADER + "\n\n" + CAPTION_FOOTER
     body = "\n\n".join(fitted)
     truncated = body[:max(0, available - 3)]
     if len(body) > len(truncated):
         truncated = truncated.rsplit(" ", 1)[0].rstrip()
-    return CAPTION_HEADER + "\n\n" + truncated + "..."
+    return (CAPTION_HEADER + "\n\n" + truncated + "...\n\n"
+            + CAPTION_FOOTER)
 
 
 # Anton: the tall condensed display face the poster format is built on —
@@ -338,7 +352,7 @@ def _fit_artwork(path: str | None) -> Image.Image:
     return Image.new("RGB", (W, H), "#101116")
 
 
-def _apply_lower_scrim(image: Image.Image) -> Image.Image:
+def _lower_scrim_overlay() -> Image.Image:
     start = int(H * 0.58)
     height = H - start
     ramp = Image.new("RGBA", (1, height))
@@ -349,7 +363,12 @@ def _apply_lower_scrim(image: Image.Image) -> Image.Image:
     gradient = ramp.resize((W, height), Image.Resampling.BILINEAR)
     overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     overlay.alpha_composite(gradient, (0, start))
-    return Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
+    return overlay
+
+
+def _apply_lower_scrim(image: Image.Image) -> Image.Image:
+    return Image.alpha_composite(
+        image.convert("RGBA"), _lower_scrim_overlay()).convert("RGB")
 
 
 def _draw_shadow_text(draw: ImageDraw.ImageDraw, xy: tuple[int, int],
@@ -364,8 +383,7 @@ def _draw_shadow_text(draw: ImageDraw.ImageDraw, xy: tuple[int, int],
               stroke_width=stroke_width, stroke_fill="#000000")
 
 
-def _draw_brand(draw: ImageDraw.ImageDraw, y: int, color: str,
-                line_color: str) -> None:
+def _draw_brand(draw: ImageDraw.ImageDraw, y: int) -> None:
     font = _font(32)
     center = W // 2
     left, right = "MIDWORLD", "DAILY"
@@ -374,20 +392,55 @@ def _draw_brand(draw: ImageDraw.ImageDraw, y: int, color: str,
     diamond_size = 12
     gap = 14
     half = int((left_width + right_width + diamond_size + gap * 2) / 2) + 30
-    draw.line((70, y + 18, center - half, y + 18), fill=line_color, width=2)
-    draw.line((center + half, y + 18, W - 70, y + 18), fill=line_color, width=2)
+    draw.line((70, y + 18, center - half, y + 18),
+              fill=SIGNAL_GOLD, width=2)
+    draw.line((center + half, y + 18, W - 70, y + 18),
+              fill=CYAN, width=2)
     left_x = center - (left_width + right_width + diamond_size + gap * 2) / 2
-    draw.text((round(left_x), y + 18), left, font=font, fill=color, anchor="lm")
+    draw.text((round(left_x), y + 18), left, font=font, fill="#FFFFFF",
+              anchor="lm")
     diamond_x = left_x + left_width + gap + diamond_size / 2
     draw.polygon(
         [(diamond_x, y + 18 - diamond_size / 2),
          (diamond_x + diamond_size / 2, y + 18),
          (diamond_x, y + 18 + diamond_size / 2),
          (diamond_x - diamond_size / 2, y + 18)],
-        fill=color,
+        fill=SIGNAL_GOLD,
     )
     right_x = diamond_x + diamond_size / 2 + gap
-    draw.text((round(right_x), y + 18), right, font=font, fill=color, anchor="lm")
+    draw.text((round(right_x), y + 18), right, font=font, fill=CYAN,
+              anchor="lm")
+
+
+def _fit_font(text: str, max_width: int, max_size: int,
+              min_size: int = 24) -> ImageFont.FreeTypeFont:
+    probe = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    for size in range(max_size, min_size - 1, -2):
+        font = _font(size)
+        if probe.textlength(text, font=font) <= max_width:
+            return font
+    return _font(min_size)
+
+
+def _draw_story_badge(image: Image.Image, badge: str) -> None:
+    badge = re.sub(r"\s+", " ", badge).strip().upper()
+    if not badge:
+        return
+    font = _font(31)
+    measure = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    width = min(390, int(measure.textlength(badge, font=font)) + 92)
+    height = 68
+    x, y = W - width - 38, 42
+    accent = SIGNAL_GOLD if any(token in badge for token in ("%", "$", "BREAKING")) else CYAN
+    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    draw.rounded_rectangle((x, y, x + width, y + height), radius=22,
+                           fill=(7, 10, 15, 205),
+                           outline=(0, 229, 255, 170), width=2)
+    draw.ellipse((x + 20, y + 26, x + 36, y + 42), fill=accent)
+    draw.text((x + 50, y + height // 2), badge, font=font,
+              fill="#FFFFFF", anchor="lm")
+    image.alpha_composite(overlay)
 
 
 def _save_slide(image: Image.Image, out: str) -> None:
@@ -456,12 +509,15 @@ def _draw_story_headline(draw: ImageDraw.ImageDraw, headline: str) -> None:
 # the fixed house look every generated illustration is asked for — ONE style
 # across every slide, every day, is what makes the feed read as a brand
 SCENE_STYLE = (
-    ". Create a photorealistic editorial news illustration in a vertical 4:5 "
-    "composition, cinematic natural light and realistic detail. Compose for "
-    "full-bleed cropping with a clear, uncluttered upper area and a darker "
-    "lower area for later graphic overlay. This is illustrative artwork, not "
-    "documentary evidence. Do not render text, letters, numbers, labels, "
-    "logos, watermarks or typography; do not depict identifiable real people.")
+    ". MidWorld Daily signature Nano Banana 2.1 art direction: a deep "
+    "obsidian-navy cinematic backdrop; dramatic photorealistic subjects occupy "
+    "the upper 62% of the vertical 4:5 frame, lit with electric-cyan "
+    "(#00E5FF) and warm signal-gold (#FFC400) studio rim lights. Add subtle "
+    "glowing cyan/gold intelligence-radar arcs only where they fit the story. "
+    "Keep the bottom 36% dark and uncluttered for text overlay. This is "
+    "illustrative editorial artwork, not documentary evidence. Strictly ZERO "
+    "text, words, letters, numbers, labels, logos, watermarks or typography "
+    "inside the image.")
 
 
 # set once per run when the key proves to have no image-generation quota
@@ -470,103 +526,142 @@ _GEN_DEAD = False
 
 @functools.lru_cache(maxsize=1)
 def image_models() -> tuple[str, ...]:
-    preferred = ["gemini-3.1-flash-image-preview", "gemini-2.5-flash-image"]
+    return IMAGE_MODELS
+
+
+_LOCATION_NAMES = {
+    "United States", "United Kingdom", "New York", "South Korea",
+    "North Korea", "Middle East", "White House", "European Union",
+    "United Nations", "World Bank", "Red Sea", "Arab League",
+}
+_TITLED_PERSON_RE = re.compile(
+    r"\b(?:President|Prime Minister|Foreign Minister|Finance Minister|"
+    r"Secretary of State|Chancellor|Governor|CEO|Chairman|Secretary)"
+    r"\s+[A-Z][a-z]+(?:[-'][A-Za-z]+)?(?:\s+[A-Z][a-z]+(?:[-'][A-Za-z]+)?){0,2}\b")
+_PROPER_NAME_RE = re.compile(
+    r"\b[A-Z][a-z]+(?:[-'][A-Za-z]+)?"
+    r"(?:\s+[A-Z][a-z]+(?:[-'][A-Za-z]+)?){1,2}\b")
+
+
+def _deidentify_scene_prompt(prompt: str) -> str:
+    role = "a senior public official in a tailored dark suit"
+    safe = _TITLED_PERSON_RE.sub(role, prompt)
+    safe = _PROPER_NAME_RE.sub(
+        lambda match: match.group(0) if match.group(0) in _LOCATION_NAMES else role,
+        safe)
+    if safe == prompt:
+        safe += (" Depict any public figures only as unnamed, vivid descriptive "
+                 "roles, never as identifiable people.")
+    return safe
+
+
+def _reference_image_part(path: str | None) -> dict | None:
+    if not path or not os.path.isfile(path):
+        return None
+    with Image.open(path) as image:
+        image = ImageOps.exif_transpose(image).convert("RGB")
+        image.thumbnail((1200, 1500), Image.Resampling.LANCZOS)
+        buffer = io.BytesIO()
+        image.save(buffer, format="JPEG", quality=88, optimize=True)
+    return {"inline_data": {
+        "mime_type": "image/jpeg",
+        "data": base64.b64encode(buffer.getvalue()).decode("ascii"),
+    }}
+
+
+def _scene_request(model: str, prompt: str, reference: dict | None) -> requests.Response:
+    text = prompt
+    if reference:
+        text += (" Use the attached press photo as visual grounding for the "
+                 "story's real-world details; create a cinematic editorial "
+                 "composition without copying text or adding logos.")
+    parts = [{"text": text + SCENE_STYLE}]
+    if reference:
+        parts.append(reference)
+    body = {
+        "contents": [{"parts": parts}],
+        "generationConfig": {
+            "responseModalities": ["TEXT", "IMAGE"],
+            "imageConfig": {"aspectRatio": "4:5"},
+        },
+    }
+    return requests.post(
+        f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
+        headers={"x-goog-api-key": dn.GEMINI_KEY,
+                 "Content-Type": "application/json"},
+        json=body,
+        timeout=180,
+    )
+
+
+def _save_generated_scene(response: requests.Response, out: str) -> str:
+    """Return 'saved', 'blocked', or 'empty' for an image-generation reply."""
     try:
-        r = requests.get(f"{dn.GEMINI_ROOT}/models",
-                         headers={"x-goog-api-key": dn.GEMINI_KEY}, timeout=30)
-        r.raise_for_status()
-        names = [m["name"].removeprefix("models/")
-                 for m in r.json().get("models", [])
-                 if "image" in m["name"]
-                 and "generateContent" in m.get("supportedGenerationMethods", [])]
-    except requests.exceptions.RequestException as e:
-        print(f"  image model discovery unavailable ({str(e)[:60]}); "
-              "trying preferred image models", file=sys.stderr)
-        names = []
+        payload = response.json()
+    except ValueError:
+        return "empty"
+    candidate = (payload.get("candidates") or [{}])[0]
+    if candidate.get("finishReason") == "IMAGE_OTHER":
+        return "blocked"
+    for part in candidate.get("content", {}).get("parts", []):
+        blob = (part.get("inlineData") or part.get("inline_data") or {}).get("data")
+        if not blob:
+            continue
+        try:
+            data = base64.b64decode(blob, validate=True)
+            with Image.open(io.BytesIO(data)) as image:
+                image.load()
+                ImageOps.fit(
+                    image.convert("RGB"), (W, H),
+                    method=Image.Resampling.LANCZOS,
+                ).save(out, format="PNG")
+            return "saved"
+        except (OSError, ValueError) as exc:
+            print(f"  generated scene was not a valid image: {exc}",
+                  file=sys.stderr)
+    return "empty"
 
-    def rank(n: str) -> tuple:
-        if n in preferred:
-            return (preferred.index(n),)
-        m = re.search(r"gemini-(\d+(?:\.\d+)?)", n)
-        return (len(preferred) + ("preview" in n or "exp" in n),
-                -(float(m.group(1)) if m else 0.0), len(n))
 
-    return tuple(sorted(set(preferred + names), key=rank))
-
-
-def gen_scene(scene_prompt: str, out: str) -> bool:
-    """Generate text-free 4:5 artwork from a story-specific scene prompt.
-
-    Tries preferred Gemini image models with bounded retries. Failure returns
-    False so verified story photos or the regional template can take over.
-    """
+def gen_scene(scene_prompt: str, out: str,
+              reference_photo: str | None = None) -> bool:
+    """Generate signature 4:5 artwork, grounded by an optional press photo."""
     global _GEN_DEAD
     if _GEN_DEAD:
         return False
-    headers = {"x-goog-api-key": dn.GEMINI_KEY,
-               "Content-Type": "application/json"}
+    reference = _reference_image_part(reference_photo)
+    safe_prompt = None
     models = image_models()
-    for model in models[:4]:
-        # image models answer with a text part AND an image part; asking for
-        # IMAGE alone is an INVALID_ARGUMENT on the gemini image family
-        body = {"contents": [{"parts": [{"text": scene_prompt + SCENE_STYLE}]}],
-                "generationConfig": {
-                    "responseModalities": ["TEXT", "IMAGE"],
-                    "imageConfig": {"aspectRatio": "4:5"}}}
-        for attempt in range(4):
+    for model in models:
+        prompt = safe_prompt or scene_prompt
+        for prompt_attempt in range(2):
             try:
-                r = requests.post(
-                    f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
-                    headers=headers, json=body, timeout=180)
-            except requests.exceptions.RequestException as e:
-                print(f"  scene gen {model}: {str(e)[:80]}", file=sys.stderr)
-                if attempt < 3:
-                    time.sleep(5 * (attempt + 1))
-                    continue
+                response = _scene_request(model, prompt, reference)
+            except requests.exceptions.RequestException as exc:
+                print(f"  scene gen {model}: {str(exc)[:120]}", file=sys.stderr)
                 break
-            if r.ok:
-                parts = (r.json().get("candidates") or [{}])[0] \
-                    .get("content", {}).get("parts", [])
-                for p in parts:
-                    blob = (p.get("inlineData") or p.get("inline_data")
-                            or {}).get("data")
-                    if blob:
-                        data = base64.b64decode(blob)
-                        if len(data) > 20_000:
-                            try:
-                                with Image.open(io.BytesIO(data)) as image:
-                                    image.load()
-                                    ImageOps.fit(
-                                        image.convert("RGB"), (W, H),
-                                        method=Image.Resampling.LANCZOS,
-                                    ).save(out, format="PNG")
-                                return True
-                            except (OSError, ValueError) as e:
-                                print(f"  scene gen {model}: invalid image ({e})",
-                                      file=sys.stderr)
-                print(f"  scene gen {model}: no image in reply",
-                      file=sys.stderr)
-                break                              # refused: next model
-            if r.status_code == 400 and "imageConfig" in str(
-                    body["generationConfig"]):
-                body["generationConfig"].pop("imageConfig", None)
-                continue
-            if r.status_code in (429, 500, 502, 503, 504):
-                if r.status_code == 429 and ("billing" in r.text
-                                             or "check your plan" in r.text):
-                    print(f"  scene gen: no image quota on this key "
-                          f"({model}) — catalog art takes over",
-                          file=sys.stderr, flush=True)
+            blocked = response.status_code == 400
+            if response.ok:
+                result = _save_generated_scene(response, out)
+                if result == "saved":
+                    return True
+                blocked = result == "blocked"
+                if not blocked:
+                    print(f"  scene gen {model}: no usable image in reply",
+                          file=sys.stderr)
+                    break
+            else:
+                print(f"  scene gen {model}: HTTP {response.status_code} "
+                      f"{response.text[:220]}", file=sys.stderr)
+                if response.status_code == 429 and (
+                        "billing" in response.text.lower()
+                        or "check your plan" in response.text.lower()):
                     _GEN_DEAD = True
                     return False
-                if attempt == 0:
-                    print(f"  scene gen {model}: {r.status_code} "
-                          f"{r.text[:220]}", file=sys.stderr, flush=True)
-                time.sleep(8 * (attempt + 1))
+            if blocked and safe_prompt is None:
+                safe_prompt = _deidentify_scene_prompt(scene_prompt)
+                prompt = safe_prompt
                 continue
-            print(f"  scene gen {model}: {r.status_code} {r.text[:160]}",
-                  file=sys.stderr)
-            break                                  # 400/404 etc: next model
+            break
     return False
 
 
@@ -583,98 +678,184 @@ def render_story(work: str, idx: int, total: int, slide: dict,
                  date_text: str, bg: str, out: str,
                  is_photo: bool = False) -> None:
     """Compose the story artwork and highlighted headline with Pillow."""
-    image = _apply_lower_scrim(_fit_artwork(bg))
+    image = _apply_lower_scrim(_fit_artwork(bg)).convert("RGBA")
+    _draw_story_badge(image, str(slide.get("badge", "")))
     draw = ImageDraw.Draw(image)
     _draw_story_headline(draw, slide["headline"])
-    _draw_brand(draw, 1255, YELLOW, YELLOW)
+    _draw_brand(draw, 1255)
     _save_slide(image, out)
 
 
 def render_cover(work: str, cover_line: str, date_text: str, total: int,
-                 out: str, bg: str | None = None) -> None:
-    image = _apply_lower_scrim(
-        _fit_artwork(bg or os.path.join(TEMPLATES, "cover.png")))
-    draw = ImageDraw.Draw(image)
-    _draw_shadow_text(draw, (W // 2, 852), "WHAT HAPPENED",
-                      _font(92), "#FFFFFF")
-    _draw_shadow_text(draw, (W // 2, 956), "IN THE WORLD",
-                      _font(96), YELLOW)
-    _draw_shadow_text(draw, (W // 2, 1060), "IN THE LAST 24 HOURS",
-                      _font(64), YELLOW)
-    _draw_brand(draw, 1138, "#FFFFFF", "#FFFFFF")
+                 out: str, bg: str | None = None,
+                 background_out: str | None = None,
+                 overlay_out: str | None = None) -> None:
+    background = _fit_artwork(bg or os.path.join(TEMPLATES, "cover.png"))
+    overlay = _lower_scrim_overlay()
+    draw = ImageDraw.Draw(overlay)
+    title_lines = (
+        ("WHAT MOVED", "#FFFFFF", 94),
+        ("THE WORLD", SIGNAL_GOLD, 98),
+        ("IN THE LAST 24 HOURS", SIGNAL_GOLD, 66),
+    )
+    for (text, color, size), y in zip(title_lines, (846, 944, 1040)):
+        _draw_shadow_text(draw, (W // 2, y), text,
+                          _fit_font(text, W - 120, size), color)
+    _draw_brand(draw, 1114)
     x0, y0, x1, y1 = 288, 1206, 792, 1294
     cut = 22
     draw.polygon(
         [(x0 + cut, y0), (x1 - cut, y0), (x1, y0 + cut),
          (x1, y1 - cut), (x1 - cut, y1), (x0 + cut, y1),
          (x0, y1 - cut), (x0, y0 + cut)],
-        fill=YELLOW,
+        fill=SIGNAL_GOLD,
     )
     _draw_shadow_text(draw, (W // 2, (y0 + y1) // 2), "SWIPE LEFT >>",
                       _font(43, bold=True), "#000000", stroke_width=0)
-    _save_slide(image, out)
+    composite = Image.alpha_composite(background.convert("RGBA"), overlay)
+    _save_slide(composite, out)
+    if background_out:
+        background.save(background_out, format="PNG")
+    if overlay_out:
+        overlay.save(overlay_out, format="PNG")
+
+
+def _render_cover_video(background_path: str, overlay_path: str,
+                        output_path: str) -> None:
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        raise RuntimeError("ffmpeg is required to render the animated cover")
+    duration, fps = 7, 30
+    music = os.path.join(BASE_DIR, "assets", "ig_music.mp3")
+    command = [
+        ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
+        "-loop", "1", "-framerate", str(fps), "-i", background_path,
+        "-loop", "1", "-framerate", str(fps), "-i", overlay_path,
+    ]
+    if os.path.isfile(music):
+        command.extend(["-stream_loop", "-1", "-i", music])
+        audio_filter = (
+            "[2:a]atrim=duration=7,afade=t=out:st=6.2:d=0.8,"
+            "loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,"
+            "aformat=sample_fmts=fltp:channel_layouts=stereo[a]"
+        )
+    else:
+        command.extend([
+            "-f", "lavfi", "-i",
+            "sine=frequency=48:sample_rate=48000:duration=7",
+            "-f", "lavfi", "-i",
+            "sine=frequency=220:sample_rate=48000:duration=7",
+        ])
+        audio_filter = (
+            "[2:a]lowpass=f=85,volume=0.32[bass];"
+            "[3:a]volume='0.18*(0.5+0.5*sin(2*PI*0.55*t))':eval=frame[pulse];"
+            "[bass][pulse]amix=inputs=2:duration=longest:normalize=0,"
+            "afade=t=out:st=6.2:d=0.8,loudnorm=I=-16:TP=-1.5:LRA=11,"
+            "aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo[a]"
+        )
+    video_filter = (
+        "[0:v]scale=2160:2700:flags=lanczos,"
+        "zoompan=z='1+0.04*on/209':"
+        "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+        "d=210:s=1080x1350:fps=30,setsar=1[bg];"
+        "[bg][1:v]overlay=0:0:shortest=1,format=yuv420p[v]"
+    )
+    command.extend([
+        "-filter_complex", video_filter + ";" + audio_filter,
+        "-map", "[v]", "-map", "[a]", "-t", str(duration),
+        "-r", str(fps), "-c:v", "libx264", "-pix_fmt", "yuv420p",
+        "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
+        "-movflags", "+faststart", output_path,
+    ])
+    try:
+        subprocess.run(command, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"ffmpeg failed to render animated cover: {exc.stderr[-1200:]}"
+        ) from exc
 
 
 def _rotated_card(image: Image.Image, angle: float) -> Image.Image:
-    card = Image.new("RGB", (350, 440), "#F3F3F3")
+    card = Image.new("RGB", (350, 440), OBSIDIAN)
     card.paste(ImageOps.fit(image.convert("RGB"), (334, 424),
                             method=Image.Resampling.LANCZOS), (8, 8))
+    ImageDraw.Draw(card).rectangle((2, 2, 347, 437), outline=CYAN, width=3)
     return card.rotate(angle, resample=Image.Resampling.BICUBIC,
-                       expand=True, fillcolor="#0A0A0C")
+                       expand=True, fillcolor=OBSIDIAN)
 
 
 def render_outro(work: str, date_text: str, out: str) -> None:
-    image = Image.new("RGB", (W, H), "#0A0A0C")
+    image = Image.new("RGB", (W, H), OBSIDIAN)
+    glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    glow_draw = ImageDraw.Draw(glow)
+    glow_draw.ellipse((-260, 20, 520, 800), fill=(0, 229, 255, 24))
+    glow_draw.ellipse((660, 100, 1330, 850), fill=(255, 196, 0, 15))
+    image = Image.alpha_composite(image.convert("RGBA"), glow).convert("RGB")
     cover_path = os.path.join(OUT_DIR, "01.jpg")
     cover = _fit_artwork(cover_path if os.path.exists(cover_path) else None)
     left = _rotated_card(cover, 8)
 
-    promo = Image.new("RGB", (350, 440), "#141519")
+    promo = Image.new("RGB", (350, 440), "#0B1520")
     promo_draw = ImageDraw.Draw(promo)
-    promo_draw.rectangle((2, 2, 347, 437), outline="#515159", width=3)
-    promo_lines = ["THE STORIES", "THAT SHAPED", "OUR WORLD", "IN THE", "LAST DAY"]
-    y = 75
-    for index, line in enumerate(promo_lines):
-        color = YELLOW if index in (1, 4) else "#FFFFFF"
-        promo_draw.text((175, y), line, font=_font(39), fill=color,
-                        anchor="mm", stroke_width=1, stroke_fill="#000000")
-        y += 63
+    promo_draw.rectangle((2, 2, 347, 437), outline=CYAN, width=3)
+    promo_draw.text((175, 82), "MIDWORLD", font=_font(46),
+                    fill="#FFFFFF", anchor="mm")
+    promo_draw.text((175, 136), "LIVE", font=_font(40),
+                    fill=CYAN, anchor="mm")
+    promo_draw.line((38, 182, 312, 182), fill=SIGNAL_GOLD, width=3)
+    for y, line in zip((240, 296, 352),
+                       ("BREAKING WIRE", "MARKET ALERTS", "24 / 7")):
+        promo_draw.text((175, y), line, font=_fit_font(line, 290, 34),
+                        fill=SIGNAL_GOLD if y == 352 else "#FFFFFF",
+                        anchor="mm")
     right = promo.rotate(-8, resample=Image.Resampling.BICUBIC,
-                         expand=True, fillcolor="#0A0A0C")
-    image.paste(left, (65, 230))
-    image.paste(right, (665, 230))
+                         expand=True, fillcolor=OBSIDIAN)
+    image.paste(left, (75, 120))
+    image.paste(right, (655, 120))
     draw = ImageDraw.Draw(image)
 
     arrow = []
     for step in range(31):
         t = step / 30
         arrow.append((round(440 + 180 * t),
-                      round(345 - 68 * math.sin(math.pi * t))))
-    draw.line(arrow, fill="#FFFFFF", width=7, joint="curve")
+                      round(282 - 62 * math.sin(math.pi * t))))
+    draw.line(arrow, fill=CYAN, width=7, joint="curve")
     end_x, end_y = arrow[-1]
     draw.polygon([(end_x, end_y), (end_x - 20, end_y - 16),
-                  (end_x - 16, end_y + 13)], fill="#FFFFFF")
+                  (end_x - 16, end_y + 13)], fill=CYAN)
 
-    draw.text((W // 2, 795), "The world's biggest stories, every day.",
-              font=_font(34), fill="#FFFFFF", anchor="mm",
-              stroke_width=1, stroke_fill="#000000")
-    follow_font = _font(45)
-    follow = "Follow "
-    prefix_width = draw.textlength(follow, font=follow_font)
-    handle_width = draw.textlength(IG_HANDLE, font=follow_font)
-    x = (W - prefix_width - handle_width) / 2
-    draw.text((round(x), 900), follow, font=follow_font, fill="#FFFFFF",
-              anchor="lm")
-    draw.text((round(x + prefix_width), 900), IG_HANDLE, font=follow_font,
-              fill="#D4FF00", anchor="lm")
+    draw.text((W // 2, 670), "GET BREAKING NEWS",
+              font=_fit_font("GET BREAKING NEWS", W - 100, 84),
+              fill="#FFFFFF", anchor="mm",
+              stroke_width=2, stroke_fill="#000000")
+    draw.text((W // 2, 766), "10 MIN FIRST",
+              font=_fit_font("10 MIN FIRST", W - 100, 100),
+              fill=SIGNAL_GOLD, anchor="mm",
+              stroke_width=2, stroke_fill="#000000")
+    subline = "24/7 GLOBAL WIRE & MARKET ALERTS ON TELEGRAM"
+    draw.text((W // 2, 868), subline,
+              font=_fit_font(subline, W - 100, 37),
+              fill="#DDE7EE", anchor="mm")
 
-    badge_y = 1174
-    center = W // 2
-    draw.line((118, badge_y, center - 70, badge_y), fill="#6A6A70", width=2)
-    draw.line((center + 70, badge_y, W - 118, badge_y), fill="#6A6A70", width=2)
-    draw.ellipse((center - 58, badge_y - 58, center + 58, badge_y + 58),
-                 outline="#D4FF00", width=3)
-    draw.text((center, badge_y), "MW", font=_font(42), fill="#FFFFFF", anchor="mm")
+    x0, y0, x1, y1 = 128, 950, 952, 1040
+    cut = 22
+    draw.polygon(
+        [(x0 + cut, y0), (x1 - cut, y0), (x1, y0 + cut),
+         (x1, y1 - cut), (x1 - cut, y1), (x0 + cut, y1),
+         (x0, y1 - cut), (x0, y0 + cut)],
+        fill=SIGNAL_GOLD,
+    )
+    button_text = "LINK IN BIO \u2022 @MIDWORLDNEWS"
+    draw.text((W // 2, (y0 + y1) // 2), button_text,
+              font=_fit_font(button_text, x1 - x0 - 50, 42),
+              fill="#000000", anchor="mm")
+    follow_text = f"Follow {IG_HANDLE} for daily briefings"
+    draw.text((W // 2, 1140), follow_text,
+              font=_fit_font(follow_text, W - 100, 37),
+              fill="#FFFFFF", anchor="mm")
+    draw.line((135, 1253, W - 135, 1253), fill="#24424E", width=2)
+    draw.text((W // 2, 1294), "MIDWORLD DAILY  \u2022  GLOBAL, EVERY DAY",
+              font=_font(23), fill=CYAN, anchor="mm")
     _save_slide(image, out)
 
 
@@ -806,6 +987,22 @@ def _download_story_photo(slide: dict, posts: list[dict], work: str,
     return fallback
 
 
+def _grade_press_photo(source_path: str, output_path: str) -> str:
+    image = _fit_artwork(source_path)
+    image = ImageEnhance.Contrast(image).enhance(1.14)
+    image = ImageEnhance.Color(image).enhance(0.82)
+    image = Image.blend(image, Image.new("RGB", (W, H), OBSIDIAN), 0.18)
+    ramp = Image.new("RGBA", (W, 1))
+    ramp.putdata([
+        (0, 229, 255, round(40 * max(0.0, 1.0 - x / (W * 0.72))))
+        for x in range(W)
+    ])
+    tint = ramp.resize((W, H), Image.Resampling.BILINEAR)
+    image = Image.alpha_composite(image.convert("RGBA"), tint).convert("RGB")
+    image.save(output_path, format="PNG")
+    return output_path
+
+
 def render() -> None:
     target = os.getenv("TARGET_DATE", "").strip()
     if target:
@@ -841,22 +1038,32 @@ def render() -> None:
     gen = os.path.join(work, "cover_gen.png")
     if gen_scene(deck["cover_scene_prompt"], gen):
         cover_bg = gen
+    cover_background = os.path.join(work, "cover_background.png")
+    cover_overlay = os.path.join(work, "cover_overlay.png")
     render_cover(work, deck.get("cover", "The day around the globe"),
                  date_text, total, os.path.join(OUT_DIR, "01.jpg"),
-                 bg=cover_bg)
+                 bg=cover_bg, background_out=cover_background,
+                 overlay_out=cover_overlay)
+    _render_cover_video(
+        cover_background, cover_overlay, os.path.join(OUT_DIR, "01.mp4"))
     print(f"  slide 1: cover ({'generated' if cover_bg else 'backdrop'})")
     for i, slide in enumerate(deck["slides"]):
-        # Use the visually selected source photo when it has enough resolution;
-        # otherwise retain the regional branded background.
         bg, label, graded = art_for(slide.get("region", "World")), "backdrop", False
         photo = _download_story_photo(slide, posts, work, i)
+        reference_photo = photo[0] if photo else None
         if photo:
             bg, _, label = photo
-            graded = True
-        if not graded and slide.get("scene_prompt"):
+        generated = False
+        if slide.get("scene_prompt"):
             gen = os.path.join(work, f"gen{i}.png")
-            if gen_scene(slide["scene_prompt"], gen):
+            if gen_scene(slide["scene_prompt"], gen,
+                         reference_photo=reference_photo):
                 bg, label, graded = gen, "generated scene", True
+                generated = True
+        if photo and not generated:
+            bg = _grade_press_photo(
+                photo[0], os.path.join(work, f"graded{i}.png"))
+            label, graded = "cyan-graded press photo", True
         render_story(work, i + 1, total, slide, date_text, bg,
                      os.path.join(OUT_DIR, f"{i + 2:02d}.jpg"),
                      is_photo=graded)
@@ -894,17 +1101,18 @@ def _meta_response_json(response: requests.Response, operation: str) -> dict:
     return payload
 
 
-def _wait_for_container(container_id: str, token: str, graph: str) -> None:
+def _wait_for_container(container_id: str, token: str, graph: str,
+                        attempts: int = 12, sleep_seconds: int = 3) -> None:
     url = f"{graph}/{container_id}"
     params = {"fields": "status_code,status", "access_token": token}
-    for attempt in range(12):
+    for attempt in range(attempts):
         response = requests.get(url, params=params, timeout=30)
         payload = _meta_response_json(response, "container status")
         error = payload.get("error")
         if (response.status_code == 400 and isinstance(error, dict)
                 and str(error.get("code")) == "100"
                 and str(error.get("error_subcode", error.get("subcode"))) == "33"):
-            time.sleep(3)
+            time.sleep(sleep_seconds)
             return
         response.raise_for_status()
         status = payload.get("status_code")
@@ -914,10 +1122,10 @@ def _wait_for_container(container_id: str, token: str, graph: str) -> None:
             raise RuntimeError(
                 f"Instagram container {container_id} reached {status}: "
                 f"{json.dumps(payload, ensure_ascii=False)}")
-        if attempt < 11:
-            time.sleep(3)
+        if attempt < attempts - 1:
+            time.sleep(sleep_seconds)
     raise RuntimeError(
-        f"Instagram container {container_id} did not finish after 12 polls: "
+        f"Instagram container {container_id} did not finish after {attempts} polls: "
         f"{json.dumps(payload, ensure_ascii=False)}")
 
 
@@ -978,7 +1186,31 @@ def publish() -> None:
         raise RuntimeError(
             f"carousel has {len(files)} images; expected exactly {MAX_SLIDES}")
     children = []
-    for f in files:
+    video_uploaded = False
+    cover_video = os.path.join(OUT_DIR, "01.mp4")
+    if os.path.isfile(cover_video) and os.path.getsize(cover_video):
+        try:
+            response = requests.post(
+                f"{graph}/{uid}/media",
+                data={"media_type": "VIDEO",
+                      "video_url": f"{raw}/01.mp4",
+                      "is_carousel_item": "true",
+                      "access_token": tok},
+                timeout=60,
+            )
+            payload = _meta_response_json(response, "create animated cover")
+            response.raise_for_status()
+            video_container = payload["id"]
+            _wait_for_container(video_container, tok, graph,
+                                attempts=25, sleep_seconds=4)
+            children.append(video_container)
+            video_uploaded = True
+        except (requests.exceptions.RequestException, RuntimeError, KeyError) as exc:
+            print(f"::warning::Animated cover rejected; falling back to 01.jpg: "
+                  f"{exc}", flush=True)
+
+    image_files = files[1:] if video_uploaded else files
+    for f in image_files:
         response = requests.post(f"{graph}/{uid}/media",
                                  data={"image_url": f"{raw}/{f}",
                                        "is_carousel_item": "true",
@@ -988,13 +1220,15 @@ def publish() -> None:
         children.append(payload["id"])
         print(f"  container for {f}: {children[-1]}")
 
-    for child in children:
+    containers_to_wait = children[1:] if video_uploaded else children
+    for child in containers_to_wait:
         _wait_for_container(child, tok, graph)
 
     response = requests.post(f"{graph}/{uid}/media",
                              data={"media_type": "CAROUSEL",
                                    "children": ",".join(children),
                                    "caption": caption,
+                                   "is_ai_generated": "true",
                                    "access_token": tok}, timeout=60)
     payload = _meta_response_json(response, "create carousel")
     response.raise_for_status()

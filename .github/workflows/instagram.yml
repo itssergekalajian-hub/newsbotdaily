@@ -49,14 +49,14 @@ jobs:
           IG_HANDLE: ${{ vars.IG_HANDLE }}
         run: python insta_slides.py render
 
-      # the slides must be on main BEFORE Instagram is asked to fetch them —
-      # the Graph API downloads each image from its public raw URL
+      # Commit all slide assets, including 01.mp4, before Instagram fetches
+      # them from their public raw URLs.
       - name: Commit slides
         run: |
           if [ -n "$(git status --porcelain slides)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add slides
+            git add slides/
             git commit -m "Slides: $(date -u +%F)"
             git pull --rebase origin main || true
             git push
