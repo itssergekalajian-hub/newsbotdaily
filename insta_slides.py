@@ -14,18 +14,19 @@ aren't set, so the render keeps working before the account exists.
 """
 
 import base64
+import concurrent.futures
 import datetime as dt
 import functools
+import html
 import io
 import json
-import math
 import os
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 import time
+import xml.etree.ElementTree as ET
 from urllib.parse import urljoin
 
 import requests
@@ -33,26 +34,39 @@ from bs4 import BeautifulSoup
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont, ImageOps
 
 import daily_news as dn
-import video
 
 W, H = 1080, 1350                 # Instagram portrait
 OUT_DIR = "slides/latest"
 TEMPLATES = "templates/ig"
 IG_MARKER = ".last_ig"            # last day actually POSTED to Instagram
-MAX_STORIES = 8                   # Instagram Graph API caps a carousel at 10 items
+MAX_STORIES = 10                  # Instagram Graph API caps a carousel at 12 items
 MAX_SLIDES = MAX_STORIES + 2      # cover + stories + closing follow slide
 CAPTION_HEADER = "Here's What Happened in the World in the Last 24 Hours:"
-CAPTION_FOOTER = "\u26a1 24/7 live breaking wire & market alerts: @midworldnews (Link in bio)"
+CAPTION_FOOTER = (
+    "Follow @midworlddaily — join our live 24/7 Telegram channels via the link in bio.")
 BRAND = "MIDWORLD DAILY"
 IG_HANDLE = os.getenv("IG_HANDLE", "@midworlddaily").strip() or "@midworlddaily"
 if not IG_HANDLE.startswith("@"):
     IG_HANDLE = f"@{IG_HANDLE}"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ANTON = os.path.join(video.BUNDLED_FONT_DIR, "Anton-Regular.ttf")
+FONT_DIR = os.path.join(BASE_DIR, "fonts")
+ANTON = os.path.join(FONT_DIR, "Anton-Regular.ttf")
 OBSIDIAN = "#070A0F"
 CYAN = "#00E5FF"
 SIGNAL_GOLD = "#FFC400"
 YELLOW = SIGNAL_GOLD
+IG_EMOTION_FEEDS = (
+    "https://www.reddit.com/r/worldnews/top/.rss?t=day",
+    "https://www.reddit.com/r/UpliftingNews/top/.rss?t=day",
+    "https://www.reddit.com/r/technology/top/.rss?t=day",
+    "https://www.reddit.com/r/science/top/.rss?t=day",
+    "https://nypost.com/news/feed/",
+    "https://www.dailymail.co.uk/news/index.rss",
+    "https://www.dailymail.co.uk/sciencetech/index.rss",
+    "https://www.theguardian.com/world/rss",
+    "https://www.space.com/feeds/all",
+)
+IG_FEED_HEADERS = {"User-Agent": "MidWorldDailyBot/1.0"}
 TEXT_MODELS = (
     "gemini-3.8-flash",
     "gemini-3.5-flash-lite",
@@ -143,30 +157,30 @@ def scene_art(art: str | None) -> str | None:
     return None
 
 
-SLIDES_PROMPT = """You are the editor of MidWorld Daily, a world and markets
-news carousel covering the last 24 hours ending {date}. Select exactly eight
-distinct, consequential stories from the channel posts below, prioritizing
-world affairs and markets. Do not repeat the same event. Put the most important
-story first. The eight story slides plus a cover and closing slide make a
-10-item Instagram carousel.
+SLIDES_PROMPT = """You are the editor of MidWorld Daily, a global news carousel
+covering the last 24 hours ending {date}. Select exactly ten distinct, real,
+high-emotion stories from the channel posts, human-interest feeds, and agency
+headlines below. Prioritize stories that make readers feel happy, sad, mad,
+excited, amazed, or afraid, and that prompt genuine conversation. Be vivid but
+strictly factual; never exaggerate or invent. Explicitly exclude boring
+bureaucratic coverage such as political nominations or withdrawals, routine
+committee votes, and dry corporate filings. Do not repeat the same event. Put
+the most compelling story first. Ten story slides plus a cover and closing
+slide make a 12-item Instagram carousel.
 
 Return ONLY JSON, no markdown fences:
-{{"cover_scene_prompt":"A massive photorealistic Earth on a dark space horizon,
-glowing with electric-cyan (#00E5FF) network grid lines and fiery golden
-(#FFC400) shockwaves, flanked by visual motifs from today's top three stories
-(such as jets, vessels, or market candlesticks) and 2-3 dramatic chest-up
-figures representing today's biggest stories in sharp attire in the
-upper-middle foreground. The center subject holds a signature prop from
-today's standout headline. Vertical 4:5 editorial composition; no text.",
+{{"cover_scene_prompt":"A clean, vivid, high-impact photorealistic global
+collage with a dramatic Earth horizon and clear visual subjects and signature
+props from today's three most striking stories. Vertical 4:5 editorial
+composition with naturally rich light and color; no text.",
+ "comment_question":"One natural, engaging sentence ending with a question mark.",
  "slides":[{{"region":"World, Markets, or another concise category",
- "headline":"A punchy, uppercase, one-sentence statement of 10-18
-words. Wrap 2-5 key names, entities, numbers or outcomes in **double asterisks**.",
+ "headline":"A punchy, uppercase, one-sentence statement of 8-16 words.
+Wrap 1-2 key phrases in **double asterisks**.",
  "caption":"Exactly two concise factual sentences for the Instagram caption.
-Keep the paragraph around 180-220 characters total. No emoji, numbering,
-bullets, headline, or source list.",
+No emoji, numbering, bullets, headline, source list, or social handles.",
  "scene_prompt":"A specific photorealistic 4:5 editorial scene for this story,
-hyper-detailed and tailored to the exact subject, vehicles, landmarks, flags,
-or technology and market hardware. No text.",
+clear, vivid, beautiful and tailored to the exact topic and subject. No text.",
  "badge":"A concise 2-3 word metric or status, or empty string.",
  "photo":17,
  "source_post":17,
@@ -174,21 +188,23 @@ or technology and market hardware. No text.",
  otherwise an empty string."}}]}}
 
 Rules:
-- Return exactly eight stories and preserve their importance order.
-- Headlines MUST be 10-18 words, uppercase, one sentence, and emphasize 2-5
-key entities/numbers/outcomes by wrapping each emphasized span in **double
-asterisks**. Do not use any other markdown.
+- Return exactly ten stories and preserve their emotional/conversation value
+and importance order.
+- Headlines MUST be 8-16 words, uppercase, one sentence, and emphasize 1-2
+key phrases by wrapping each emphasized span in **double asterisks**. Do not
+use any other markdown.
 - Each caption paragraph must contain exactly two concise sentences and be
-around 180-220 characters total, understandable without reading the slide.
-Facts and numbers must come only from the posts or agency context; never invent.
-- Scene prompts are hyper-detailed photorealistic 4:5 composites tailored to
-the exact story subject, vehicles, landmarks, flags, or hardware. Badges are
+understandable without reading the slide. Facts and numbers must come only
+from the supplied sources; never invent. Include one natural one-line
+comment_question that invites readers to respond to the stories.
+- Scene prompts are clear, vivid, beautiful photorealistic 4:5 editorial
+images directly depicting each story's exact topic and subject. Badges are
 short 2-3 word metric/status labels or empty. Avoid unrelated decoration.
-- "photo" is the one-based number of a post whose attached photo visibly depicts
-this exact story; otherwise use null. "source_post" is the one-based post most
-directly reporting this story, preferably one with an article link. "source_url"
+- "photo" is the one-based number of a channel POST whose attached photo visibly
+depicts this exact story; otherwise use null. "source_post" is the one-based
+channel POST most directly reporting this story, preferably one with an article link. "source_url"
 must exactly match an article URL provided in the context. Never choose a logo,
-screenshot, meme or unrelated photo.
+screenshot, meme or unrelated photo. Never include social-media handles.
 - Keep reporting factual, concise and neutral. No emojis in any returned field.
 
 POSTS FROM {date} (the available reporting window):
@@ -196,6 +212,9 @@ POSTS FROM {date} (the available reporting window):
 
 AGENCY HEADLINES (context only):
 {wire}
+
+HUMAN-INTEREST AND VIRAL FEEDS:
+{emotion_items}
 """
 
 
@@ -234,7 +253,8 @@ def _text_model_attempts() -> tuple[str, ...]:
 
 
 def _validate_generated_deck(deck: dict, posts: list[dict], day: dt.date,
-                             wire: str) -> dict:
+                             wire: str,
+                             emotion_items: list[dict] | None = None) -> dict:
     slides = [slide for slide in deck.get("slides", [])
               if isinstance(slide, dict) and slide.get("headline")
               and slide.get("caption") and slide.get("scene_prompt")]
@@ -244,25 +264,38 @@ def _validate_generated_deck(deck: dict, posts: list[dict], day: dt.date,
             f"Gemini returned {len(slides)} valid stories; expected {MAX_STORIES}")
     for slide in slides:
         slide["headline"] = re.sub(
-            r"\s+", " ", slide["headline"]).strip().upper()
+            r"\s+", " ", _safe_instagram_copy(slide["headline"])).strip().upper()
         emphasis = re.findall(r"\*\*(.+?)\*\*", slide["headline"])
         words = re.findall(r"\b[\w'-]+\b", slide["headline"].replace("**", ""))
-        if (not 10 <= len(words) <= 18
-                or not 2 <= len(emphasis) <= 5
+        if (not 8 <= len(words) <= 16
+                or not 1 <= len(emphasis) <= 2
                 or slide["headline"].count("**") != len(emphasis) * 2):
             raise RuntimeError(
-                "Gemini returned a headline outside the 10-18 word / "
-                "2-5 highlighted-span requirements")
+                "Gemini returned a headline outside the 8-16 word / "
+                "1-2 highlighted-span requirements")
         paragraph = re.sub(
             r"^\s*(?:[-*•]|\d+[.)])\s*", "", slide["caption"]).strip()
         sentences = re.split(r"(?<=[.!?])\s+", paragraph)
         if len(sentences) != 2 or any(not sentence for sentence in sentences):
             raise RuntimeError(
                 "Gemini returned a story caption that is not two sentences")
-        slide["caption"] = " ".join(sentences)
-        badge = re.sub(r"\s+", " ", str(slide.get("badge", ""))).strip()
+        slide["caption"] = _safe_instagram_copy(" ".join(sentences)).strip()
+        badge = re.sub(
+            r"\s+", " ", _safe_instagram_copy(
+                str(slide.get("badge", "")))).strip()
         slide["badge"] = " ".join(badge.split()[:3]).upper()
-    deck["cover_scene_prompt"] = deck.get("cover_scene_prompt", "").strip()
+        slide["scene_prompt"] = _safe_instagram_copy(
+            str(slide["scene_prompt"])).strip()
+    question = re.sub(
+        r"\s+", " ", _safe_instagram_copy(
+            str(deck.get("comment_question", ""))).strip())
+    if (not question or not question.endswith("?") or question.count("?") != 1
+            or len(re.split(r"(?<=[.!?])\s+", question)) != 1):
+        raise RuntimeError(
+            "Gemini did not return a one-line comment_question")
+    deck["comment_question"] = question
+    deck["cover_scene_prompt"] = _safe_instagram_copy(
+        deck.get("cover_scene_prompt", "")).strip()
     if not deck["cover_scene_prompt"]:
         raise RuntimeError("Gemini did not return a cover scene prompt")
     allowed_urls = {
@@ -272,6 +305,9 @@ def _validate_generated_deck(deck: dict, posts: list[dict], day: dt.date,
     allowed_urls.update(
         link for post in posts for link in (post.get("links") or [])
         if isinstance(link, str))
+    allowed_urls.update(
+        item["url"] for item in (emotion_items or [])
+        if isinstance(item.get("url"), str))
     for slide in slides:
         source_url = slide.get("source_url", "")
         slide["source_url"] = (
@@ -287,16 +323,24 @@ def _validate_generated_deck(deck: dict, posts: list[dict], day: dt.date,
     return deck
 
 
-def write_deck(posts: list[dict], day: dt.date) -> dict:
+def write_deck(posts: list[dict], day: dt.date, wire: str | None = None,
+               emotion_items: list[dict] | None = None) -> dict:
     items = "\n\n---\n\n".join(
         f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
         f"{'ARTICLE LINKS: ' + ', '.join(p.get('links', [])) + chr(10) if p.get('links') else ''}"
         f"{p['text']}"
         for i, p in enumerate(posts, 1))
-    wire = dn.fetch_wire(day)
+    if wire is None:
+        wire = dn.fetch_wire(day)
+    emotion_context = "\n\n---\n\n".join(
+        f"{item.get('title', '')}\n"
+        f"{item.get('summary', '')}\n"
+        f"SOURCE: {item.get('url', '')}"
+        for item in (emotion_items or []))
     prompt = SLIDES_PROMPT.format(date=f"{day:%A, %d %B %Y}",
                                   items=items[:300_000],
-                                  wire=wire[:30_000])
+                                  wire=wire[:30_000],
+                                  emotion_items=emotion_context[:60_000])
     # the writer SEES the photos, so its "photo" picks are judged by what
     # each picture shows — the same grounding the video bulletin uses
     photos = dn._photo_parts(posts)
@@ -359,7 +403,7 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
             if not raw:
                 raise ValueError("model returned no non-empty text parts")
             deck = _validate_generated_deck(
-                dn._extract_json(raw), posts, day, wire)
+                dn._extract_json(raw), posts, day, wire, emotion_items)
         except (ValueError, KeyError, TypeError, IndexError, AttributeError,
                 RuntimeError) as exc:
             last_error = f"{model} (finishReason={finish_reason}): {exc}"
@@ -371,8 +415,17 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
     raise DeckGenerationError(last_error, retryable_http_failure=True)
 
 
-def _fit_caption(caption: str, limit: int = 2180) -> str:
-    """Keep story paragraphs, the fixed header and funnel footer within limit."""
+def _safe_instagram_copy(text: str) -> str:
+    protected_handle = "\0IG_HANDLE\0"
+    text = text.replace(IG_HANDLE, protected_handle)
+    text = re.sub(r"(?<![\w])@[A-Za-z0-9._]+", "", text,
+                  flags=re.IGNORECASE)
+    return text.replace(protected_handle, IG_HANDLE)
+
+
+def _fit_caption(caption: str, limit: int = 2180,
+                 comment_question: str = "") -> str:
+    """Keep the ordered story copy, question, header, and footer within limit."""
     limit = max(limit, len(CAPTION_HEADER) + len(CAPTION_FOOTER) + 4)
     text = str(caption or "").strip()
     if text.startswith(CAPTION_HEADER):
@@ -381,52 +434,108 @@ def _fit_caption(caption: str, limit: int = 2180) -> str:
         body = text
     if body.endswith(CAPTION_FOOTER):
         body = body[:-len(CAPTION_FOOTER)].rstrip()
-    paragraphs = [part.strip() for part in re.split(r"\n\s*\n", body)
+    existing_paragraphs = re.split(r"\n\s*\n", body)
+    if (existing_paragraphs
+            and re.search(r"24/7 live breaking wire & market alerts",
+                          existing_paragraphs[-1], re.IGNORECASE)):
+        existing_paragraphs.pop()
+    body = "\n\n".join(existing_paragraphs)
+    paragraphs = [_safe_instagram_copy(part.strip()) for part in
+                  re.split(r"\n\s*\n", body)
                   if part.strip()]
-    fitted = paragraphs[:]
+    question = re.sub(r"\s+", " ", _safe_instagram_copy(
+        str(comment_question or "").strip()))
+    if question and paragraphs and paragraphs[-1] == question:
+        paragraphs.pop()
 
-    def assemble() -> str:
-        suffix = "\n\n".join(fitted)
-        prefix = CAPTION_HEADER + (f"\n\n{suffix}" if suffix else "")
-        return prefix + "\n\n" + CAPTION_FOOTER
+    def assemble(stories: list[str], prompt: str) -> str:
+        parts = [CAPTION_HEADER, *stories]
+        if prompt:
+            parts.append(prompt)
+        parts.append(CAPTION_FOOTER)
+        return "\n\n".join(parts)
 
-    for index in sorted(range(len(fitted)),
-                        key=lambda item: len(fitted[item]), reverse=True):
-        if len(assemble()) <= limit:
+    for index in sorted(range(len(paragraphs)),
+                        key=lambda item: len(paragraphs[item]), reverse=True):
+        if len(assemble(paragraphs, question)) <= limit:
             break
-        sentences = re.split(r"(?<=[.!?])\s+", fitted[index], maxsplit=1)
+        sentences = re.split(r"(?<=[.!?])\s+", paragraphs[index], maxsplit=1)
         if len(sentences) > 1:
-            fitted[index] = sentences[0].strip()
+            paragraphs[index] = sentences[0].strip()
 
-    result = assemble()
+    result = assemble(paragraphs, question)
     if len(result) <= limit:
         return result
 
-    available = (limit - len(CAPTION_HEADER) - 2
-                 - 2 - len(CAPTION_FOOTER))
-    if available <= 0:
-        return CAPTION_HEADER + "\n\n" + CAPTION_FOOTER
-    body = "\n\n".join(fitted)
-    truncated = body[:max(0, available - 3)]
-    if len(body) > len(truncated):
+    stories = "\n\n".join(paragraphs)
+    fixed_length = (len(CAPTION_HEADER) + 2 + 2 + len(CAPTION_FOOTER)
+                    + (len(question) + 2 if question else 0))
+    available = max(0, limit - fixed_length - 3)
+    truncated = stories[:available]
+    if len(stories) > len(truncated):
         truncated = truncated.rsplit(" ", 1)[0].rstrip()
-    return (CAPTION_HEADER + "\n\n" + truncated + "...\n\n"
-            + CAPTION_FOOTER)
+    if truncated:
+        paragraphs = [truncated + "..."]
+    else:
+        paragraphs = []
+
+    result = assemble(paragraphs, question)
+    if len(result) <= limit:
+        return result
+    question_space = max(
+        0, limit - len(CAPTION_HEADER) - len(CAPTION_FOOTER) - 4)
+    question = question[:max(0, question_space - 3)].rsplit(" ", 1)[0].rstrip()
+    if question:
+        question += "..."
+    result = assemble([], question)
+    return result[:limit]
 
 
 # Anton: the tall condensed display face the poster format is built on —
 # committed to the repo (OFL licence) so every runner renders identically
-ANTON = os.path.join(video.BUNDLED_FONT_DIR, "Anton-Regular.ttf")
+ANTON = os.path.join(FONT_DIR, "Anton-Regular.ttf")
 
 
-def _font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
-    path = ANTON if os.path.exists(ANTON) else video.BOLD
+def _font(size: int) -> ImageFont.FreeTypeFont:
+    path = ANTON
     try:
         return ImageFont.truetype(path, size=size)
     except OSError:
+        fallback = (r"C:\Windows\Fonts\arialbd.ttf" if os.name == "nt"
+                    else "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+        return ImageFont.truetype(fallback, size=size)
+
+
+def _ui_font(size: int, bold: bool = True) -> ImageFont.FreeTypeFont:
+    weight = "Bold" if bold else "Regular"
+    for family in ("Inter", "Montserrat"):
+        path = os.path.join(FONT_DIR, f"{family}-{weight}.ttf")
+        if os.path.isfile(path):
+            return ImageFont.truetype(path, size=size)
+    if os.name == "nt":
+        fallback = (r"C:\Windows\Fonts\segoeuib.ttf" if bold
+                    else r"C:\Windows\Fonts\segoeui.ttf")
+    else:
         fallback = ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
                     if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
+    if os.path.isfile(fallback):
         return ImageFont.truetype(fallback, size=size)
+    return ImageFont.load_default()
+
+
+def _tracked_width(text: str, font: ImageFont.FreeTypeFont,
+                   tracking: int) -> float:
+    probe = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    return sum(probe.textlength(character, font=font) for character in text) + (
+        max(0, len(text) - 1) * tracking)
+
+
+def _draw_tracked_text(draw: ImageDraw.ImageDraw, x: float, y: float,
+                       text: str, font: ImageFont.FreeTypeFont, fill: str,
+                       tracking: int = 2) -> None:
+    for character in text:
+        draw.text((round(x), y), character, font=font, fill=fill, anchor="lm")
+        x += draw.textlength(character, font=font) + tracking
 
 
 def _fit_artwork(path: str | None) -> Image.Image:
@@ -469,33 +578,37 @@ def _draw_shadow_text(draw: ImageDraw.ImageDraw, xy: tuple[int, int],
               stroke_width=stroke_width, stroke_fill="#000000")
 
 
-def _draw_brand(draw: ImageDraw.ImageDraw, y: int) -> None:
-    font = _font(32)
-    center = W // 2
+def _draw_brand(image: Image.Image, y: int) -> None:
+    scale, strip_width, strip_height = 3, 940, 54
+    layer = Image.new("RGBA", (strip_width * scale, strip_height * scale),
+                      (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    center_x, center_y = layer.width / 2, layer.height / 2
+    font = _ui_font(26 * scale)
+    tracking, gap, diamond = 2 * scale, 12 * scale, 12 * scale
     left, right = "MIDWORLD", "DAILY"
-    left_width = draw.textlength(left, font=font)
-    right_width = draw.textlength(right, font=font)
-    diamond_size = 12
-    gap = 14
-    half = int((left_width + right_width + diamond_size + gap * 2) / 2) + 30
-    draw.line((70, y + 18, center - half, y + 18),
-              fill=SIGNAL_GOLD, width=2)
-    draw.line((center + half, y + 18, W - 70, y + 18),
-              fill=CYAN, width=2)
-    left_x = center - (left_width + right_width + diamond_size + gap * 2) / 2
-    draw.text((round(left_x), y + 18), left, font=font, fill="#FFFFFF",
-              anchor="lm")
-    diamond_x = left_x + left_width + gap + diamond_size / 2
+    left_width = _tracked_width(left, font, tracking)
+    right_width = _tracked_width(right, font, tracking)
+    total_width = left_width + right_width + diamond + gap * 2
+    left_x = center_x - total_width / 2
+    diamond_x = left_x + left_width + gap
+    right_x = diamond_x + diamond + gap
+    rule_gap = 24 * scale
+    draw.line((0, center_y, left_x - rule_gap, center_y),
+              fill=SIGNAL_GOLD, width=2 * scale)
+    draw.line((right_x + right_width + rule_gap, center_y,
+               layer.width, center_y), fill=CYAN, width=2 * scale)
+    _draw_tracked_text(draw, left_x, center_y, left, font, "#FFFFFF", tracking)
     draw.polygon(
-        [(diamond_x, y + 18 - diamond_size / 2),
-         (diamond_x + diamond_size / 2, y + 18),
-         (diamond_x, y + 18 + diamond_size / 2),
-         (diamond_x - diamond_size / 2, y + 18)],
+        [(diamond_x + diamond / 2, center_y - diamond / 2),
+         (diamond_x + diamond, center_y),
+         (diamond_x + diamond / 2, center_y + diamond / 2),
+         (diamond_x, center_y)],
         fill=SIGNAL_GOLD,
     )
-    right_x = diamond_x + diamond_size / 2 + gap
-    draw.text((round(right_x), y + 18), right, font=font, fill=CYAN,
-              anchor="lm")
+    _draw_tracked_text(draw, right_x, center_y, right, font, CYAN, tracking)
+    strip = layer.resize((strip_width, strip_height), Image.Resampling.LANCZOS)
+    image.paste(strip, (70, y), strip)
 
 
 def _fit_font(text: str, max_width: int, max_size: int,
@@ -508,25 +621,78 @@ def _fit_font(text: str, max_width: int, max_size: int,
     return _font(min_size)
 
 
+def _draw_pill_button(image: Image.Image, box: tuple[int, int, int, int],
+                      label: str, icon: str) -> None:
+    scale = 3
+    x0, y0, x1, y1 = box
+    width, height = (x1 - x0) * scale, (y1 - y0) * scale
+    layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    draw.rounded_rectangle(
+        (1, 1, width - 2, height - 2),
+        radius=height // 2,
+        fill=SIGNAL_GOLD,
+    )
+    left_padding = 30 * scale
+    right_padding = (96 if icon else 30) * scale
+    text_region = width - left_padding - right_padding
+    font_size = 30 * scale
+    tracking = 2 * scale
+    font = _ui_font(font_size)
+    while (_tracked_width(label, font, tracking) > text_region
+           and font_size > 18 * scale):
+        font_size -= 2 * scale
+        font = _ui_font(font_size)
+    text_width = _tracked_width(label, font, tracking)
+    _draw_tracked_text(draw, left_padding + (text_region - text_width) / 2,
+                       height / 2,
+                       label, font, "#0B0D12", tracking)
+    if icon:
+        mid_y = height // 2
+        start_x = width - 48 * scale
+        if icon == "chevrons":
+            for index in range(2):
+                x = start_x + index * 17 * scale
+                draw.line(
+                    [(x - 6 * scale, mid_y - 10 * scale),
+                     (x + 5 * scale, mid_y),
+                     (x - 6 * scale, mid_y + 10 * scale)],
+                    fill="#0B0D12", width=4 * scale, joint="curve")
+        else:
+            draw.line((start_x - 8 * scale, mid_y,
+                       start_x + 12 * scale, mid_y),
+                      fill="#0B0D12", width=4 * scale)
+            draw.line(
+                [(start_x + 4 * scale, mid_y - 9 * scale),
+                 (start_x + 13 * scale, mid_y),
+                 (start_x + 4 * scale, mid_y + 9 * scale)],
+                fill="#0B0D12", width=4 * scale, joint="curve")
+    button = layer.resize((x1 - x0, y1 - y0), Image.Resampling.LANCZOS)
+    image.paste(button, (x0, y0), button)
+
+
 def _draw_story_badge(image: Image.Image, badge: str) -> None:
-    badge = re.sub(r"\s+", " ", badge).strip().upper()
+    badge = re.sub(r"(?:>{2}|[\u25c6\u26a1\u2022])", " ", badge)
+    badge = _safe_instagram_copy(re.sub(r"\s+", " ", badge)).strip().upper()
     if not badge:
         return
-    font = _font(31)
-    measure = ImageDraw.Draw(Image.new("RGB", (1, 1)))
-    width = min(390, int(measure.textlength(badge, font=font)) + 92)
-    height = 68
+    scale, height = 3, 68
+    font = _ui_font(25 * scale)
+    width = min(390, round(_tracked_width(badge, font, 1 * scale) / scale) + 88)
     x, y = W - width - 38, 42
     accent = SIGNAL_GOLD if any(token in badge for token in ("%", "$", "BREAKING")) else CYAN
-    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(overlay)
-    draw.rounded_rectangle((x, y, x + width, y + height), radius=22,
-                           fill=(7, 10, 15, 205),
-                           outline=(0, 229, 255, 170), width=2)
-    draw.ellipse((x + 20, y + 26, x + 36, y + 42), fill=accent)
-    draw.text((x + 50, y + height // 2), badge, font=font,
-              fill="#FFFFFF", anchor="lm")
-    image.alpha_composite(overlay)
+    layer = Image.new("RGBA", (width * scale, height * scale), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    draw.rounded_rectangle(
+        (2, 2, layer.width - 3, layer.height - 3), radius=22 * scale,
+        fill=(7, 10, 15, 205), outline=(0, 229, 255, 170), width=2 * scale)
+    mid_y = layer.height // 2
+    draw.ellipse((18 * scale, mid_y - 7 * scale, 32 * scale, mid_y + 7 * scale),
+                 fill=accent)
+    _draw_tracked_text(draw, 46 * scale, mid_y, badge, font, "#FFFFFF",
+                       1 * scale)
+    badge_layer = layer.resize((width, height), Image.Resampling.LANCZOS)
+    image.paste(badge_layer, (x, y), badge_layer)
 
 
 def _save_slide(image: Image.Image, out: str) -> None:
@@ -555,6 +721,8 @@ def _wrap_pixels(words: list[tuple[str, bool]], font: ImageFont.FreeTypeFont,
 
 
 def _headline_words(headline: str) -> list[tuple[str, bool]]:
+    headline = _safe_instagram_copy(headline)
+    headline = re.sub(r"(?:>{2}|[\u25c6\u26a1\u2022])", " ", headline)
     words = []
     for match in re.finditer(r"\*\*(.+?)\*\*|([^*]+)", headline.upper()):
         highlighted = match.group(1) is not None
@@ -567,15 +735,15 @@ def _draw_story_headline(draw: ImageDraw.ImageDraw, headline: str) -> None:
     words = _headline_words(headline)
     chosen_font = _font(86)
     lines = []
-    for size in range(86, 59, -2):
+    for size in range(86, 49, -2):
         font = _font(size)
         lines = _wrap_pixels(words, font, W - 112)
-        line_height = int(size * 1.08)
-        if len(lines) <= 4 and len(lines) * line_height <= 372:
+        line_height = int(size * 1.12)
+        if len(lines) <= 4 and len(lines) * line_height <= 390:
             chosen_font = font
             break
-    line_height = int(chosen_font.size * 1.08)
-    top = 814 + max(0, (378 - len(lines) * line_height) // 2)
+    line_height = int(chosen_font.size * 1.12)
+    top = 806 + max(0, (396 - len(lines) * line_height) // 2)
     metrics = ImageDraw.Draw(Image.new("RGB", (1, 1)))
     for line_index, line in enumerate(lines):
         widths = [metrics.textlength(word, font=chosen_font)
@@ -595,15 +763,13 @@ def _draw_story_headline(draw: ImageDraw.ImageDraw, headline: str) -> None:
 # the fixed house look every generated illustration is asked for — ONE style
 # across every slide, every day, is what makes the feed read as a brand
 SCENE_STYLE = (
-    ". MidWorld Daily signature Nano Banana 2.1 art direction: a deep "
-    "obsidian-navy cinematic backdrop; dramatic photorealistic subjects occupy "
-    "the upper 62% of the vertical 4:5 frame, lit with electric-cyan "
-    "(#00E5FF) and warm signal-gold (#FFC400) studio rim lights. Add subtle "
-    "glowing cyan/gold intelligence-radar arcs only where they fit the story. "
-    "Keep the bottom 36% dark and uncluttered for text overlay. This is "
-    "illustrative editorial artwork, not documentary evidence. Strictly ZERO "
-    "text, words, letters, numbers, labels, logos, watermarks or typography "
-    "inside the image.")
+    ". Create a clear, vivid, beautiful photorealistic editorial scene that "
+    "directly depicts the exact topic and subject of this story. Use rich, "
+    "natural cinematic lighting and colors, with the sharp focal subject in "
+    "the upper 62% of the vertical 4:5 frame. Keep the lower third smooth, "
+    "dark and uncluttered for headline readability. This is illustrative "
+    "editorial artwork, not documentary evidence. Strictly zero text, words, "
+    "letters, numbers, labels, logos or watermarks inside the image.")
 
 
 # set once per run when the key proves to have no image-generation quota
@@ -768,97 +934,28 @@ def render_story(work: str, idx: int, total: int, slide: dict,
     _draw_story_badge(image, str(slide.get("badge", "")))
     draw = ImageDraw.Draw(image)
     _draw_story_headline(draw, slide["headline"])
-    _draw_brand(draw, 1255)
+    _draw_brand(image, 1255)
     _save_slide(image, out)
 
 
 def render_cover(work: str, cover_line: str, date_text: str, total: int,
-                 out: str, bg: str | None = None,
-                 background_out: str | None = None,
-                 overlay_out: str | None = None) -> None:
+                 out: str, bg: str | None = None) -> None:
     background = _fit_artwork(bg or os.path.join(TEMPLATES, "cover.png"))
     overlay = _lower_scrim_overlay()
     draw = ImageDraw.Draw(overlay)
     title_lines = (
-        ("WHAT MOVED", "#FFFFFF", 94),
-        ("THE WORLD", SIGNAL_GOLD, 98),
-        ("IN THE LAST 24 HOURS", SIGNAL_GOLD, 66),
+        ("WHAT HAPPENED", "#FFFFFF", 88),
+        ("IN THE WORLD", SIGNAL_GOLD, 91),
+        ("IN THE LAST 24 HOURS", SIGNAL_GOLD, 64),
     )
-    for (text, color, size), y in zip(title_lines, (846, 944, 1040)):
+    for (text, color, size), y in zip(title_lines, (850, 945, 1042)):
         _draw_shadow_text(draw, (W // 2, y), text,
-                          _fit_font(text, W - 120, size), color)
-    _draw_brand(draw, 1114)
-    x0, y0, x1, y1 = 288, 1206, 792, 1294
-    cut = 22
-    draw.polygon(
-        [(x0 + cut, y0), (x1 - cut, y0), (x1, y0 + cut),
-         (x1, y1 - cut), (x1 - cut, y1), (x0 + cut, y1),
-         (x0, y1 - cut), (x0, y0 + cut)],
-        fill=SIGNAL_GOLD,
-    )
-    _draw_shadow_text(draw, (W // 2, (y0 + y1) // 2), "SWIPE LEFT >>",
-                      _font(43, bold=True), "#000000", stroke_width=0)
+                          _fit_font(text, W - 112, size), color)
+    _draw_brand(overlay, 1112)
+    _draw_pill_button(overlay, (300, 1204, 780, 1294),
+                      "SWIPE LEFT", "chevrons")
     composite = Image.alpha_composite(background.convert("RGBA"), overlay)
     _save_slide(composite, out)
-    if background_out:
-        background.save(background_out, format="PNG")
-    if overlay_out:
-        overlay.save(overlay_out, format="PNG")
-
-
-def _render_cover_video(background_path: str, overlay_path: str,
-                        output_path: str) -> None:
-    ffmpeg = shutil.which("ffmpeg")
-    if not ffmpeg:
-        raise RuntimeError("ffmpeg is required to render the animated cover")
-    duration, fps = 7, 30
-    music = os.path.join(BASE_DIR, "assets", "ig_music.mp3")
-    command = [
-        ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
-        "-loop", "1", "-framerate", str(fps), "-i", background_path,
-        "-loop", "1", "-framerate", str(fps), "-i", overlay_path,
-    ]
-    if os.path.isfile(music):
-        command.extend(["-stream_loop", "-1", "-i", music])
-        audio_filter = (
-            "[2:a]atrim=duration=7,afade=t=out:st=6.2:d=0.8,"
-            "loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,"
-            "aformat=sample_fmts=fltp:channel_layouts=stereo[a]"
-        )
-    else:
-        command.extend([
-            "-f", "lavfi", "-i",
-            "sine=frequency=48:sample_rate=48000:duration=7",
-            "-f", "lavfi", "-i",
-            "sine=frequency=220:sample_rate=48000:duration=7",
-        ])
-        audio_filter = (
-            "[2:a]lowpass=f=85,volume=0.32[bass];"
-            "[3:a]volume='0.18*(0.5+0.5*sin(2*PI*0.55*t))':eval=frame[pulse];"
-            "[bass][pulse]amix=inputs=2:duration=longest:normalize=0,"
-            "afade=t=out:st=6.2:d=0.8,loudnorm=I=-16:TP=-1.5:LRA=11,"
-            "aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo[a]"
-        )
-    video_filter = (
-        "[0:v]scale=2160:2700:flags=lanczos,"
-        "zoompan=z='1+0.04*on/209':"
-        "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
-        "d=210:s=1080x1350:fps=30,setsar=1[bg];"
-        "[bg][1:v]overlay=0:0:shortest=1,format=yuv420p[v]"
-    )
-    command.extend([
-        "-filter_complex", video_filter + ";" + audio_filter,
-        "-map", "[v]", "-map", "[a]", "-t", str(duration),
-        "-r", str(fps), "-c:v", "libx264", "-pix_fmt", "yuv420p",
-        "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
-        "-movflags", "+faststart", output_path,
-    ])
-    try:
-        subprocess.run(command, check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError as exc:
-        raise RuntimeError(
-            f"ffmpeg failed to render animated cover: {exc.stderr[-1200:]}"
-        ) from exc
 
 
 def _rotated_card(image: Image.Image, angle: float) -> Image.Image:
@@ -884,14 +981,14 @@ def render_outro(work: str, date_text: str, out: str) -> None:
     promo = Image.new("RGB", (350, 440), "#0B1520")
     promo_draw = ImageDraw.Draw(promo)
     promo_draw.rectangle((2, 2, 347, 437), outline=CYAN, width=3)
-    promo_draw.text((175, 82), "MIDWORLD", font=_font(46),
+    promo_draw.text((175, 82), "MIDWORLD", font=_ui_font(38),
                     fill="#FFFFFF", anchor="mm")
-    promo_draw.text((175, 136), "LIVE", font=_font(40),
+    promo_draw.text((175, 136), "DAILY", font=_ui_font(34),
                     fill=CYAN, anchor="mm")
     promo_draw.line((38, 182, 312, 182), fill=SIGNAL_GOLD, width=3)
     for y, line in zip((240, 296, 352),
-                       ("BREAKING WIRE", "MARKET ALERTS", "24 / 7")):
-        promo_draw.text((175, y), line, font=_fit_font(line, 290, 34),
+                       ("GLOBAL NEWS", "HUMAN STORIES", "EVERY DAY")):
+        promo_draw.text((175, y), line, font=_ui_font(26),
                         fill=SIGNAL_GOLD if y == 352 else "#FFFFFF",
                         anchor="mm")
     right = promo.rotate(-8, resample=Image.Resampling.BICUBIC,
@@ -900,48 +997,18 @@ def render_outro(work: str, date_text: str, out: str) -> None:
     image.paste(right, (655, 120))
     draw = ImageDraw.Draw(image)
 
-    arrow = []
-    for step in range(31):
-        t = step / 30
-        arrow.append((round(440 + 180 * t),
-                      round(282 - 62 * math.sin(math.pi * t))))
-    draw.line(arrow, fill=CYAN, width=7, joint="curve")
-    end_x, end_y = arrow[-1]
-    draw.polygon([(end_x, end_y), (end_x - 20, end_y - 16),
-                  (end_x - 16, end_y + 13)], fill=CYAN)
-
-    draw.text((W // 2, 670), "GET BREAKING NEWS",
-              font=_fit_font("GET BREAKING NEWS", W - 100, 84),
-              fill="#FFFFFF", anchor="mm",
-              stroke_width=2, stroke_fill="#000000")
-    draw.text((W // 2, 766), "10 MIN FIRST",
-              font=_fit_font("10 MIN FIRST", W - 100, 100),
-              fill=SIGNAL_GOLD, anchor="mm",
-              stroke_width=2, stroke_fill="#000000")
-    subline = "24/7 GLOBAL WIRE & MARKET ALERTS ON TELEGRAM"
-    draw.text((W // 2, 868), subline,
-              font=_fit_font(subline, W - 100, 37),
-              fill="#DDE7EE", anchor="mm")
-
-    x0, y0, x1, y1 = 128, 950, 952, 1040
-    cut = 22
-    draw.polygon(
-        [(x0 + cut, y0), (x1 - cut, y0), (x1, y0 + cut),
-         (x1, y1 - cut), (x1 - cut, y1), (x0 + cut, y1),
-         (x0, y1 - cut), (x0, y0 + cut)],
-        fill=SIGNAL_GOLD,
-    )
-    button_text = "LINK IN BIO \u2022 @MIDWORLDNEWS"
-    draw.text((W // 2, (y0 + y1) // 2), button_text,
-              font=_fit_font(button_text, x1 - x0 - 50, 42),
-              fill="#000000", anchor="mm")
-    follow_text = f"Follow {IG_HANDLE} for daily briefings"
-    draw.text((W // 2, 1140), follow_text,
-              font=_fit_font(follow_text, W - 100, 37),
-              fill="#FFFFFF", anchor="mm")
-    draw.line((135, 1253, W - 135, 1253), fill="#24424E", width=2)
-    draw.text((W // 2, 1294), "MIDWORLD DAILY  \u2022  GLOBAL, EVERY DAY",
-              font=_font(23), fill=CYAN, anchor="mm")
+    _draw_shadow_text(draw, (W // 2, 690), "REAL-TIME NEWS",
+                      _fit_font("REAL-TIME NEWS", W - 90, 88), "#FFFFFF")
+    _draw_shadow_text(draw, (W // 2, 790), "BEFORE IT TRENDS",
+                      _fit_font("BEFORE IT TRENDS", W - 90, 78),
+                      SIGNAL_GOLD)
+    subline_font = _ui_font(29)
+    draw.text((W // 2, 890), f"Follow {IG_HANDLE} & tap the link in bio",
+              font=subline_font, fill="#FFFFFF", anchor="mm")
+    draw.text((W // 2, 934), "for our 24/7 Telegram channels",
+              font=subline_font, fill="#FFFFFF", anchor="mm")
+    _draw_pill_button(image, (320, 1000, 760, 1092), "LINK IN BIO", "arrow")
+    _draw_brand(image, 1236)
     _save_slide(image, out)
 
 
@@ -952,6 +1019,63 @@ def target_day() -> dt.date:
     # just after local midnight this is the day that just ended; by afternoon
     # it is today-so-far — either way, the most recent full stretch of news
     return (dt.datetime.now(dn.TZ) - dt.timedelta(hours=12)).date()
+
+
+def _feed_text(element: ET.Element, wanted: set[str]) -> str:
+    for child in list(element):
+        name = child.tag.rsplit("}", 1)[-1].lower()
+        if name in wanted:
+            if name == "link":
+                value = child.attrib.get("href") or child.text or ""
+                return html.unescape(value).strip()
+            value = "".join(child.itertext())
+            text = BeautifulSoup(html.unescape(value), "html.parser").get_text(
+                " ", strip=True)
+            if text:
+                return text
+    return ""
+
+
+def _fetch_emotion_feed(feed_url: str) -> list[dict]:
+    try:
+        response = requests.get(
+            feed_url, headers=IG_FEED_HEADERS, timeout=10)
+        response.raise_for_status()
+        root = ET.fromstring(response.content)
+    except (requests.exceptions.RequestException, ET.ParseError, OSError) as exc:
+        print(f"  human-interest feed unavailable ({feed_url}): {exc}",
+              file=sys.stderr)
+        return []
+
+    entries = [
+        element for element in root.iter()
+        if element.tag.rsplit("}", 1)[-1].lower() in ("item", "entry")
+    ]
+    results = []
+    for entry in entries[:12]:
+        title = _feed_text(entry, {"title"})
+        if not title:
+            continue
+        url = _feed_text(entry, {"link"})
+        summary = _feed_text(entry, {"description", "summary", "content", "encoded"})
+        results.append({
+            "title": title[:400],
+            "summary": summary[:1000],
+            "url": url,
+            "feed": feed_url,
+        })
+    return results
+
+
+def fetch_emotion_feeds() -> list[dict]:
+    """Fetch viral and human-interest RSS/Atom entries concurrently."""
+    with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(IG_EMOTION_FEEDS)) as executor:
+        return [
+            item
+            for feed_items in executor.map(_fetch_emotion_feed, IG_EMOTION_FEEDS)
+            for item in feed_items
+        ]
 
 
 def _posts_last_24h(end: dt.datetime) -> list[dict]:
@@ -1112,7 +1236,11 @@ def _load_cached_deck(deck_path: str, day: dt.date) -> dict:
                 f"Photorealistic 4:5 editorial scene about {headline}. "
                 f"Story context: {caption}. No text or logos.")
         else:
-            slide["scene_prompt"] = scene_prompt.strip()
+            slide["scene_prompt"] = _safe_instagram_copy(scene_prompt).strip()
+        slide["headline"] = _safe_instagram_copy(
+            str(slide["headline"])).strip()
+        slide["caption"] = _safe_instagram_copy(caption)
+        slide["badge"] = _safe_instagram_copy(str(slide.get("badge", "")))
     if not isinstance(deck.get("cover_scene_prompt"), str) or not (
             deck["cover_scene_prompt"].strip()):
         top_stories = "; ".join(
@@ -1122,6 +1250,15 @@ def _load_cached_deck(deck_path: str, day: dt.date) -> dict:
         deck["cover_scene_prompt"] = (
             "Dramatic photorealistic 4:5 editorial cover illustrating these "
             f"top world and market stories: {top_stories}. No text or logos.")
+    else:
+        deck["cover_scene_prompt"] = _safe_instagram_copy(
+            deck["cover_scene_prompt"])
+    question = deck.get("comment_question")
+    if not isinstance(question, str) or not question.strip():
+        deck["comment_question"] = (
+            "Which of these stories do you think will matter most next?")
+    else:
+        deck["comment_question"] = _safe_instagram_copy(question).strip()
     return deck
 
 
@@ -1139,50 +1276,64 @@ def render() -> None:
         try:
             with open(deck_path, encoding="utf-8") as deck_file:
                 cached_date = json.load(deck_file).get("date")
-            expected_files = [
-                "caption.txt", "01.mp4",
-                *(f"{index:02d}.jpg" for index in range(1, MAX_SLIDES + 1)),
-            ]
+            expected_jpegs = {
+                f"{index:02d}.jpg" for index in range(1, MAX_SLIDES + 1)}
+            existing_jpegs = {
+                name for name in os.listdir(OUT_DIR)
+                if name.lower().endswith(".jpg")}
+            has_stale_mp4 = any(name.lower().endswith(".mp4")
+                                 for name in os.listdir(OUT_DIR))
             if (cached_date == day.isoformat()
-                    and all(os.path.isfile(os.path.join(OUT_DIR, filename))
-                            for filename in expected_files)):
+                    and existing_jpegs == expected_jpegs
+                    and not has_stale_mp4
+                    and os.path.isfile(os.path.join(OUT_DIR, "caption.txt"))):
                 print(f"slides for {day} already rendered — nothing to do")
                 return
         except (OSError, json.JSONDecodeError, AttributeError) as exc:
             print(f"  ignoring unreadable cached deck: {exc}", file=sys.stderr)
-    posts = _posts_last_24h(end)
-    if len(posts) < 2:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        posts_future = executor.submit(_posts_last_24h, end)
+        wire_future = executor.submit(dn.fetch_wire, day)
+        emotion_future = executor.submit(fetch_emotion_feeds)
+        posts = posts_future.result()
+        wire = wire_future.result()
+        emotion_items = emotion_future.result()
+    if len(posts) + len(emotion_items) < 2 and not wire.strip():
         print("not enough posts for a carousel")
         return
     try:
-        deck = write_deck(posts, day)
+        deck = write_deck(posts, day, wire=wire,
+                          emotion_items=emotion_items)
     except DeckGenerationError as exc:
         if not exc.retryable_http_failure or not os.path.exists(deck_path):
             raise
         print(f"Gemini text generation failed; reusing cached deck: {exc}",
               file=sys.stderr)
         deck = _load_cached_deck(deck_path, day)
-    deck["caption"] = _fit_caption(deck.get("caption", ""))
-    total = len(deck["slides"]) + 2
-    if total > MAX_SLIDES:
-        raise RuntimeError(f"carousel has {total} items; maximum is {MAX_SLIDES}")
+    if len(deck.get("slides", [])) != MAX_STORIES:
+        raise RuntimeError(
+            f"carousel has {len(deck.get('slides', []))} stories; "
+            f"expected {MAX_STORIES}")
+    deck["comment_question"] = str(deck.get("comment_question", "")).strip()
+    deck["caption"] = _fit_caption(
+        deck.get("caption", ""),
+        comment_question=deck["comment_question"])
+    total = MAX_SLIDES
     date_text = f"{day:%d %B %Y}"
     os.makedirs(OUT_DIR, exist_ok=True)
     for old in os.listdir(OUT_DIR):
-        os.remove(os.path.join(OUT_DIR, old))
+        old_path = os.path.join(OUT_DIR, old)
+        if (os.path.isfile(old_path)
+                and old.lower().endswith((".mp4", ".jpg"))):
+            os.remove(old_path)
     work = tempfile.mkdtemp(prefix="ig-")
     cover_bg = None
     gen = os.path.join(work, "cover_gen.png")
     if gen_scene(deck["cover_scene_prompt"], gen):
         cover_bg = gen
-    cover_background = os.path.join(work, "cover_background.png")
-    cover_overlay = os.path.join(work, "cover_overlay.png")
     render_cover(work, deck.get("cover", "The day around the globe"),
                  date_text, total, os.path.join(OUT_DIR, "01.jpg"),
-                 bg=cover_bg, background_out=cover_background,
-                 overlay_out=cover_overlay)
-    _render_cover_video(
-        cover_background, cover_overlay, os.path.join(OUT_DIR, "01.mp4"))
+                 bg=cover_bg)
     print(f"  slide 1: cover ({'generated' if cover_bg else 'backdrop'})")
     for i, slide in enumerate(deck["slides"]):
         bg, label, graded = art_for(slide.get("region", "World")), "backdrop", False
@@ -1279,7 +1430,7 @@ def check_auth() -> None:
     )
     payload = _meta_response_json(response, "auth check")
     response.raise_for_status()
-    print(f"Connected Instagram account: @{payload['username']}")
+    print(f"Connected Instagram account: {payload['username']}")
 
 
 def publish() -> None:
@@ -1289,7 +1440,8 @@ def publish() -> None:
     if not os.path.exists(deck_path):
         print("no deck rendered — nothing to publish")
         return
-    deck = json.load(open(deck_path))
+    with open(deck_path, encoding="utf-8") as deck_file:
+        deck = json.load(deck_file)
     day = deck.get("date", "")
     if not uid or not tok:
         print("IG_USER_ID / IG_ACCESS_TOKEN not set — slides rendered and "
@@ -1308,7 +1460,9 @@ def publish() -> None:
     except FileNotFoundError:
         pass
 
-    caption = _fit_caption(deck.get("caption", ""))
+    caption = _fit_caption(
+        deck.get("caption", ""),
+        comment_question=deck.get("comment_question", ""))
     if not caption.startswith(
             "Here's What Happened in the World in the Last 24 Hours:"):
         raise RuntimeError("deck is missing its formatted 24-hour caption")
@@ -1318,36 +1472,16 @@ def publish() -> None:
     repo = os.getenv("GITHUB_REPOSITORY", "itssergekalajian-hub/newsbotdaily")
     raw = f"https://raw.githubusercontent.com/{repo}/main/{OUT_DIR}"
     graph = graph_base(tok)
-    files = sorted(f for f in os.listdir(OUT_DIR) if f.endswith(".jpg"))
-    if len(files) != MAX_SLIDES:
+    files = [f"{index:02d}.jpg" for index in range(1, MAX_SLIDES + 1)]
+    actual_images = {
+        name for name in os.listdir(OUT_DIR) if name.lower().endswith(".jpg")}
+    if (actual_images != set(files)
+            or any(not os.path.isfile(os.path.join(OUT_DIR, filename))
+                   for filename in files)):
         raise RuntimeError(
-            f"carousel has {len(files)} images; expected exactly {MAX_SLIDES}")
+            f"carousel must contain exactly {MAX_SLIDES} numbered JPEG images")
     children = []
-    video_uploaded = False
-    cover_video = os.path.join(OUT_DIR, "01.mp4")
-    if os.path.isfile(cover_video) and os.path.getsize(cover_video):
-        try:
-            response = requests.post(
-                f"{graph}/{uid}/media",
-                data={"media_type": "VIDEO",
-                      "video_url": f"{raw}/01.mp4",
-                      "is_carousel_item": "true",
-                      "access_token": tok},
-                timeout=60,
-            )
-            payload = _meta_response_json(response, "create animated cover")
-            response.raise_for_status()
-            video_container = payload["id"]
-            _wait_for_container(video_container, tok, graph,
-                                attempts=25, sleep_seconds=4)
-            children.append(video_container)
-            video_uploaded = True
-        except (requests.exceptions.RequestException, RuntimeError, KeyError) as exc:
-            print(f"::warning::Animated cover rejected; falling back to 01.jpg: "
-                  f"{exc}", flush=True)
-
-    image_files = files[1:] if video_uploaded else files
-    for f in image_files:
+    for f in files:
         response = requests.post(f"{graph}/{uid}/media",
                                  data={"image_url": f"{raw}/{f}",
                                        "is_carousel_item": "true",
@@ -1357,8 +1491,7 @@ def publish() -> None:
         children.append(payload["id"])
         print(f"  container for {f}: {children[-1]}")
 
-    containers_to_wait = children[1:] if video_uploaded else children
-    for child in containers_to_wait:
+    for child in children:
         _wait_for_container(child, tok, graph)
 
     response = requests.post(f"{graph}/{uid}/media",
