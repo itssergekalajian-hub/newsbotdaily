@@ -1,45 +1,5 @@
 [
  {
-  "date": "2026-11-13",
-  "stories": [
-   {
-    "topic": "Technology",
-    "headline": "Nvidia scandal triggers fallout inside Washington cabinet",
-    "tease": "Nvidia CEO resigns as spy allegations ignite White House rift"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Diplomats secure European seat in upcoming peace negotiati",
-    "tease": "Envoys secure European seat at upcoming Ukraine peace talks"
-   },
-   {
-    "topic": "United States",
-    "headline": "Van Hollen launches challenge for Senate leadership",
-    "tease": "Van Hollen challenges Schumer for Senate Democratic leadership"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Global Microsoft outage disrupts key worldwide services",
-    "tease": "Global Microsoft outage leaves key services disrupted worldwide"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Torrential rains flood Gaza camps as tensions escalate",
-    "tease": "Torrential Gaza floods displace thousands amid frozen peace talks"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Brief updates from cybercrime politics and entertainment",
-    "tease": "Justice Department disrupts major North Korean crypto hacking ring"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Congressional hearings and upcoming peace summits ahead",
-    "tease": "High-stakes Senate hearings and peace talks set for next week"
-   }
-  ]
- },
- {
   "date": "2026-11-14",
   "stories": [
    {
@@ -161,6 +121,56 @@
     "topic": "What to Watch",
     "headline": "APEC Summit and Shenzhen Trilateral Headline High-Stakes W",
     "tease": "High stakes diplomacy and market catalysts await in the days ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-17",
+  "stories": [
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Crimean Bridge Partially Collapses After Ukrainian Assault",
+    "tease": "Strategic Crimean Bridge collapses in major Ukrainian strike"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Jensen Huang Addresses Nvidia Ouster Amid Turmoil",
+    "tease": "Jensen Huang speaks out on potential Nvidia return"
+   },
+   {
+    "topic": "United States",
+    "headline": "Classified NSA Computer Network Suffers Massive Outage",
+    "tease": "Nationwide technical failure knocks out classified NSA networks"
+   },
+   {
+    "topic": "Health",
+    "headline": "United States Loses Measles Elimination Status",
+    "tease": "United States loses measles elimination status after resurgence"
+   },
+   {
+    "topic": "Europe",
+    "headline": "Five EU Nations Plan Rwanda Migrant Hub",
+    "tease": "Five European nations plan migrant deportation hub in Rwanda"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Regulators Sound Alarm Over Autonomous Financial Agents",
+    "tease": "Regulators warn autonomous software could trigger lightning bank runs"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Developments and Domestic Court Rulings",
+    "tease": "World leaders travel while domestic legal fights escalate"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Research Exposes Deadly AI System Vulnerabilities",
+    "tease": "AI models tricked into designating schools as military targets"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "High Stakes Shenzen Trilateral and Crucial Tech Hearings",
+    "tease": "Key summits and earnings calls dominate the days ahead"
    }
   ]
  }
