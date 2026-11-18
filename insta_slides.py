@@ -54,18 +54,29 @@ CYAN = "#00E5FF"
 SIGNAL_GOLD = "#FFC400"
 YELLOW = SIGNAL_GOLD
 TEXT_MODELS = (
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-2.0-flash",
+    "gemini-3.8-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-4-hydrogen",
 )
-TEXT_MODEL_ATTEMPTS = TEXT_MODELS + (TEXT_MODELS[0],)
+DEPRECATED_TEXT_MODELS = frozenset({
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-001",
+    "gemini-2.0-flash-lite",
+    "gemini-2.0-flash-lite-001",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-preview-05-20",
+    "gemini-2.5-flash-preview-09-2025",
+    "gemini-2.5-flash-lite-preview-09-2025",
+    "gemini-3.1-flash-lite-preview",
+})
 IMAGE_MODELS = (
     "gemini-nano-banana-2.1",
     "gemini-3.1-flash-lite-image",
     "gemini-3.1-flash-image",
     "gemini-2.5-flash-image",
 )
-MODEL_BACKOFFS = (5, 15, 30)
+MODEL_BACKOFFS = (5, 15, 25)
 
 REGION_ART = (
     (("sport", "football", "mma", "tennis", "basket", "olymp", "formula"),
@@ -188,6 +199,40 @@ AGENCY HEADLINES (context only):
 """
 
 
+class DeckGenerationError(RuntimeError):
+    def __init__(self, message: str, retryable_http_failure: bool = False):
+        super().__init__(message)
+        self.retryable_http_failure = retryable_http_failure
+
+
+def _text_model_attempts() -> tuple[str, ...]:
+    models = list(TEXT_MODELS)
+    get_candidates = getattr(dn, "candidate_models", None)
+    if not callable(get_candidates):
+        return tuple(models)
+    try:
+        candidates = get_candidates()
+    except (requests.exceptions.RequestException, RuntimeError, ValueError,
+            KeyError, TypeError) as exc:
+        print(f"could not load additional Gemini models: {exc}",
+              file=sys.stderr)
+        return tuple(models)
+
+    added = 0
+    for candidate in candidates:
+        if not isinstance(candidate, str):
+            continue
+        model = candidate.removeprefix("models/").strip()
+        if ("flash" not in model or model in models
+                or model in DEPRECATED_TEXT_MODELS):
+            continue
+        models.append(model)
+        added += 1
+        if added == 2:
+            break
+    return tuple(models)
+
+
 def write_deck(posts: list[dict], day: dt.date) -> dict:
     items = "\n\n---\n\n".join(
         f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
@@ -208,7 +253,12 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
     headers = {"x-goog-api-key": dn.GEMINI_KEY,
                "Content-Type": "application/json"}
     response = None
-    for model_index, model in enumerate(TEXT_MODEL_ATTEMPTS):
+    last_error = "no Gemini models were available"
+    had_retryable_http_failure = False
+    backoff_index = 0
+    models = _text_model_attempts()
+    for model_index, model in enumerate(models):
+        response = None
         try:
             response = requests.post(
                 f"{dn.GEMINI_ROOT}/models/{model}:generateContent",
@@ -216,21 +266,29 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
         except requests.exceptions.RequestException as exc:
             print(f"text model {model} failed ({exc.__class__.__name__}): {exc}",
                   file=sys.stderr)
+            last_error = f"{model}: {exc}"
         else:
             if response.ok:
                 break
             print(f"text model {model} returned {response.status_code}: "
                   f"{response.text[:400]}", file=sys.stderr)
-        if model_index < len(TEXT_MODEL_ATTEMPTS) - 1:
-            wait = MODEL_BACKOFFS[model_index]
-            print(f"trying next text model in {wait}s", file=sys.stderr)
-            time.sleep(wait)
+            last_error = (f"{model}: HTTP {response.status_code}: "
+                          f"{response.text[:600]}")
+            status = response.status_code
+            if status == 429 or 500 <= status <= 599:
+                had_retryable_http_failure = True
+                if (model_index < len(models) - 1
+                        and backoff_index < len(MODEL_BACKOFFS)):
+                    wait = MODEL_BACKOFFS[backoff_index]
+                    backoff_index += 1
+                    print(f"trying next text model in {wait}s", file=sys.stderr)
+                    time.sleep(wait)
     if response is not None and response.ok:
         r = response
     else:
-        last_error = (response.text[:600] if response is not None
-                      else "network request failed for every model")
-        raise RuntimeError(f"all text generation models failed: {last_error}")
+        raise DeckGenerationError(
+            f"all text generation models failed: {last_error}",
+            retryable_http_failure=had_retryable_http_failure)
 
     raw = "\n".join(p["text"] for p in
                     r.json()["candidates"][0]["content"]["parts"]
@@ -1003,6 +1061,42 @@ def _grade_press_photo(source_path: str, output_path: str) -> str:
     return output_path
 
 
+def _load_cached_deck(deck_path: str, day: dt.date) -> dict:
+    try:
+        with open(deck_path, encoding="utf-8") as deck_file:
+            deck = json.load(deck_file)
+    except (OSError, ValueError) as exc:
+        raise RuntimeError(f"could not load cached deck {deck_path}: {exc}") from exc
+    if not isinstance(deck, dict) or deck.get("date") != day.isoformat():
+        raise RuntimeError(f"cached deck {deck_path} is not for {day.isoformat()}")
+    slides = deck.get("slides")
+    if not isinstance(slides, list) or len(slides) != MAX_STORIES:
+        raise RuntimeError(
+            f"cached deck {deck_path} must contain exactly {MAX_STORIES} stories")
+    for slide in slides:
+        if not isinstance(slide, dict) or not slide.get("headline"):
+            raise RuntimeError(f"cached deck {deck_path} has an invalid story")
+        headline = re.sub(r"\*{2}", "", str(slide["headline"])).strip()
+        caption = str(slide.get("caption", "")).strip()
+        scene_prompt = slide.get("scene_prompt")
+        if not isinstance(scene_prompt, str) or not scene_prompt.strip():
+            slide["scene_prompt"] = (
+                f"Photorealistic 4:5 editorial scene about {headline}. "
+                f"Story context: {caption}. No text or logos.")
+        else:
+            slide["scene_prompt"] = scene_prompt.strip()
+    if not isinstance(deck.get("cover_scene_prompt"), str) or not (
+            deck["cover_scene_prompt"].strip()):
+        top_stories = "; ".join(
+            f"{str(slide['headline']).replace('**', '').strip()}: "
+            f"{str(slide.get('caption', '')).strip()}"
+            for slide in slides[:3])
+        deck["cover_scene_prompt"] = (
+            "Dramatic photorealistic 4:5 editorial cover illustrating these "
+            f"top world and market stories: {top_stories}. No text or logos.")
+    return deck
+
+
 def render() -> None:
     target = os.getenv("TARGET_DATE", "").strip()
     if target:
@@ -1015,7 +1109,15 @@ def render() -> None:
     deck_path = os.path.join(OUT_DIR, "deck.json")
     if not os.getenv("FORCE_SLIDES") and os.path.exists(deck_path):
         try:
-            if json.load(open(deck_path)).get("date") == day.isoformat():
+            with open(deck_path, encoding="utf-8") as deck_file:
+                cached_date = json.load(deck_file).get("date")
+            expected_files = [
+                "caption.txt", "01.mp4",
+                *(f"{index:02d}.jpg" for index in range(1, MAX_SLIDES + 1)),
+            ]
+            if (cached_date == day.isoformat()
+                    and all(os.path.isfile(os.path.join(OUT_DIR, filename))
+                            for filename in expected_files)):
                 print(f"slides for {day} already rendered — nothing to do")
                 return
         except (OSError, json.JSONDecodeError, AttributeError) as exc:
@@ -1024,7 +1126,14 @@ def render() -> None:
     if len(posts) < 2:
         print("not enough posts for a carousel")
         return
-    deck = write_deck(posts, day)
+    try:
+        deck = write_deck(posts, day)
+    except DeckGenerationError as exc:
+        if not exc.retryable_http_failure or not os.path.exists(deck_path):
+            raise
+        print(f"Gemini text generation failed; reusing cached deck: {exc}",
+              file=sys.stderr)
+        deck = _load_cached_deck(deck_path, day)
     deck["caption"] = _fit_caption(deck.get("caption", ""))
     total = len(deck["slides"]) + 2
     if total > MAX_SLIDES:
