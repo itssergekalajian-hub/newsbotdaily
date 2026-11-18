@@ -24,6 +24,7 @@ import sys
 import tempfile
 import time
 from email.utils import parsedate_to_datetime
+from urllib.parse import urlparse
 from xml.etree import ElementTree
 from zoneinfo import ZoneInfo
 
@@ -280,8 +281,17 @@ def fetch_posts(username: str, day: dt.date, max_pages: int = 12) -> list[dict]:
             text = body.get_text("\n").strip() if body else ""
             if len(text) > 20 and DIGEST_MARK not in text:
                 media = _post_media(b)
+                links = list(dict.fromkeys(
+                    anchor["href"].strip()
+                    for anchor in (body.select("a[href]") if body else [])
+                    if anchor["href"].strip().startswith(("http://", "https://"))
+                    and not re.search(
+                        r"(^|\.)t\.me$|(^|\.)telegram\.org$",
+                        urlparse(anchor["href"].strip()).hostname or "",
+                        re.IGNORECASE)))
                 posts[mid] = {"time": when.strftime("%H:%M"), "text": text,
-                              "images": media["photos"], "videos": media["videos"]}
+                              "images": media["photos"], "videos": media["videos"],
+                              "links": links}
 
         if oldest_day is None or oldest_day < day or oldest_id <= 1:
             break
@@ -328,6 +338,12 @@ def _fetch_wire_feed(day: dt.date, name: str, url: str) -> list[str]:
                 continue
             pub = (item.findtext("pubDate") or item.findtext("{*}published")
                    or item.findtext("{*}updated"))
+            link_node = item.find("link")
+            if link_node is None:
+                link_node = item.find("{*}link")
+            article_url = ""
+            if link_node is not None:
+                article_url = (link_node.get("href") or link_node.text or "").strip()
             if pub:
                 try:
                     try:
@@ -348,6 +364,8 @@ def _fetch_wire_feed(day: dt.date, name: str, url: str) -> list[str]:
             line = f"- [{name}] {title}"
             if desc and desc[:60].lower() not in title.lower():
                 line += f" — {desc[:240]}"
+            if article_url.startswith(("http://", "https://")):
+                line += f" [URL: {article_url}]"
             lines.append(line)
             if len(lines) >= 25:
                 break

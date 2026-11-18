@@ -66,6 +66,7 @@ jobs:
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          FORCE_SLIDES: ${{ github.event.inputs.force }}
           IG_HANDLE: ${{ vars.IG_HANDLE }}
           TARGET_CHAT_ID: ${{ secrets.TARGET_CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}

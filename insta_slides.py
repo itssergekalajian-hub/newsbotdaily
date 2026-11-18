@@ -25,8 +25,10 @@ import shutil
 import sys
 import tempfile
 import time
+from urllib.parse import urljoin
 
 import requests
+from bs4 import BeautifulSoup
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 import daily_news as dn
@@ -38,6 +40,7 @@ TEMPLATES = "templates/ig"
 IG_MARKER = ".last_ig"            # last day actually POSTED to Instagram
 MAX_STORIES = 8                   # Instagram Graph API caps a carousel at 10 items
 MAX_SLIDES = MAX_STORIES + 2      # cover + stories + closing follow slide
+CAPTION_HEADER = "Here's What Happened in the World in the Last 24 Hours:"
 BRAND = "MIDWORLD DAILY"
 IG_HANDLE = os.getenv("IG_HANDLE", "@midworlddaily").strip() or "@midworlddaily"
 if not IG_HANDLE.startswith("@"):
@@ -127,25 +130,31 @@ combining the day's top three visual elements, leaders or events. No text.",
  "headline":"A punchy, uppercase, one-sentence statement of 10-18
 words. Wrap 2-5 key names, entities, numbers or outcomes in **double asterisks**.",
  "caption":"Exactly two concise factual sentences for the Instagram caption.
-No emoji, numbering, bullets, headline, or source list.",
+Keep the paragraph around 180-220 characters total. No emoji, numbering,
+bullets, headline, or source list.",
  "scene_prompt":"A specific photorealistic 4:5 editorial scene for this story,
 describing the setting, visible details and mood. No text.",
- "photo":17}}]}}
+ "photo":17,
+ "source_post":17,
+ "source_url":"Exact article URL from the provided post links or wire context,
+ otherwise an empty string."}}]}}
 
 Rules:
 - Return exactly eight stories and preserve their importance order.
 - Headlines MUST be 10-18 words, uppercase, one sentence, and emphasize 2-5
 key entities/numbers/outcomes by wrapping each emphasized span in **double
 asterisks**. Do not use any other markdown.
-- Each caption paragraph must contain exactly two sentences and be understandable
-without reading the slide. Facts and numbers must come only from the posts or
-agency context; never invent.
+- Each caption paragraph must contain exactly two concise sentences and be
+around 180-220 characters total, understandable without reading the slide.
+Facts and numbers must come only from the posts or agency context; never invent.
 - Scene prompts are photorealistic 4:5 editorial illustrations with no text,
 letters, numbers, logos or watermarks. Avoid implying that an illustrative
 image is real documentary footage; do not depict identifiable private people.
 - "photo" is the one-based number of a post whose attached photo visibly depicts
-this exact story; otherwise use null. Never choose a logo, screenshot, meme or
-unrelated photo.
+this exact story; otherwise use null. "source_post" is the one-based post most
+directly reporting this story, preferably one with an article link. "source_url"
+must exactly match an article URL provided in the context. Never choose a logo,
+screenshot, meme or unrelated photo.
 - Keep reporting factual, concise and neutral. No emojis in any returned field.
 
 POSTS FROM {date} (the available reporting window):
@@ -159,6 +168,7 @@ AGENCY HEADLINES (context only):
 def write_deck(posts: list[dict], day: dt.date) -> dict:
     items = "\n\n---\n\n".join(
         f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
+        f"{'ARTICLE LINKS: ' + ', '.join(p.get('links', [])) + chr(10) if p.get('links') else ''}"
         f"{p['text']}"
         for i, p in enumerate(posts, 1))
     wire = dn.fetch_wire(day)
@@ -244,6 +254,19 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
     deck["cover_scene_prompt"] = deck.get("cover_scene_prompt", "").strip()
     if not deck["cover_scene_prompt"]:
         raise RuntimeError("Gemini did not return a cover scene prompt")
+    allowed_urls = {
+        url.rstrip(".,;:]}")
+        for url in re.findall(r"https?://[^\s<>()\"']+", wire)
+    }
+    allowed_urls.update(
+        link for post in posts for link in (post.get("links") or [])
+        if isinstance(link, str))
+    for slide in slides:
+        source_url = slide.get("source_url", "")
+        slide["source_url"] = (
+            source_url.strip()
+            if isinstance(source_url, str) and source_url.strip() in allowed_urls
+            else "")
     deck["slides"] = slides
     deck["date"] = day.isoformat()
     deck["caption"] = (
@@ -251,6 +274,44 @@ def write_deck(posts: list[dict], day: dt.date) -> dict:
         + "\n\n".join(slide["caption"] for slide in slides)
     )
     return deck
+
+
+def _fit_caption(caption: str, limit: int = 2180) -> str:
+    """Keep the fixed header and ordered story paragraphs within Instagram's limit."""
+    limit = max(limit, len(CAPTION_HEADER))
+    text = str(caption or "").strip()
+    if text.startswith(CAPTION_HEADER):
+        body = text[len(CAPTION_HEADER):].strip()
+    else:
+        body = text
+    paragraphs = [part.strip() for part in re.split(r"\n\s*\n", body)
+                  if part.strip()]
+    fitted = paragraphs[:]
+
+    def assemble() -> str:
+        suffix = "\n\n".join(fitted)
+        return CAPTION_HEADER + (f"\n\n{suffix}" if suffix else "")
+
+    for index in sorted(range(len(fitted)),
+                        key=lambda item: len(fitted[item]), reverse=True):
+        if len(assemble()) <= limit:
+            break
+        sentences = re.split(r"(?<=[.!?])\s+", fitted[index], maxsplit=1)
+        if len(sentences) > 1:
+            fitted[index] = sentences[0].strip()
+
+    result = assemble()
+    if len(result) <= limit:
+        return result
+
+    available = limit - len(CAPTION_HEADER) - 2
+    if available <= 0:
+        return CAPTION_HEADER[:limit]
+    body = "\n\n".join(fitted)
+    truncated = body[:max(0, available - 3)]
+    if len(body) > len(truncated):
+        truncated = truncated.rsplit(" ", 1)[0].rstrip()
+    return CAPTION_HEADER + "\n\n" + truncated + "..."
 
 
 # Anton: the tall condensed display face the poster format is built on —
@@ -648,23 +709,101 @@ def _posts_last_24h(end: dt.datetime) -> list[dict]:
 
 
 def _download_story_photo(slide: dict, posts: list[dict], work: str,
-                          index: int) -> tuple[str, int] | None:
-    """Download the photo selected as relevant, requiring at least 900px width."""
-    pick = slide.get("photo")
-    if not isinstance(pick, int) or not 1 <= pick <= len(posts):
+                          index: int) -> tuple[str, int, str] | None:
+    """Prefer a high-resolution source image, retaining valid Telegram photos."""
+    photo_pick = slide.get("photo")
+    if not isinstance(photo_pick, int) or not 1 <= photo_pick <= len(posts):
+        photo_pick = None
+    source_pick = slide.get("source_post")
+    if not isinstance(source_pick, int) or not 1 <= source_pick <= len(posts):
+        source_pick = photo_pick
+    source_url = slide.get("source_url")
+    if source_pick is None and not (
+            isinstance(source_url, str)
+            and source_url.startswith(("http://", "https://"))):
         return None
-    urls = posts[pick - 1].get("images") or []
-    if not urls:
-        return None
+    source_post = posts[source_pick - 1] if source_pick is not None else {}
+    fallback = None
+    image_post = (posts[photo_pick - 1] if photo_pick is not None
+                  else source_post)
+    urls = image_post.get("images") or []
     for candidate, url in enumerate(urls):
         raw = os.path.join(work, f"photo{index}-{candidate}.img")
         try:
-            if dn._download(url, raw, dn.UA, min_size=(900, 1)):
-                return raw, pick
-        except requests.exceptions.RequestException as e:
+            if dn._download(url, raw, dn.UA, min_size=(600, 340)):
+                with Image.open(raw) as image:
+                    width, height = image.size
+                fallback = (raw, photo_pick or source_pick,
+                            f"post {photo_pick or source_pick} photo")
+                if width >= 1000 and height >= 340:
+                    return fallback
+        except (requests.exceptions.RequestException, OSError, ValueError) as e:
             print(f"    story photo unavailable ({str(e)[:80]}); "
                   "trying next candidate", file=sys.stderr)
-    return None
+
+    article_urls = []
+    if isinstance(source_url, str) and source_url:
+        article_urls.append(source_url)
+    for key in ("article_url", "source_url", "url"):
+        value = source_post.get(key)
+        if isinstance(value, str):
+            article_urls.append(value)
+    links = source_post.get("links") or []
+    if isinstance(links, str):
+        links = [links]
+    for link in links:
+        if isinstance(link, str):
+            article_urls.append(link)
+        elif isinstance(link, dict):
+            article_urls.extend(value for key, value in link.items()
+                                if key in ("url", "href")
+                                and isinstance(value, str))
+    article_urls.extend(
+        re.findall(r"https?://[^\s<>()\"']+", source_post.get("text", "")))
+
+    for article_index, article_url in enumerate(
+            list(dict.fromkeys(article_urls))[:2]):
+        if not article_url.startswith(("http://", "https://")):
+            continue
+        try:
+            response = requests.get(article_url, headers=dn.UA, timeout=8)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            image_urls = []
+            for selector in (
+                    'meta[property="og:image"]',
+                    'meta[name="twitter:image"]',
+                    'meta[name="twitter:image:src"]'):
+                tag = soup.select_one(selector)
+                if tag and tag.get("content"):
+                    image_urls.append(urljoin(response.url, tag["content"].strip()))
+            for image_index, image_url in enumerate(
+                    list(dict.fromkeys(image_urls))[:2]):
+                image_response = requests.get(
+                    image_url, headers=dn.UA, timeout=8)
+                image_response.raise_for_status()
+                if (not image_response.headers.get("content-type", "")
+                        .startswith("image/")
+                        or len(image_response.content) < 8000):
+                    continue
+                with Image.open(io.BytesIO(image_response.content)) as image:
+                    image.load()
+                    width, height = image.size
+                if width < 600 or height < 340:
+                    continue
+                raw = os.path.join(
+                    work, f"article{index}-{article_index}-{image_index}.img")
+                with open(raw, "wb") as image_file:
+                    image_file.write(image_response.content)
+                article_photo = (raw, source_pick or 0, "article photo")
+                if width >= 1000:
+                    return article_photo
+                if fallback is None:
+                    fallback = article_photo
+        except (requests.exceptions.RequestException, OSError, ValueError) as e:
+            print(f"    article photo unavailable ({str(e)[:80]})",
+                  file=sys.stderr)
+    return fallback
 
 
 def render() -> None:
@@ -689,6 +828,7 @@ def render() -> None:
         print("not enough posts for a carousel")
         return
     deck = write_deck(posts, day)
+    deck["caption"] = _fit_caption(deck.get("caption", ""))
     total = len(deck["slides"]) + 2
     if total > MAX_SLIDES:
         raise RuntimeError(f"carousel has {total} items; maximum is {MAX_SLIDES}")
@@ -711,8 +851,8 @@ def render() -> None:
         bg, label, graded = art_for(slide.get("region", "World")), "backdrop", False
         photo = _download_story_photo(slide, posts, work, i)
         if photo:
-            bg, pick = photo
-            label, graded = f"post {pick} photo", True
+            bg, _, label = photo
+            graded = True
         if not graded and slide.get("scene_prompt"):
             gen = os.path.join(work, f"gen{i}.png")
             if gen_scene(slide["scene_prompt"], gen):
@@ -815,13 +955,15 @@ def publish() -> None:
               "as repo secrets.")
         return
     try:
-        if open(IG_MARKER).read().strip() == day:
+        force_publish = os.getenv("FORCE_SLIDES", "").strip().lower() not in (
+            "", "0", "false")
+        if not force_publish and open(IG_MARKER).read().strip() == day:
             print(f"{day} already posted to Instagram — skipping")
             return
     except FileNotFoundError:
         pass
 
-    caption = deck.get("caption", "")
+    caption = _fit_caption(deck.get("caption", ""))
     if not caption.startswith(
             "Here's What Happened in the World in the Last 24 Hours:"):
         raise RuntimeError("deck is missing its formatted 24-hour caption")
