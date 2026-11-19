@@ -1,108 +1,108 @@
 {
- "cover_scene_prompt": "A clean, vivid, high-impact photorealistic global collage with a dramatic Earth horizon and clear visual subjects and signature props from today's three most striking stories: a smoking collapsed bridge span over choppy water, ceremonial red-carpet diplomatic flags in Shenzhen, and a damaged military transport plane on an airport tarmac. Vertical 4:5 editorial composition with naturally rich light and color; no text.",
- "comment_question": "Which of today's unprecedented global developments concerns or surprises you the most?",
+ "cover_scene_prompt": "A clean, vivid, high-impact photorealistic global collage with a dramatic Earth horizon and clear visual subjects and signature props from today's three most striking stories: world leaders convening along a formal red carpet, an underground industrial pipeline tunnel illuminated by headlamps, and a somber international courtroom. Vertical 4:5 editorial composition with naturally rich light and color; no text.",
+ "comment_question": "Which of today's major global developments do you believe will have the most lasting consequence?",
  "slides": [
   {
-   "region": "Geopolitics",
-   "headline": "UKRAINE SEVERELY DAMAGES THE **CRITICAL KERCH BRIDGE** IN A MASSIVE **PRECISION MISSILE STRIKE**",
-   "caption": "A critical bridge linking Russia to occupied Crimea has partially collapsed following an unprecedented Ukrainian missile strike. President Volodymyr Zelensky hailed the operation, stating that the high-stakes assault required weeks of preparation.",
-   "scene_prompt": "Editorial photorealistic eye-level view of the massive Kerch Strait Bridge over water, showing broken concrete spans and smoke trailing against an overcast sky with a dramatic marine atmosphere.",
-   "badge": "BRIDGE COLLAPSE",
-   "photo": 4,
-   "source_post": 4,
-   "source_url": "https://www.bbc.co.uk/news/articles/cw772jk4rvmxo?at_medium=RSS&amp;at_campaign=rss"
+   "region": "World",
+   "headline": "DONALD TRUMP MEETS VLADIMIR PUTIN AND XI JINPING IN **UNPRECEDENTED THREE-WAY SUMMIT** IN CHINA",
+   "caption": "Donald Trump and Vladimir Putin shook hands in China ahead of an unprecedented three-way summit with Chinese leader Xi Jinping. Officials rolled out a red carpet for the gathering in Shenzhen, which marked the first meeting between Trump and Putin in over a year.",
+   "scene_prompt": "Editorial photorealistic shot of three global statesmen convening in an opulent summit hall in Shenzhen, red carpet runner under soft directional lighting, grand architectural backdrop, sharp focus, 4:5 vertical framing. No text.",
+   "badge": "HISTORIC TRILATERAL SUMMIT",
+   "photo": 14,
+   "source_post": 14,
+   "source_url": "https://www.nytimes.com/live/2026/11/18/world/trump-china-asia-apec"
   },
   {
    "region": "World",
-   "headline": "DONALD TRUMP ARRIVES IN CHINA FOR AN **UNPRECEDENTED TRILATERAL SUMMIT** WITH **XI AND PUTIN**",
-   "caption": "US President Donald Trump has landed in Shenzhen ahead of high-stakes talks with Chinese leader Xi Jinping and Russian President Vladimir Putin. Xi opened the APEC summit by urging expanded cooperation in scientific trade, artificial intelligence, and global digital markets.",
-   "scene_prompt": "Editorial photorealistic scene of world leaders Donald Trump and Xi Jinping walking side-by-side down an airport red carpet in Shenzhen, surrounded by ceremonial guards and media under crisp afternoon light.",
-   "badge": "HISTORIC SUMMIT",
-   "photo": 22,
-   "source_post": 22,
-   "source_url": "https://www.cnbc.com/2026/11/18/trump-xi-putin-china-apec.html"
+   "headline": "UKRAINIAN SOLDIERS WAGE A BRUTAL BATTLE AGAINST RUSSIAN FORCES INSIDE **UNDERGROUND GAS PIPELINES**",
+   "caption": "Ukrainian and Russian armed forces have extended their battlefield underground into Soviet-era gas pipelines. Soldiers stationed in the subterranean network described the harrowing environment as a war zone where drones cannot fly.",
+   "scene_prompt": "A gritty photorealistic editorial portrait of a fatigued combat soldier inside a dark, narrow underground steel pipeline, illuminated solely by a bright tactical headlamp and handheld terminal, dirt and moisture on concrete walls, 4:5 vertical framing. No text.",
+   "badge": "UNDERGROUND FRONT LINE",
+   "photo": 13,
+   "source_post": 13,
+   "source_url": "https://www.bbc.co.uk/news/articles/c32l507ev4v4o?at_medium=RSS&at_campaign=rss"
   },
   {
-   "region": "Crime",
-   "headline": "MAN ARRESTED FOR **SMASHING MILITARY AIRPLANE** WITH AN AXE AT AN **IRISH AIRPORT**",
-   "caption": "Prosecutors charged forty-eight-year-old Daithi O'Corrain after he breached airfield security and severely damaged a sixty-million-dollar C-130 Hercules transport aircraft. Investigators say the intruder used an axe to smash cockpit instruments, severed hydraulic lines, and dumped ball bearings into fuel tanks.",
-   "scene_prompt": "Photorealistic editorial view of a military C-130 Hercules transport aircraft parked on an airport tarmac at Shannon Airport under dramatic overcast skies, with security tape and forensic investigators nearby.",
-   "badge": "$60M DAMAGE",
-   "photo": 20,
-   "source_post": 20,
-   "source_url": "https://nypost.com/2026/11/17/world-news/anti-israel-activist-allegedly-destroyed-60-million-us-military-aircraft-at-irish-airport-feds/"
+   "region": "Policy",
+   "headline": "MYANMAR FACES AN UNPRECEDENTED UNITED NATIONS COURT VERDICT OVER **ROHINGYA MASSACRES**",
+   "caption": "The International Court of Justice is preparing to deliver its ruling in a seven-year-old genocide lawsuit brought against Myanmar by The Gambia. A conviction would mark the first time in history that a sovereign state has been found guilty of genocide by an international court.",
+   "scene_prompt": "A poignant photorealistic portrait of displaced Rohingya refugees clutching family members under daylight, conveying profound emotional resilience and grief, documentary style with shallow depth of field, 4:5 vertical framing. No text.",
+   "badge": "HISTORIC ICJ VERDICT",
+   "photo": 29,
+   "source_post": 29,
+   "source_url": "https://www.bbc.co.uk/news/articles/c5m2l90ez144o?at_medium=RSS&at_campaign=rss"
+  },
+  {
+   "region": "Middle East",
+   "headline": "ISRAELI MILITARY LAUNCHES GROUND OFFENSIVE IN CENTRAL GAZA **BEYOND THE YELLOW LINE**",
+   "caption": "Israeli ground forces and tanks advanced east of the Nuseirat refugee camp into territory outside their control following evacuation orders. The rare military advance beyond the Yellow Line was accompanied by heavy artillery strikes near both Nuseirat and Bureij camps.",
+   "scene_prompt": "A powerful documentary shot of displaced civilians walking along a dusty dirt road carrying duffel bags and holding small children, hazy atmosphere in central Gaza, raw sunlight, 4:5 vertical framing. No text.",
+   "badge": "GAZA GROUND PUSH",
+   "photo": 30,
+   "source_post": 30,
+   "source_url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9hTVBjZ3ZTR2x5c0NaYmhGUl9VUUg0enFwUWNmUW9RR0hNSElNN1NfRWxMRkdDWkx6UFZNY0xlMG9WNUJfU0V4amltWU1WOGN6Ykt6WVktakgwaG8?oc=5"
   },
   {
    "region": "Markets",
-   "headline": "NVIDIA RULES OUT **REINSTATING JENSEN HUANG** DESPITE SURGING PAST **RECORD QUARTERLY SALES**",
-   "caption": "Nvidia announced that its quarterly sales doubled to exceed one hundred billion dollars for the first time in corporate history. The company board confirmed it will not reinstate former chief executive Jensen Huang following his sudden resignation.",
-   "scene_prompt": "Editorial portrait style photograph of sleek corporate executive stage lighting illuminating an ultra-modern Silicon Valley auditorium backdrop during a high-stakes financial presentation.",
-   "badge": "$100B REVENUE",
-   "photo": 12,
-   "source_post": 12,
-   "source_url": "https://www.bbc.co.uk/news/articles/cm2kl50vkwkdo?at_medium=RSS&amp;at_campaign=rss"
-  },
-  {
-   "region": "Geopolitics",
-   "headline": "CLASSIFIED **NSA COMMUNICATIONS NETWORK** CRASHES NATIONWIDE AMID WIDESPREAD **AMERICAN TECHNOLOGY OUTAGES**",
-   "caption": "A classified internal computer system utilized by the National Security Agency suffered an unexpected outage causing significant work disruptions across the agency. Intelligence officials reported no initial evidence of a cyberattack as inquiries into recent airline and banking disruptions intensify.",
-   "scene_prompt": "Photorealistic exterior view of the modern glass facade of the National Security Agency headquarters at Fort Meade, with security entrance barriers and official signage in crisp morning light.",
-   "badge": "NETWORK DOWN",
-   "photo": 6,
-   "source_post": 6,
-   "source_url": "https://www.marketwatch.com/story/the-latest-tech-failure-u-s-classified-national-security-communications-network-ad271899?mod=mw_rss_topstories"
-  },
-  {
-   "region": "Conflict",
-   "headline": "RUSSIAN BALLISTIC MISSILES **STRIKE MAIN BRIDGES** ACROSS KYIV IN **DEADLY MIDNIGHT ATTACK**",
-   "caption": "Air raid sirens sounded across Kyiv before ballistic missiles struck major bridge crossings over the Dnipro River. Terrified residents rushed to underground shelters while emergency crews responded to explosions illuminating the night skyline.",
-   "scene_prompt": "Dramatic photorealistic night scene in Kyiv showing flashes of light over the Dnipro river with bridge silhouettes, emergency vehicles with flashing lights parked on the embankment, and reflective dark water.",
-   "badge": "KYIV STRUCK",
-   "photo": 10,
-   "source_post": 10,
-   "source_url": "https://www.bbc.co.uk/news/articles/cq7825234lgmo?at_medium=RSS&amp;at_campaign=rss"
-  },
-  {
-   "region": "Justice",
-   "headline": "PROSECUTORS SUE GOVERNOR NEWSOM OVER **PLANNED MASS COMMUTATIONS** FOR **FIVE HUNDRED INMATES**",
-   "caption": "Thirty California district attorneys and families of murder victims filed a state Supreme Court lawsuit to halt the governor's clemency actions. The legal petition contends the governor overstepped constitutional executive authority by seeking to clear death row.",
-   "scene_prompt": "Photorealistic editorial shot of the grand steps of the California State Capitol building in Sacramento, bathed in solemn evening light with dramatic shadows across tall classical columns.",
-   "badge": "LEGAL BATTLE",
-   "photo": 5,
-   "source_post": 5,
-   "source_url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxQZVNjV2JhVlFqZW9tNHdhdHNWeFNSN0NDZ1YydlAzTUtDWTN4ZmUwLS01VHlZVXJJQUFKY29yamZJMUJnblR2ZDVwV2FLM2gyRU56OVdYYU5aU1ZUQzRnWmQwSlJFLU1YeUhuemMtTDhMeTFfVWRJNDAwd3kxTVNnbVVxNjBCSlZGMkVJV3hiemRwY0MtRHJqUHBLeGVDSV9Rd0dZV3FjVlVlcWRIMjkyVW8wUGxSNXJP?oc=5"
+   "headline": "ANTHROPIC VALUED AT **ONE POINT FIVE TRILLION DOLLARS** AFTER PRICING HISTORIC IPO",
+   "caption": "Artificial intelligence developer Anthropic priced its initial public offering at $83 per share, surpassing its projected range of $70 to $78. The blockbuster pricing gives the company a fully diluted market valuation of $1.5 trillion ahead of trading on the Nasdaq.",
+   "scene_prompt": "A clean, modern financial boardroom setting with executive tech leadership discussing record market valuation numbers, glowing digital market ticker screens in the background, sleek architectural glass, 4:5 vertical framing. No text.",
+   "badge": "$1.5 TRILLION VALUATION",
+   "photo": 21,
+   "source_post": 21,
+   "source_url": "https://techcrunch.com/2026/11/18/anthropic-reportedly-prices-ipo-at-83-a-share-above-projected-range/"
   },
   {
    "region": "Technology",
-   "headline": "MAJOR ARTIFICIAL INTELLIGENCE MODELS ARE **TRICKED INTO TARGETING CIVILIANS** THROUGH **SIMULATED WAR GAMES**",
-   "caption": "Research revealed leading models from OpenAI, Anthropic, Google, and DeepSeek misidentified schools and civilians as military airstrike targets when jailbroken through game prompts. Testing utilized real and simulated aerial imagery from recent war zones to expose grave safety vulnerabilities in automated warfare.",
-   "scene_prompt": "A darkened military intelligence room with high-contrast tactical monitor displays showing satellite reconnaissance terrain overlaid with red digital targeting reticles.",
-   "badge": "AI VULNERABILITY",
+   "headline": "MAJOR BANKS WARN CUSTOMERS USING **AI FINANCIAL AGENTS** ASSUME FULL LIABILITY FOR LOSSES",
+   "caption": "Leading financial institutions including Citibank have updated their terms of service to deny responsibility for unauthorized transactions caused by third-party artificial intelligence assistants. Customers who grant automated tools access to their accounts will bear all financial liabilities even when stolen funds result from a hack.",
+   "scene_prompt": "A crisp editorial exterior of a major metropolitan banking branch with reflective plate glass windows and polished granite architecture on a bustling downtown street corner, 4:5 vertical framing. No text.",
+   "badge": "ZERO HACK PROTECTION",
+   "photo": 16,
+   "source_post": 16,
+   "source_url": "https://techcrunch.com/2026/11/18/more-banks-says-customers-using-ai-agents-are-on-their-own-even-if-they-get-hacked/"
+  },
+  {
+   "region": "Law",
+   "headline": "GERMAN JUDGE OFFERS TO DROP CRIMINAL PIRACY CASE FOR **BILLIONS IN BITCOIN**",
+   "caption": "A German judge proposed dismissing the criminal proceedings against the operator of piracy portal Movie2k if the defendant surrenders $2.56 billion worth of bitcoin. The suggested agreement would close the legal prosecution tied to one of the largest copyright infringement networks in Germany.",
+   "scene_prompt": "A dignified European courtroom chamber with rich dark wooden benches, law books, a wooden gavel resting on the judge's bench under moody architectural window lighting, 4:5 vertical framing. No text.",
+   "badge": "$2.56B BITCOIN DEAL",
    "photo": null,
-   "source_post": 9,
-   "source_url": "https://techcrunch.com/2026/11/17/ai-models-can-be-tricked-into-identifying-civilians-as-military-targets-by-telling-them-its-a-game/"
+   "source_post": 15,
+   "source_url": "https://www.coindesk.com/business/2026/11/18/german-judge-proposes-dropping-movie2k-case-if-operator-hands-over-usd2-56-billion-in-bitcoin"
+  },
+  {
+   "region": "Technology",
+   "headline": "MICROSOFT CEO WARNS **CRITICAL INFRASTRUCTURE IS UNPATCHABLE** AGAINST EMERGING AI CYBERATTACKS",
+   "caption": "Microsoft chief executive Satya Nadella warned at the DealBook Summit that vital infrastructure across the globe contains unfixable software flaws. He emphasized that internet-linked equipment like data center chillers, HVAC units, and firmware cannot be patched against artificial intelligence cyberthreats.",
+   "scene_prompt": "A tech executive speaking animatedly from a conference armchair on an auditorium stage, subtle spotlighting against a minimalist dark blue backdrop, photorealistic editorial finish, 4:5 vertical framing. No text.",
+   "badge": "AI CYBER ALERT",
+   "photo": 28,
+   "source_post": 28,
+   "source_url": "https://techcrunch.com/2026/11/18/amidst-fears-of-ai-cyberattacks-satya-nadella-says-lots-of-critical-infrastructure-is-unpatchable/"
+  },
+  {
+   "region": "Technology",
+   "headline": "SAM ALTMAN REJECTS HANDING DECISION-MAKING POWER OVER MAJOR INSTITUTIONS TO **ARTIFICIAL INTELLIGENCE**",
+   "caption": "OpenAI chief executive Sam Altman warned against ceding institutional decision-making authority to artificial intelligence during the DealBook Summit. He expressed alarm over recursive self-improvement models in Silicon Valley that could construct smarter generational systems beyond human oversight.",
+   "scene_prompt": "An expressive close-up editorial shot of a technology CEO gesturing with hands open while speaking passionately on a conference stage, soft ambient stage lighting, 4:5 vertical framing. No text.",
+   "badge": "AI SAFETY WARNING",
+   "photo": 20,
+   "source_post": 20,
+   "source_url": "https://techcrunch.com/2026/11/18/sam-altman-warns-against-a-future-where-ai-not-humans-calls-the-shots/"
   },
   {
    "region": "World",
-   "headline": "ECUADORIAN FISHERMEN SUE TRUMP ADMINISTRATION OVER **LETHAL DRONE STRIKE** ON **CIVILIAN BOAT**",
-   "caption": "Surviving crew members filed a federal lawsuit alleging their vessel was unlawfully attacked by drones launched from a US-operated naval craft. The legal complaint accuses American military authorities of carrying out an unauthorized strike campaign against innocent commercial fishers.",
-   "scene_prompt": "Photorealistic oceanic view of a small wooden commercial fishing vessel on choppy open ocean waters, bathed in bright tropical sun under a wide sky.",
-   "badge": "FEDERAL LAWSUIT",
-   "photo": 18,
-   "source_post": 18,
-   "source_url": "https://www.aljazeera.com/news/2026/11/18/ecuadorian-fishermen-sue-trump-administration-over-drone-strike?traffic_source=rss"
-  },
-  {
-   "region": "Science",
-   "headline": "EUROPE INVESTS MILLIONS INTO **PHOTONIC MICROCHIPS** THAT COMPUTE USING **BEAMS OF LIGHT**",
-   "caption": "European Union institutions and Dutch research partners are injecting millions into next-generation photonic chips that process data via photons rather than electrical currents. Engineers say the cutting-edge technology is on the verge of a major industrial computing breakthrough.",
-   "scene_prompt": "Photorealistic cleanroom semiconductor laboratory scene where an engineer in a white sterile suit inspects an iridescent optical microchip wafer under focused microscopic laser illumination.",
-   "badge": "TECH BREAKTHROUGH",
-   "photo": 17,
-   "source_post": 17,
-   "source_url": "https://www.bbc.co.uk/news/articles/cqglwjd450k0o?at_medium=RSS&amp;at_campaign=rss"
+   "headline": "UKRAINIAN INVESTIGATION UNCOVERS ORGANIZED COMMAND APPROVAL FOR **RUSSIAN CHEMICAL WEAPONS USE**",
+   "caption": "A probe by Ukrainian investigators revealed that Russian forces systematically deployed prohibited toxic agents on the front line in violation of international conventions. The findings established coordinated supply networks and formal military command approval for the battlefield chemical munitions.",
+   "scene_prompt": "A forensic military investigation scene with hazardous material gear, protective respirators, and sealed specimen containers set upon a rugged field desk near the front lines, 4:5 vertical framing. No text.",
+   "badge": "CHEMICAL WARFARE PROBE",
+   "photo": null,
+   "source_post": 10,
+   "source_url": "https://www.upi.com/Top_News/World-News/2026/11/18/ukraine-Russia-chemical-weapons/8141794983599/"
   }
  ],
- "date": "2026-11-18",
- "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nA critical bridge linking Russia to occupied Crimea has partially collapsed following an unprecedented Ukrainian missile strike. President Volodymyr Zelensky hailed the operation, stating that the high-stakes assault required weeks of preparation.\n\nUS President Donald Trump has landed in Shenzhen ahead of high-stakes talks with Chinese leader Xi Jinping and Russian President Vladimir Putin.\n\nProsecutors charged forty-eight-year-old Daithi O'Corrain after he breached airfield security and severely damaged a sixty-million-dollar C-130 Hercules transport aircraft.\n\nNvidia announced that its quarterly sales doubled to exceed one hundred billion dollars for the first time in corporate history. The company board confirmed it will not reinstate former chief executive Jensen Huang following his sudden resignation.\n\nA classified internal computer system utilized by the National Security Agency suffered an unexpected outage causing significant work disruptions across the agency.\n\nAir raid sirens sounded across Kyiv before ballistic missiles struck major bridge crossings over the Dnipro River. Terrified residents rushed to underground shelters while emergency crews responded to explosions illuminating the night skyline.\n\nThirty California district attorneys and families of murder victims filed a state Supreme Court lawsuit to halt the governor's clemency actions.\n\nResearch revealed leading models from OpenAI, Anthropic, Google, and DeepSeek misidentified schools and civilians as military airstrike targets when jailbroken through game prompts.\n\nSurviving crew members filed a federal lawsuit alleging their vessel was unlawfully attacked by drones launched from a US-operated naval craft.\n\nEuropean Union institutions and Dutch research partners are injecting millions into next-generation photonic chips that process data via photons rather than electrical currents.\n\nWhich of today's unprecedented global developments concerns or surprises you the most?\n\nFollow @midworlddaily — join our live 24/7 Telegram channels via the link in bio."
+ "date": "2026-11-19",
+ "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nDonald Trump and Vladimir Putin shook hands in China ahead of an unprecedented three-way summit with Chinese leader Xi Jinping. Officials rolled out a red carpet for the gathering in Shenzhen, which marked the first meeting between Trump and Putin in over a year.\n\nUkrainian and Russian armed forces have extended their battlefield underground into Soviet-era gas pipelines. Soldiers stationed in the subterranean network described the harrowing environment as a war zone where drones cannot fly.\n\nThe International Court of Justice is preparing to deliver its ruling in a seven-year-old genocide lawsuit brought against Myanmar by The Gambia.\n\nIsraeli ground forces and tanks advanced east of the Nuseirat refugee camp into territory outside their control following evacuation orders.\n\nArtificial intelligence developer Anthropic priced its initial public offering at $83 per share, surpassing its projected range of $70 to $78. The blockbuster pricing gives the company a fully diluted market valuation of $1.5 trillion ahead of trading on the Nasdaq.\n\nLeading financial institutions including Citibank have updated their terms of service to deny responsibility for unauthorized transactions caused by third-party artificial intelligence assistants.\n\nA German judge proposed dismissing the criminal proceedings against the operator of piracy portal Movie2k if the defendant surrenders $2.56 billion worth of bitcoin.\n\nMicrosoft chief executive Satya Nadella warned at the DealBook Summit that vital infrastructure across the globe contains unfixable software flaws.\n\nOpenAI chief executive Sam Altman warned against ceding institutional decision-making authority to artificial intelligence during the DealBook Summit.\n\nA probe by Ukrainian investigators revealed that Russian forces systematically deployed prohibited toxic agents on the front line in violation of international conventions.\n\nWhich of today's major global developments do you believe will have the most lasting consequence?\n\nFollow @midworlddaily — join our live 24/7 Telegram channels via the link in bio."
 }
