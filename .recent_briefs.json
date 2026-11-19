@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-14",
-  "stories": [
-   {
-    "topic": "United States",
-    "headline": "FAA Lifts Hourslong Nationwide Ground Stop",
-    "tease": "A nationwide flight ban grounds thousands of American departures overnight."
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "US Floats Donbas Proposal in Peace Talks",
-    "tease": "Negotiators propose territorial concessions to break the ongoing Ukraine stalemate."
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Turkey and Qatar Sign Mutual Defence Pact",
-    "tease": "Turkey and Qatar finalize a binding mutual defense agreement today."
-   },
-   {
-    "topic": "Technology",
-    "headline": "Nvidia Leadership Fallout Shakes Silicon Valley",
-    "tease": "Major investors push for Jensen Huang's return following his exit."
-   },
-   {
-    "topic": "Markets",
-    "headline": "Meta Hit with Record European Fine",
-    "tease": "Italian regulators issue an eight hundred million euro privacy fine."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Brief Updates from Geopolitics Science and Health",
-    "tease": "Public health setbacks and space tests make news around the world."
-   },
-   {
-    "topic": "Technology",
-    "headline": "Tesla Opens Orders for Autonomous Cybercab",
-    "tease": "Tesla begins accepting consumer orders for its driverless vehicle."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Trilateral Summit and Congressional Hearings Headline Week",
-    "tease": "World leaders prepare for a momentous week of high-level diplomacy."
-   }
-  ]
- },
- {
   "date": "2026-11-15",
   "stories": [
    {
@@ -171,6 +126,51 @@
     "topic": "What to Watch",
     "headline": "High Stakes Shenzen Trilateral and Crucial Tech Hearings",
     "tease": "Key summits and earnings calls dominate the days ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-18",
+  "stories": [
+   {
+    "topic": "China Summit",
+    "headline": "Trump Putin and Xi Convene Historic Shenzhen Trilateral",
+    "tease": "World leaders shake hands in Shenzhen ahead of unprecedented trilateral talks"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Nvidia Rejects Huang Return and Exits Chinese Market",
+    "tease": "Nvidia posts record sales while slamming the door on Jensen Huang"
+   },
+   {
+    "topic": "United States",
+    "headline": "Democrats Sweep Final Races and Nominate Jeffries",
+    "tease": "Hakeem Jeffries nominated for speaker as Democrats sweep final midterm races"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Gulf Escalation Deepens as US Navy War Stocks Strain",
+    "tease": "Rising Gulf clashes expose severe strains on American naval munitions"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Banks Move to Shed AI Liability as Inflation Ticks Up",
+    "tease": "Banks strip consumer protections for automated artificial intelligence agents"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "War Extends Underground as Pipeline Combat Intensifies",
+    "tease": "Ukrainian troops battle underground inside pipelines to escape drone strikes"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Court Actions Outages and Diplomatic Tours",
+    "tease": "Intelligence blackouts and royal diplomacy make headlines across the globe"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "APEC Trilateral and Upcoming International Court Rulings",
+    "tease": "Crucial diplomatic showdowns and major market tests anchor the week ahead"
    }
   ]
  }
