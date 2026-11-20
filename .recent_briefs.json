@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-15",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Iran Targets US Facilities in Bahrain Barrage",
-    "tease": "Aerial strikes target American military installations across Bahrain"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Kyiv Clashes with Musk Over Starshield Limits",
-    "tease": "Zelensky accuses SpaceX of hobbling frontline air defenses"
-   },
-   {
-    "topic": "Space",
-    "headline": "SpaceX Catches Returning Starship in Historic Triumph",
-    "tease": "SpaceX makes history by catching a descending Starship rocket"
-   },
-   {
-    "topic": "United States",
-    "headline": "Aviation Chaos Cascades into Third Straight Day",
-    "tease": "Flight disruptions persist nationwide following a runway collision"
-   },
-   {
-    "topic": "Technology",
-    "headline": "Bessent Demands Outside Leadership at Nvidia",
-    "tease": "Treasury secretary demands a complete leadership overhaul at Nvidia"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Estonia Shuts Russian Border Crossings Over Sabotage",
-    "tease": "Estonia closes Russian border crossings after factory sabotage attempt"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Court Protects Potomac Golf Nigeria Checks AI",
-    "tease": "Federal court blocks park closure as art market tests billions"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Trilateral Summit and House Tech Hearings Ahead",
-    "tease": "Upcoming summitry and regulatory deadlines will define the coming week"
-   }
-  ]
- },
- {
   "date": "2026-11-16",
   "stories": [
    {
@@ -171,6 +126,56 @@
     "topic": "What to Watch",
     "headline": "APEC Trilateral and Upcoming International Court Rulings",
     "tease": "Crucial diplomatic showdowns and major market tests anchor the week ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-19",
+  "stories": [
+   {
+    "topic": "Superpower Diplomacy",
+    "headline": "Trump Putin and Xi Sign Trilateral Peace Pact",
+    "tease": "World leaders conclude a surprise summit in Shenzhen with a historic pact"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Crimean Bridge Hit Again as Ceasefire Prospects Dim",
+    "tease": "Ukraine strikes the Crimean Bridge for the third time this week"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Israeli Troops Advance into Central Gaza Across Yellow Lin",
+    "tease": "Israeli tanks push into central Gaza as regional shipping faces fresh attacks"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Anthropic Shatters Records in Eighty-One Billion Dollar Wa",
+    "tease": "Anthropic debuts on Wall Street with the biggest IPO in history"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Tech Giants Sound Alarm Over AI Vulnerabilities and Agent ",
+    "tease": "Tech leaders warn vital infrastructure cannot be patched against AI attacks"
+   },
+   {
+    "topic": "Human Rights",
+    "headline": "World Court Delivers Historic Genocide Verdict Against Mya",
+    "tease": "The International Court of Justice finds Myanmar guilty of Rohingya genocide"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Greenland Pact Approved and Armenia Demarcates Peace Trans",
+    "tease": "Quick hits on Arctic defense, Caucasus transit, and judicial nominations"
+   },
+   {
+    "topic": "Space",
+    "headline": "Voyager One Phones Home from Historic One Light-Day Bounda",
+    "tease": "Nasa's Voyager probe reaches an astonishing milestone across interstellar space"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "High Stakes Diplomatic Repercussions and Arctic Security I",
+    "tease": "Key international reactions to watch closely in the coming days"
    }
   ]
  }
