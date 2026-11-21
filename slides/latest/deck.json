@@ -1,108 +1,108 @@
 {
- "cover_scene_prompt": "A clean, vivid, high-impact photorealistic global collage with a dramatic Earth horizon curve set against deep space, seamlessly incorporating the Peace Palace of The Hague illuminated under solemn morning light, a formal summit stage draped in international silk flags, and a glowing digital financial podium, captured in a vertical 4:5 editorial composition with rich natural contrast and cinematic lighting; no text.",
- "comment_question": "Which of today's historic developments will have the longest-lasting impact on our world?",
+ "cover_scene_prompt": "A dramatic, vivid, photorealistic global editorial collage with Earth's curved horizon at twilight, seamlessly blending scenes of smoke over an Eastern European river crossing, a glowing chalkboard covered in complex mathematical formulas, and a military cockpit monitor scanning an airborne anomaly over a desert landscape. Vertical 4:5 editorial composition with rich atmospheric lighting and cinematic contrast, no text.",
+ "comment_question": "Which of today's global developments surprised or concerned you the most?",
  "slides": [
   {
    "region": "World",
-   "headline": "UN COURT RULES **MYANMAR COMMITTED GENOCIDE** AGAINST ROHINGYA IN A LANDMARK VERDICT.",
-   "caption": "The International Court of Justice issued a landmark ruling finding Myanmar guilty of genocide against the Rohingya Muslim minority. The historic verdict addresses systematic state-backed violence and military operations directed against the population.",
-   "scene_prompt": "A wide editorial eye-level view of the majestic Peace Palace in The Hague under a dramatic overcast sky, capturing the ornate brick architecture, manicured green lawns, and tall wrought-iron security gates in solemn natural morning light.",
-   "badge": "LANDMARK RULING",
-   "photo": 18,
-   "source_post": 18,
-   "source_url": "https://www.bbc.co.uk/news/articles/c804wzp20ddvo?at_medium=RSS&at_campaign=rss"
-  },
-  {
-   "region": "Geopolitics",
-   "headline": "TRUMP, PUTIN, AND XI SIGN A HISTORIC **JOINT PEACE DECLARATION** AT SHENZHEN SUMMIT.",
-   "caption": "US President Donald Trump, Russian President Vladimir Putin, and Chinese President Xi Jinping signed a four-point peace declaration in Shenzhen. The trilateral agreement includes a nuclear weapons pledge and energy cooperation but omits ongoing wars in Ukraine and Iran.",
-   "scene_prompt": "Editorial photo of a high-level diplomatic summit stage in Shenzhen, showing three world leaders standing side by side in formal dark suits before international flags under bright summit stage lighting.",
-   "badge": "TRILATERAL PACT",
-   "photo": 11,
-   "source_post": 11,
-   "source_url": "https://www.theguardian.com/world/2026/nov/19/china-russia-us-agree-peace-statement-no-mention-ukraine-iran-wars"
-  },
-  {
-   "region": "Markets",
-   "headline": "ANTHROPIC RAISES EIGHTY-ONE BILLION DOLLARS IN THE **LARGEST INITIAL PUBLIC OFFERING** IN HISTORY.",
-   "caption": "Artificial intelligence firm Anthropic raised $81 billion in its Nasdaq debut, pushing its market valuation toward $1.76 trillion. Chief executive Dario Amodei pledged that the maker of Claude will maintain human control and pace development responsibly.",
-   "scene_prompt": "An executive standing at a sleek white Nasdaq opening bell podium backed by a towering digital blue screen displaying stock market tickers in crisp editorial daylight.",
-   "badge": "$81B RAISED",
-   "photo": 15,
-   "source_post": 15,
-   "source_url": "https://techcrunch.com/2026/11/19/at-nasdaq-opening-bell-anthropic-ceo-recommits-to-pacing-ai-development/"
-  },
-  {
-   "region": "Geopolitics",
-   "headline": "UKRAINE STRIKES THE **CRIMEAN BRIDGE** CAUSING A ROADWAY COLLAPSE AS RUSSIA VOWS RETALIATION.",
-   "caption": "Russian officials confirmed that Ukraine targeted the Crimean Bridge in a major strike, marking the third assault on the structure this week. Video footage showed a collapsed roadway span over the water as Moscow warned of painful retaliation.",
-   "scene_prompt": "A dramatic wide-angle aerial shot of a massive arched bridge over dark open water at dusk, showing emergency lighting illuminating a severed structural roadway span.",
-   "badge": "BRIDGE COLLAPSE",
-   "photo": 3,
-   "source_post": 3,
-   "source_url": "https://www.bbc.co.uk/news/articles/cm879dqn3e1jo?at_medium=RSS&at_campaign=rss"
-  },
-  {
-   "region": "Geopolitics",
-   "headline": "RUSSIAN MISSILES STRIKE KYIV LEAVING ONE DEAD AND DAMAGING **DUTCH AND AUSTRIAN EMBASSIES**.",
-   "caption": "A barrage of Russian daytime strikes on Kyiv killed one person and inflicted damage across the Ukrainian capital. Blast impacts shattered windows and damaged structural elements of buildings housing the Austrian and Dutch diplomatic missions.",
-   "scene_prompt": "Emergency crews and shattered glass on a historic European city street in Kyiv with damaged diplomatic building facades and flashing blue emergency lights in daylight.",
-   "badge": "EMBASSIES DAMAGED",
-   "photo": null,
-   "source_post": 23,
-   "source_url": "https://www.france24.com/en/russian-strikes-on-kyiv-kill-one-damage-dutch-and-austrian-embassies"
+   "headline": "RUSSIA TARGETS KYIV CROSSINGS AND RAIL STATIONS IN **DEVASTATING NATIONWIDE MISSILE BARRAGE**",
+   "caption": "Russian ballistic missiles struck transport hubs, warehouses, and energy facilities across Ukraine, killing at least eight people. President Volodymyr Zelensky called the coordinated overnight attack one of the most massive bombardments of the war.",
+   "scene_prompt": "Photorealistic 4:5 editorial image showing the aftermath of a missile strike near an urban railway viaduct in Kyiv, with emergency workers in reflective jackets navigating charred debris and smoke under a somber overcast morning sky, no text.",
+   "badge": "8 DEAD",
+   "photo": 16,
+   "source_post": 16,
+   "source_url": "https://www.bbc.co.uk/news/articles/c6x29gn4pdn9o?at_medium=RSS&amp;at_campaign=rss"
   },
   {
    "region": "Technology",
-   "headline": "RUSSIAN NATIONAL CHARGED WITH **SPYING ON DEFENSE WORKERS** ASSISTING UKRAINE IN SILICON VALLEY.",
-   "caption": "Federal prosecutors indicted 25-year-old Igor D'iu for conducting surveillance on employees of a tech company providing aid to Ukraine. Authorities revealed the suspect photographed laptop screens in Palo Alto and engaged in a high-speed vehicle pursuit to San Francisco.",
-   "scene_prompt": "A dark surveillance-style photograph taken through a vehicle windshield in Palo Alto, showing a rainy street with high-tech office buildings in the background.",
-   "badge": "ESPIONAGE CHARGES",
-   "photo": null,
-   "source_post": 24,
-   "source_url": "https://arstechnica.com/security/2026/11/man-charged-with-spying-on-silicon-valley-tech-and-defense-company-for-russia/"
+   "headline": "MATHEMATICIAN CLAIMS TO SOLVE THE **RIEMANN HYPOTHESIS** USING ANTHROPIC ARTIFICIAL INTELLIGENCE",
+   "caption": "Anthropic researcher Levent Alpöge produced a machine-verified proof for one of the Millennium Prize problems concerning prime numbers. The breakthrough proof was developed over six weeks of work utilizing the Claude chatbot system.",
+   "scene_prompt": "Photorealistic 4:5 vertical editorial shot of a massive slate chalkboard densely covered with intricate mathematical proofs and prime number formulas, illuminated by warm focused study lamps in an academic research office, no text.",
+   "badge": "HISTORIC CLAIM",
+   "photo": 26,
+   "source_post": 26,
+   "source_url": "https://techcrunch.com/2026/11/20/ai-claimed-a-solution-to-the-167-year-old-riemann-hypothesis-and-a-human-did-too/"
   },
   {
-   "region": "Geopolitics",
-   "headline": "SOUTH KOREA IMPOSES STRICT COLLEGE ENTRANCE RULES FOLLOWING AN **ARTIFICIAL INTELLIGENCE CHEATING** SCANDAL.",
-   "caption": "South Korean education authorities introduced sweeping restrictions for the high-stakes Suneung college entrance examination. The sudden security overhaul follows the discovery of artificial intelligence cheating during the testing process.",
-   "scene_prompt": "A sterile examination classroom in South Korea with rows of empty student desks, each holding only an identification slip, analog watch, and pencil under cool fluorescent light.",
-   "badge": "SUNEUNG OVERHAUL",
-   "photo": 5,
-   "source_post": 5,
-   "source_url": "https://www.nytimes.com/2026/11/18/world/asia/south-korea-cheating-college-exam-suneung.html"
-  },
-  {
-   "region": "Policy",
-   "headline": "PRESIDENT TRUMP ISSUES A POSTHUMOUS PRESIDENTIAL PARDON FOR BASEBALL LEGEND **PETE ROSE**.",
-   "caption": "Donald Trump granted a posthumous pardon to Major League Baseball's all-time hit leader Pete Rose. The controversial baseball icon served prison time for 1990 tax offenses and received a lifetime ban from the sport for gambling.",
-   "scene_prompt": "A sunlit baseball diamond with an empty batter's box and a vintage leather glove resting near home plate under stadium floodlights.",
-   "badge": "POSTHUMOUS PARDON",
-   "photo": 29,
-   "source_post": 29,
-   "source_url": "https://www.independent.co.uk/news/world/americas/us-politics/trump-pardon-pete-rose-baseball-b3088301.html"
+   "region": "World",
+   "headline": "PENTAGON RELEASES NEW DECLASSIFIED MILITARY FOOTAGE SHOWING **UNIDENTIFIED ANOMALOUS PHENOMENA** OVERSEAS",
+   "caption": "The United States military unveiled an eighth batch of declassified records featuring unidentified objects filmed across the Middle East. The disclosure follows a presidential executive order mandating government transparency on aerial anomalies.",
+   "scene_prompt": "Photorealistic 4:5 editorial display of a modern defense cockpit infrared sensor screen showing an indistinct metallic object maneuvering silently over an arid desert expanse, captured in authentic military monochrome telemetry, no text.",
+   "badge": "DECLASSIFIED",
+   "photo": 36,
+   "source_post": 36,
+   "source_url": "https://www.bbc.co.uk/news/videos/cqdr1x8mypnko?at_medium=RSS&amp;at_campaign=rss"
   },
   {
    "region": "Policy",
-   "headline": "EUROPEAN COMMISSION CONFIRMS IT WAS TARGETED BY FIRST KNOWN **AI-GENERATED CYBERATTACK** CAMPAIGN.",
-   "caption": "The European Commission confirmed that its infrastructure faced a sophisticated cybercampaign utilizing artificial intelligence tools. Spokesperson Thomas Regnier stated that while the incident was detected on October 22, investigators found no wider staff data breach.",
-   "scene_prompt": "A row of vibrant blue European Union flags fluttering on tall steel flagpoles outside the modern glass facade of the European Commission Berlaymont building in Brussels.",
-   "badge": "AI CYBERATTACK",
+   "headline": "TRUMP THREATENS MASSIVE TAX PENALTIES ON US TECH FIRMS **BUILDING DATA CENTERS ABROAD**",
+   "caption": "Donald Trump announced plans to prevent American technology companies from constructing critical computing infrastructure on foreign soil. The administration warned that firms moving server facilities overseas will face heavy punitive tariffs.",
+   "scene_prompt": "Photorealistic 4:5 editorial portrait of Donald Trump speaking vigorously from behind a formal podium in the White House briefing room, gesturing emphatically with both hands under bright press studio lighting, no text.",
+   "badge": "NEW TARIFFS",
+   "photo": 25,
+   "source_post": 25,
+   "source_url": "https://www.bbc.co.uk/news/articles/cmde1lw9y54ko?at_medium=RSS&amp;at_campaign=rss"
+  },
+  {
+   "region": "Justice",
+   "headline": "INDIAN NATIONAL GETS NINETEEN YEARS FOR PLOTTING **ASSASSINATION OF SIKH SEPARATIST** LEADER",
+   "caption": "Nikhil Gupta received a 235-month federal prison sentence after pleading guilty to murder-for-hire charges in New York. Prosecutors revealed the thwarted scheme specifically targeted dual US-Canadian activist Gurpatwant Singh Pannun.",
+   "scene_prompt": "Photorealistic 4:5 editorial illustration depicting an expressive courtroom sketch of a solemn middle-aged defendant in custody, rendered in expressive pastels and colored pencils inside an imposing federal courtroom, no text.",
+   "badge": "19-YEAR SENTENCE",
+   "photo": 27,
+   "source_post": 27,
+   "source_url": "https://www.independent.co.uk/news/world/americas/crime/sikh-nikhil-gupta-hitman-b3088957.html"
+  },
+  {
+   "region": "Policy",
+   "headline": "MAYOR ZOHRAN MAMDANI UNVEILS PLAN TO PERMANENTLY CLOSE **NEW YORK'S RIKERS ISLAND**",
+   "caption": "New York City plans to shutter the infamous jail complex by late 2032 and transfer detainees to smaller borough facilities. A new 146 million dollar investment aims to reduce pretrial detention and eliminate persistent court case delays.",
+   "scene_prompt": "Photorealistic 4:5 editorial view of Mayor Zohran Mamdani seated among men in correctional uniforms during a discussion inside a communal institutional facility room, framed with documentary clarity, no text.",
+   "badge": "CLOSING 2032",
+   "photo": 17,
+   "source_post": 17,
+   "source_url": "https://www.independent.co.uk/news/world/americas/mamdani-rikers-island-jail-closing-b3088549.html"
+  },
+  {
+   "region": "Security",
+   "headline": "WHITE HOUSE FIRES NATIONAL CYBER DIRECTOR FOLLOWING **WIDESPREAD TECHNOLOGICAL OUTAGES** ACROSS NATION",
+   "caption": "The administration removed the top federal cyber official after crippling digital network failures disrupted services across the United States. Federal authorities moved swiftly to replace leadership amid intense scrutiny over domestic infrastructure vulnerabilities.",
+   "scene_prompt": "Photorealistic 4:5 editorial wide shot of high-level officials seated along a cream linen banquet table in the White House State Dining Room, framed against gold drapery and American flags during a tense national security briefing, no text.",
+   "badge": "CYBER OUSTER",
+   "photo": 1,
+   "source_post": 1,
+   "source_url": "https://www.france24.com/en/americas/20261120-white-house-fires-national-cyber-director-over-widespread-outages"
+  },
+  {
+   "region": "Diplomacy",
+   "headline": "UNITED KINGDOM AND EUROPEAN UNION REACH **LANDMARK RESET ACCORD** TO REBUILD RELATIONS",
+   "caption": "British Prime Minister Andy Burnham and European leaders finalized terms covering food export checks, emissions quotas, and youth mobility. British officials estimate the cross-border pact could deliver a seventeen billion pound annual economic lift.",
+   "scene_prompt": "Photorealistic 4:5 editorial photograph of British Prime Minister Andy Burnham joining hands in unity with European Commission President Ursula von der Leyen in front of European Union summit banners in Brussels, no text.",
+   "badge": "POST-BREXIT DEAL",
+   "photo": 23,
+   "source_post": 23,
+   "source_url": "https://www.theguardian.com/world/live/2026/nov/20/uk-eu-european-union-brexit-deal-andy-burnham-latest-news-updates"
+  },
+  {
+   "region": "Technology",
+   "headline": "SIGNAL ROLLS OUT UPDATE BLOCKING **ARTIFICIAL INTELLIGENCE ASSISTANTS** FROM SCANNING CHATS",
+   "caption": "The encrypted messaging app has introduced safeguards preventing digital helpers like Siri and Gemini from reading on-screen messages. Activating the protective privacy control simultaneously shuts down internal screenshot functionality and app-switcher previews.",
+   "scene_prompt": "Photorealistic 4:5 close-up editorial shot of a sleek smartphone resting on a minimalist slate desk, displaying a clean dark-mode application security settings interface with a highlighted toggle switch, no text.",
+   "badge": "PRIVACY SHIELD",
    "photo": 14,
    "source_post": 14,
-   "source_url": "https://www.dw.com/en/eu-commission-confirms-it-was-targeted-in-cyberattack-using-ai-tools/a-79993016?maca=en-rss-en-top-1022-rdf"
+   "source_url": "https://www.theverge.com/ai-artificial-intelligence/1038390/signal-blocking-ai-agent-screenshots-mobile-app"
   },
   {
    "region": "Markets",
-   "headline": "UNITED STATES APPROVED EXPORT OF NEARLY NINE HUNDRED THOUSAND **AI CHIPS** TO CHINA.",
-   "caption": "Congressional records revealed that the Commerce Department cleared shipments of over 879,000 artificial intelligence chips to Chinese companies over six months. The approved sales included transactions with entities designated by the Pentagon as Chinese Military Companies, including Alibaba and Tencent.",
-   "scene_prompt": "Macro close-up shot of an advanced green semiconductor circuit board with silicon microchips and copper pathways under precise studio lighting.",
-   "badge": "879K CHIPS EXPORTED",
-   "photo": 28,
-   "source_post": 28,
-   "source_url": "https://www.aljazeera.com/economy/2026/11/19/us-signed-off-on-sales-of-nearly-900000-ai-chips-to-china-in-six-months?traffic_source=rss"
+   "headline": "BITCOIN TUMBLES BELOW FIFTY-NINE THOUSAND DOLLARS AS **INVESTORS FLEE TO CASH**",
+   "caption": "The premier cryptocurrency dropped sharply under 59,000 dollars as broad technology equities dragged digital tokens into steep losses. Market volatility gauges spiked across major financial asset classes as traders braced for fresh bear lows.",
+   "scene_prompt": "Photorealistic 4:5 vertical editorial view of a professional multi-monitor trading desk in a darkened Wall Street office, displaying sharply cascading red candlestick price charts and surging market volatility indexes, no text.",
+   "badge": "SUB-$59K DROP",
+   "photo": 29,
+   "source_post": 29,
+   "source_url": "https://www.coindesk.com/markets/2026/11/20/bitcoin-plunges-below-usd59-000-as-rush-to-cash-puts-new-bear-market-lows-back-in-play"
   }
  ],
- "date": "2026-11-20",
- "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nThe International Court of Justice issued a landmark ruling finding Myanmar guilty of genocide against the Rohingya Muslim minority. The historic verdict addresses systematic state-backed violence and military operations directed against the population.\n\nUS President Donald Trump, Russian President Vladimir Putin, and Chinese President Xi Jinping signed a four-point peace declaration in Shenzhen.\n\nArtificial intelligence firm Anthropic raised $81 billion in its Nasdaq debut, pushing its market valuation toward $1.76 trillion.\n\nRussian officials confirmed that Ukraine targeted the Crimean Bridge in a major strike, marking the third assault on the structure this week. Video footage showed a collapsed roadway span over the water as Moscow warned of painful retaliation.\n\nA barrage of Russian daytime strikes on Kyiv killed one person and inflicted damage across the Ukrainian capital. Blast impacts shattered windows and damaged structural elements of buildings housing the Austrian and Dutch diplomatic missions.\n\nFederal prosecutors indicted 25-year-old Igor D'iu for conducting surveillance on employees of a tech company providing aid to Ukraine.\n\nSouth Korean education authorities introduced sweeping restrictions for the high-stakes Suneung college entrance examination. The sudden security overhaul follows the discovery of artificial intelligence cheating during the testing process.\n\nDonald Trump granted a posthumous pardon to Major League Baseball's all-time hit leader Pete Rose. The controversial baseball icon served prison time for 1990 tax offenses and received a lifetime ban from the sport for gambling.\n\nThe European Commission confirmed that its infrastructure faced a sophisticated cybercampaign utilizing artificial intelligence tools.\n\nCongressional records revealed that the Commerce Department cleared shipments of over 879,000 artificial intelligence chips to Chinese companies over six months.\n\nWhich of today's historic developments will have the longest-lasting impact on our world?\n\nFollow @midworlddaily — join our live 24/7 Telegram channels via the link in bio."
+ "date": "2026-11-21",
+ "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nRussian ballistic missiles struck transport hubs, warehouses, and energy facilities across Ukraine, killing at least eight people.\n\nAnthropic researcher Levent Alpöge produced a machine-verified proof for one of the Millennium Prize problems concerning prime numbers. The breakthrough proof was developed over six weeks of work utilizing the Claude chatbot system.\n\nThe United States military unveiled an eighth batch of declassified records featuring unidentified objects filmed across the Middle East.\n\nDonald Trump announced plans to prevent American technology companies from constructing critical computing infrastructure on foreign soil. The administration warned that firms moving server facilities overseas will face heavy punitive tariffs.\n\nNikhil Gupta received a 235-month federal prison sentence after pleading guilty to murder-for-hire charges in New York. Prosecutors revealed the thwarted scheme specifically targeted dual US-Canadian activist Gurpatwant Singh Pannun.\n\nNew York City plans to shutter the infamous jail complex by late 2032 and transfer detainees to smaller borough facilities. A new 146 million dollar investment aims to reduce pretrial detention and eliminate persistent court case delays.\n\nThe administration removed the top federal cyber official after crippling digital network failures disrupted services across the United States.\n\nBritish Prime Minister Andy Burnham and European leaders finalized terms covering food export checks, emissions quotas, and youth mobility.\n\nThe encrypted messaging app has introduced safeguards preventing digital helpers like Siri and Gemini from reading on-screen messages.\n\nThe premier cryptocurrency dropped sharply under 59,000 dollars as broad technology equities dragged digital tokens into steep losses. Market volatility gauges spiked across major financial asset classes as traders braced for fresh bear lows.\n\nWhich of today's global developments surprised or concerned you the most?\n\nFollow @midworlddaily — join our live 24/7 Telegram channels via the link in bio."
 }
