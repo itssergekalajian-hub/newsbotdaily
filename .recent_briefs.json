@@ -1,40 +1,5 @@
 [
  {
-  "date": "2026-11-16",
-  "stories": [
-   {
-    "topic": "Middle East",
-    "headline": "Houthi Forces Advance Towards Key Shipping Strait",
-    "tease": "Yemeni rebel advances threaten crucial Red Sea global shipping chokepoints"
-   },
-   {
-    "topic": "Technology",
-    "headline": "Trump Dismisses National Security Risks Around Nvidia",
-    "tease": "Donald Trump dismisses security fears as Jensen Huang plots Nvidia comeback"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Semiconductor Selloff Deepens as Global Pressures Mount",
-    "tease": "Tech stocks slide as chipmakers tumble and economic warning signs emerge"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Ukraine Targets Crimean Bridge in Record Drone Strike",
-    "tease": "Massive drone strikes hit Crimean bridge as frontline infrastructure reels"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Bank Disruptions and Commercial Rocket Disasters",
-    "tease": "Banking outages hit the United States while rockets and data breach"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "APEC Summit and Shenzhen Trilateral Headline High-Stakes W",
-    "tease": "High stakes diplomacy and market catalysts await in the days ahead"
-   }
-  ]
- },
- {
   "date": "2026-11-17",
   "stories": [
    {
@@ -176,6 +141,51 @@
     "topic": "What to Watch",
     "headline": "High Stakes Diplomatic Repercussions and Arctic Security I",
     "tease": "Key international reactions to watch closely in the coming days"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-20",
+  "stories": [
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Massive Missile Strikes Pound Kyiv Infrastructure",
+    "tease": "Russian missiles pound Ukrainian cities following strikes on Crimean Bridge"
+   },
+   {
+    "topic": "Europe",
+    "headline": "UK and European Union Seal Reset Deal",
+    "tease": "Britain and Brussels agree landmark pact to restore bilateral ties"
+   },
+   {
+    "topic": "United States",
+    "headline": "Trump Issues Tariff Threat on Tech Infrastructure",
+    "tease": "Donald Trump threatens massive taxes on offshore artificial intelligence facilities"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Tech Rout Deepens as Volatility Surges",
+    "tease": "Tech stocks slide and Bitcoin tumbles as market volatility surges"
+   },
+   {
+    "topic": "Energy",
+    "headline": "Senate Passes Sweeping Infrastructure Permitting Reform",
+    "tease": "Senate approves major permitting overhaul to accelerate critical energy projects"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Espionage Sentencings and App Security Updates",
+    "tease": "Federal courts issue major rulings while messaging platforms tighten privacy"
+   },
+   {
+    "topic": "Mathematics",
+    "headline": "Researcher Claims Proof for Riemann Hypothesis",
+    "tease": "Anthropic mathematician claims solution to century old prime number riddle"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Diplomatic Follow-Up and High-Stakes Tech Hearings",
+    "tease": "Permitting showdowns and European diplomatic summits headline next week"
    }
   ]
  }
