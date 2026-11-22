@@ -56,17 +56,38 @@ CYAN = "#00E5FF"
 SIGNAL_GOLD = "#FFC400"
 YELLOW = SIGNAL_GOLD
 IG_EMOTION_FEEDS = (
-    "https://www.reddit.com/r/worldnews/top/.rss?t=day",
-    "https://www.reddit.com/r/UpliftingNews/top/.rss?t=day",
-    "https://www.reddit.com/r/technology/top/.rss?t=day",
-    "https://www.reddit.com/r/science/top/.rss?t=day",
     "https://nypost.com/news/feed/",
     "https://www.dailymail.co.uk/news/index.rss",
     "https://www.dailymail.co.uk/sciencetech/index.rss",
     "https://www.theguardian.com/world/rss",
     "https://www.space.com/feeds/all",
+    "https://phys.org/rss-feed/breaking/",
+    "https://www.goodnewsnetwork.org/feed/",
+    "https://www.cbsnews.com/latest/rss/world",
+    "https://www.independent.co.uk/news/world/rss",
 )
-IG_FEED_HEADERS = {"User-Agent": "MidWorldDailyBot/1.0"}
+_CHROME_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/131.0.0.0 Safari/537.36"
+)
+IG_FEED_HEADERS = {
+    "User-Agent": _CHROME_USER_AGENT,
+    "Accept": "application/rss+xml, application/atom+xml, application/xml, "
+              "text/xml, text/html;q=0.9, */*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+}
+IG_ARTICLE_HEADERS = {
+    "User-Agent": _CHROME_USER_AGENT,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,"
+              "image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+}
+IG_IMAGE_HEADERS = {
+    "User-Agent": _CHROME_USER_AGENT,
+    "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+}
 TEXT_MODELS = (
     "gemini-3.8-flash",
     "gemini-3.5-flash-lite",
@@ -1026,7 +1047,13 @@ def _feed_text(element: ET.Element, wanted: set[str]) -> str:
         name = child.tag.rsplit("}", 1)[-1].lower()
         if name in wanted:
             if name == "link":
-                value = child.attrib.get("href") or child.text or ""
+                link_attrs = {
+                    key.rsplit("}", 1)[-1].lower(): value
+                    for key, value in child.attrib.items()
+                }
+                value = (link_attrs.get("href")
+                         or link_attrs.get("resource")
+                         or child.text or "")
                 return html.unescape(value).strip()
             value = "".join(child.itertext())
             text = BeautifulSoup(html.unescape(value), "html.parser").get_text(
@@ -1121,7 +1148,7 @@ def _download_story_photo(slide: dict, posts: list[dict], work: str,
     for candidate, url in enumerate(urls):
         raw = os.path.join(work, f"photo{index}-{candidate}.img")
         try:
-            if dn._download(url, raw, dn.UA, min_size=(600, 340)):
+            if dn._download(url, raw, IG_IMAGE_HEADERS, min_size=(500, 300)):
                 with Image.open(raw) as image:
                     width, height = image.size
                 fallback = (raw, photo_pick or source_pick,
@@ -1157,7 +1184,8 @@ def _download_story_photo(slide: dict, posts: list[dict], work: str,
         if not article_url.startswith(("http://", "https://")):
             continue
         try:
-            response = requests.get(article_url, headers=dn.UA, timeout=8)
+            response = requests.get(
+                article_url, headers=IG_ARTICLE_HEADERS, timeout=8)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, "html.parser")
             image_urls = []
@@ -1171,7 +1199,7 @@ def _download_story_photo(slide: dict, posts: list[dict], work: str,
             for image_index, image_url in enumerate(
                     list(dict.fromkeys(image_urls))[:2]):
                 image_response = requests.get(
-                    image_url, headers=dn.UA, timeout=8)
+                    image_url, headers=IG_IMAGE_HEADERS, timeout=8)
                 image_response.raise_for_status()
                 if (not image_response.headers.get("content-type", "")
                         .startswith("image/")
@@ -1180,7 +1208,7 @@ def _download_story_photo(slide: dict, posts: list[dict], work: str,
                 with Image.open(io.BytesIO(image_response.content)) as image:
                     image.load()
                     width, height = image.size
-                if width < 600 or height < 340:
+                if width < 500 or height < 300:
                     continue
                 raw = os.path.join(
                     work, f"article{index}-{article_index}-{image_index}.img")
@@ -1389,6 +1417,59 @@ def _meta_response_json(response: requests.Response, operation: str) -> dict:
     return payload
 
 
+def _instagram_error_summary(exc: Exception, token: str) -> str:
+    response = getattr(exc, "response", None)
+    payload = {}
+    if response is not None:
+        try:
+            payload = response.json()
+        except ValueError:
+            pass
+    if not payload:
+        message = str(exc)
+        json_start = message.find("{")
+        if json_start >= 0:
+            try:
+                payload = json.loads(message[json_start:])
+            except ValueError:
+                pass
+
+    error = payload.get("error") if isinstance(payload, dict) else None
+    if isinstance(error, dict):
+        parts = [str(error[key]) for key in ("type", "code", "error_subcode")
+                 if error.get(key) is not None]
+        if error.get("message"):
+            parts.append(str(error["message"]))
+        return " ".join(parts)[:300] or "Meta Graph API error"
+    if response is not None:
+        return f"Meta Graph API HTTP {response.status_code}"[:300]
+    return str(exc).replace(token, "[redacted]")[:300] or "Meta Graph API error"
+
+
+def _alert_instagram_publish_failure(exc: Exception, token: str) -> None:
+    bot_token = os.getenv("BOT_TOKEN", "").strip()
+    target = os.getenv("TARGET_CHAT_ID", "").strip()
+    if not bot_token or not target:
+        print("  could not alert Telegram: BOT_TOKEN or TARGET_CHAT_ID is unset",
+              file=sys.stderr)
+        return
+    text = ("⚠️ @midworlddaily Instagram publish failed: "
+            f"{_instagram_error_summary(exc, token)}")
+    try:
+        response = requests.post(
+            f"https://api.telegram.org/bot{bot_token}/sendMessage",
+            data={"chat_id": target, "text": text},
+            timeout=10,
+        )
+        response.raise_for_status()
+    except requests.exceptions.RequestException as alert_error:
+        status = getattr(getattr(alert_error, "response", None),
+                         "status_code", None)
+        detail = f"HTTP {status}" if status else type(alert_error).__name__
+        print(f"  Telegram publish-failure alert failed ({detail})",
+              file=sys.stderr)
+
+
 def _wait_for_container(container_id: str, token: str, graph: str,
                         attempts: int = 12, sleep_seconds: int = 3) -> None:
     url = f"{graph}/{container_id}"
@@ -1480,49 +1561,62 @@ def publish() -> None:
                    for filename in files)):
         raise RuntimeError(
             f"carousel must contain exactly {MAX_SLIDES} numbered JPEG images")
-    children = []
-    for f in files:
+    published_id = None
+    try:
+        children = []
+        for f in files:
+            response = requests.post(f"{graph}/{uid}/media",
+                                     data={"image_url": f"{raw}/{f}",
+                                           "is_carousel_item": "true",
+                                           "access_token": tok}, timeout=60)
+            payload = _meta_response_json(response, f"create child {f}")
+            if isinstance(payload.get("error"), dict):
+                raise RuntimeError(json.dumps(payload, ensure_ascii=False))
+            response.raise_for_status()
+            children.append(payload["id"])
+            print(f"  container for {f}: {children[-1]}")
+
+        for child in children:
+            _wait_for_container(child, tok, graph)
+
         response = requests.post(f"{graph}/{uid}/media",
-                                 data={"image_url": f"{raw}/{f}",
-                                       "is_carousel_item": "true",
+                                 data={"media_type": "CAROUSEL",
+                                       "children": ",".join(children),
+                                       "caption": caption,
+                                       "is_ai_generated": "true",
                                        "access_token": tok}, timeout=60)
-        payload = _meta_response_json(response, f"create child {f}")
+        payload = _meta_response_json(response, "create carousel")
+        if isinstance(payload.get("error"), dict):
+            raise RuntimeError(json.dumps(payload, ensure_ascii=False))
         response.raise_for_status()
-        children.append(payload["id"])
-        print(f"  container for {f}: {children[-1]}")
+        carousel = payload["id"]
+        _wait_for_container(carousel, tok, graph)
 
-    for child in children:
-        _wait_for_container(child, tok, graph)
-
-    response = requests.post(f"{graph}/{uid}/media",
-                             data={"media_type": "CAROUSEL",
-                                   "children": ",".join(children),
-                                   "caption": caption,
-                                   "is_ai_generated": "true",
-                                   "access_token": tok}, timeout=60)
-    payload = _meta_response_json(response, "create carousel")
-    response.raise_for_status()
-    carousel = payload["id"]
-    _wait_for_container(carousel, tok, graph)
-
-    for attempt in range(10):
-        response = requests.post(f"{graph}/{uid}/media_publish",
-                                 data={"creation_id": carousel,
-                                       "access_token": tok}, timeout=60)
-        payload = _meta_response_json(response, "publish carousel")
-        if payload.get("config_issue"):
-            print(f"::warning::Instagram media_publish config_issue: "
-                  f"{json.dumps(payload['config_issue'], ensure_ascii=False)}",
-                  flush=True)
-        if response.ok:
-            print(f"published to Instagram: media {payload.get('id')}")
-            with open(IG_MARKER, "w") as f:
-                f.write(day)
-            return
-        time.sleep(15)
-    raise RuntimeError(
-        f"carousel publish failed after 10 attempts: "
-        f"{json.dumps(payload, ensure_ascii=False)}")
+        for attempt in range(10):
+            response = requests.post(f"{graph}/{uid}/media_publish",
+                                     data={"creation_id": carousel,
+                                           "access_token": tok}, timeout=60)
+            payload = _meta_response_json(response, "publish carousel")
+            if payload.get("config_issue"):
+                print(f"::warning::Instagram media_publish config_issue: "
+                      f"{json.dumps(payload['config_issue'], ensure_ascii=False)}",
+                      flush=True)
+            if response.ok and not isinstance(payload.get("error"), dict):
+                print(f"published to Instagram: media {payload.get('id')}")
+                published_id = payload.get("id")
+                break
+            if isinstance(payload.get("error"), dict):
+                raise RuntimeError(json.dumps(payload, ensure_ascii=False))
+            time.sleep(15)
+        if published_id is None:
+            raise RuntimeError(
+                f"carousel publish failed after 10 attempts: "
+                f"{json.dumps(payload, ensure_ascii=False)}")
+    except Exception as exc:
+        _alert_instagram_publish_failure(exc, tok)
+        raise
+    with open(IG_MARKER, "w") as f:
+        f.write(day)
 
 
 if __name__ == "__main__":

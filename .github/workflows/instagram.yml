@@ -26,19 +26,36 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - name: Skip off-season schedule run
+        id: schedule_gate
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TZ: Asia/Beirut
+        run: |
+          if [ "$EVENT_NAME" != "schedule" ] || [ "$(date +%H)" = "00" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Off-season cron; Beirut local hour is not 00."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v6
+        if: steps.schedule_gate.outputs.run == 'true'
         with:
           python-version: "3.12"
 
       - name: Install ffmpeg
+        if: steps.schedule_gate.outputs.run == 'true'
         run: command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
 
       - name: Install dependencies
+        if: steps.schedule_gate.outputs.run == 'true'
         run: pip install -q -r requirements.txt
 
       - name: Render slides
+        if: steps.schedule_gate.outputs.run == 'true'
         env:
           SOURCE_CHANNEL: midworldnews
           TARGET_CHAT_ID: ${{ secrets.TARGET_CHAT_ID }}
@@ -53,6 +70,7 @@ jobs:
       # Commit all slide assets, including 01.mp4, before Instagram fetches
       # them from their public raw URLs.
       - name: Commit slides
+        if: steps.schedule_gate.outputs.run == 'true'
         run: |
           if [ -n "$(git status --porcelain slides)" ]; then
             git config user.name "github-actions[bot]"
@@ -64,6 +82,7 @@ jobs:
           fi
 
       - name: Publish to Instagram
+        if: steps.schedule_gate.outputs.run == 'true'
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
@@ -76,6 +95,7 @@ jobs:
         run: python insta_slides.py publish
 
       - name: Record post marker
+        if: steps.schedule_gate.outputs.run == 'true'
         run: |
           if [ -n "$(git status --porcelain .last_ig)" ]; then
             git config user.name "github-actions[bot]"

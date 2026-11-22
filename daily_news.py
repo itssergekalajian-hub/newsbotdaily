@@ -331,19 +331,40 @@ def _fetch_wire_feed(day: dt.date, name: str, url: str) -> list[str]:
                          timeout=30)
         r.raise_for_status()
         root = ElementTree.fromstring(r.content)
-        items = list(root.iter("item")) + list(root.findall(".//{*}entry"))
+        items = [
+            element for element in root.iter()
+            if element.tag.rsplit("}", 1)[-1].lower() in ("item", "entry")
+        ]
         for item in items:
-            title = (item.findtext("title") or item.findtext("{*}title") or "").strip()
+            title_node = next(
+                (child for child in item
+                 if child.tag.rsplit("}", 1)[-1].lower() == "title"),
+                None,
+            )
+            title = ("".join(title_node.itertext()).strip()
+                     if title_node is not None else "")
             if not title:
                 continue
-            pub = (item.findtext("pubDate") or item.findtext("{*}published")
-                   or item.findtext("{*}updated"))
-            link_node = item.find("link")
-            if link_node is None:
-                link_node = item.find("{*}link")
+            fields = {
+                child.tag.rsplit("}", 1)[-1].lower(): child
+                for child in item
+            }
+            pub_node = next(
+                (fields[key] for key in ("pubdate", "published", "updated")
+                 if key in fields),
+                None,
+            )
+            pub = "".join(pub_node.itertext()).strip() if pub_node is not None else ""
+            link_node = fields.get("link")
             article_url = ""
             if link_node is not None:
-                article_url = (link_node.get("href") or link_node.text or "").strip()
+                link_attrs = {
+                    key.rsplit("}", 1)[-1].lower(): value
+                    for key, value in link_node.attrib.items()
+                }
+                article_url = (link_attrs.get("href")
+                               or link_attrs.get("resource")
+                               or link_node.text or "").strip()
             if pub:
                 try:
                     try:
@@ -356,9 +377,13 @@ def _fetch_wire_feed(day: dt.date, name: str, url: str) -> list[str]:
                         continue
                 except (TypeError, ValueError, OverflowError):
                     pass
-            description = (item.findtext("description")
-                           or item.findtext("{*}summary")
-                           or item.findtext("{*}content") or "")
+            description_node = next(
+                (fields[key] for key in ("description", "summary", "content")
+                 if key in fields),
+                None,
+            )
+            description = ("".join(description_node.itertext())
+                           if description_node is not None else "")
             desc = re.sub(r"<[^>]+>", " ", description)
             desc = re.sub(r"\s+", " ", desc).strip()
             line = f"- [{name}] {title}"
