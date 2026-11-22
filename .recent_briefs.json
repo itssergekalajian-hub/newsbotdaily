@@ -1,55 +1,5 @@
 [
  {
-  "date": "2026-11-17",
-  "stories": [
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Crimean Bridge Partially Collapses After Ukrainian Assault",
-    "tease": "Strategic Crimean Bridge collapses in major Ukrainian strike"
-   },
-   {
-    "topic": "Technology",
-    "headline": "Jensen Huang Addresses Nvidia Ouster Amid Turmoil",
-    "tease": "Jensen Huang speaks out on potential Nvidia return"
-   },
-   {
-    "topic": "United States",
-    "headline": "Classified NSA Computer Network Suffers Massive Outage",
-    "tease": "Nationwide technical failure knocks out classified NSA networks"
-   },
-   {
-    "topic": "Health",
-    "headline": "United States Loses Measles Elimination Status",
-    "tease": "United States loses measles elimination status after resurgence"
-   },
-   {
-    "topic": "Europe",
-    "headline": "Five EU Nations Plan Rwanda Migrant Hub",
-    "tease": "Five European nations plan migrant deportation hub in Rwanda"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Regulators Sound Alarm Over Autonomous Financial Agents",
-    "tease": "Regulators warn autonomous software could trigger lightning bank runs"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Developments and Domestic Court Rulings",
-    "tease": "World leaders travel while domestic legal fights escalate"
-   },
-   {
-    "topic": "Technology",
-    "headline": "Research Exposes Deadly AI System Vulnerabilities",
-    "tease": "AI models tricked into designating schools as military targets"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "High Stakes Shenzen Trilateral and Crucial Tech Hearings",
-    "tease": "Key summits and earnings calls dominate the days ahead"
-   }
-  ]
- },
- {
   "date": "2026-11-18",
   "stories": [
    {
@@ -186,6 +136,51 @@
     "topic": "What to Watch",
     "headline": "Diplomatic Follow-Up and High-Stakes Tech Hearings",
     "tease": "Permitting showdowns and European diplomatic summits headline next week"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-21",
+  "stories": [
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Russian Ballistic Missile Strikes Zelensky Hometown",
+    "tease": "Russian ballistic strikes ravage Kryvyi Rih as Baltic tensions flare"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Iraqi Forces Move on Militia Stronghold",
+    "tease": "Iraqi security forces deploy into militia territory to curb smuggling"
+   },
+   {
+    "topic": "Security",
+    "headline": "Cartel Boss Captured After Fierce Firefight",
+    "tease": "Mexican forces capture FBI top ten fugitive after bloody battle"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Tech Rout Deepens Around Chip Turmoil",
+    "tease": "Tech stocks slide further as Nvidia suffers historic losing streak"
+   },
+   {
+    "topic": "Europe",
+    "headline": "France Faces Sixth Week of Rallies",
+    "tease": "Street protests test France as Brussels proposes Big Tech tax"
+   },
+   {
+    "topic": "United States",
+    "headline": "Secret Memo Restricts Canada Defense Ties",
+    "tease": "Pentagon memo curbs Canada defense cooperation amid cyber breach fallout"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Diplomatic Talks Protests and Scientific Milestones",
+    "tease": "United Nations weapons talks collapse as climate negotiations stall"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Israeli Talks and Tech Hearings Approach",
+    "tease": "Marathon coalition talks and high-stakes tech showdowns ahead"
    }
   ]
  }
