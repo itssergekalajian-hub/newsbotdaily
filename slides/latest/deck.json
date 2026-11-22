@@ -1,108 +1,108 @@
 {
- "cover_scene_prompt": "A dramatic, vivid, photorealistic global editorial collage with Earth's curved horizon at twilight, seamlessly blending scenes of smoke over an Eastern European river crossing, a glowing chalkboard covered in complex mathematical formulas, and a military cockpit monitor scanning an airborne anomaly over a desert landscape. Vertical 4:5 editorial composition with rich atmospheric lighting and cinematic contrast, no text.",
- "comment_question": "Which of today's global developments surprised or concerned you the most?",
+ "cover_scene_prompt": "A clean, vivid, high-impact photorealistic global collage with a dramatic Earth horizon and clear visual subjects and signature props from today's three most striking stories. Vertical 4:5 editorial composition with naturally rich light and color; no text.",
+ "comment_question": "Which of these breaking global developments surprised you the most today?",
  "slides": [
   {
    "region": "World",
-   "headline": "RUSSIA TARGETS KYIV CROSSINGS AND RAIL STATIONS IN **DEVASTATING NATIONWIDE MISSILE BARRAGE**",
-   "caption": "Russian ballistic missiles struck transport hubs, warehouses, and energy facilities across Ukraine, killing at least eight people. President Volodymyr Zelensky called the coordinated overnight attack one of the most massive bombardments of the war.",
-   "scene_prompt": "Photorealistic 4:5 editorial image showing the aftermath of a missile strike near an urban railway viaduct in Kyiv, with emergency workers in reflective jackets navigating charred debris and smoke under a somber overcast morning sky, no text.",
-   "badge": "8 DEAD",
-   "photo": 16,
-   "source_post": 16,
-   "source_url": "https://www.bbc.co.uk/news/articles/c6x29gn4pdn9o?at_medium=RSS&amp;at_campaign=rss"
-  },
-  {
-   "region": "Technology",
-   "headline": "MATHEMATICIAN CLAIMS TO SOLVE THE **RIEMANN HYPOTHESIS** USING ANTHROPIC ARTIFICIAL INTELLIGENCE",
-   "caption": "Anthropic researcher Levent Alpöge produced a machine-verified proof for one of the Millennium Prize problems concerning prime numbers. The breakthrough proof was developed over six weeks of work utilizing the Claude chatbot system.",
-   "scene_prompt": "Photorealistic 4:5 vertical editorial shot of a massive slate chalkboard densely covered with intricate mathematical proofs and prime number formulas, illuminated by warm focused study lamps in an academic research office, no text.",
-   "badge": "HISTORIC CLAIM",
-   "photo": 26,
-   "source_post": 26,
-   "source_url": "https://techcrunch.com/2026/11/20/ai-claimed-a-solution-to-the-167-year-old-riemann-hypothesis-and-a-human-did-too/"
+   "headline": "MEXICAN SPECIAL FORCES **CAPTURE NOTORIOUS CARTEL BOSS** EL CHAPO ISIDRO IN DEADLY SINALOA RAID",
+   "caption": "Fausto Isidro Meza Flores, one of the FBI's most wanted fugitives, was captured following a fierce firefight that left 11 people dead. The high-profile arrest triggered widespread panic and retaliatory security incidents across the Sinaloa region.",
+   "scene_prompt": "A dramatic photorealistic 4:5 editorial photo of armed Mexican special forces conducting a raid on a compound in Sinaloa under night lighting.",
+   "badge": "CARTEL BOSS ARRESTED",
+   "photo": 29,
+   "source_post": 29,
+   "source_url": "https://www.independent.co.uk/news/world/americas/el-chapo-isidro-captured-fbi-sinaloa-trump-b3089155.html"
   },
   {
    "region": "World",
-   "headline": "PENTAGON RELEASES NEW DECLASSIFIED MILITARY FOOTAGE SHOWING **UNIDENTIFIED ANOMALOUS PHENOMENA** OVERSEAS",
-   "caption": "The United States military unveiled an eighth batch of declassified records featuring unidentified objects filmed across the Middle East. The disclosure follows a presidential executive order mandating government transparency on aerial anomalies.",
-   "scene_prompt": "Photorealistic 4:5 editorial display of a modern defense cockpit infrared sensor screen showing an indistinct metallic object maneuvering silently over an arid desert expanse, captured in authentic military monochrome telemetry, no text.",
-   "badge": "DECLASSIFIED",
-   "photo": 36,
-   "source_post": 36,
-   "source_url": "https://www.bbc.co.uk/news/videos/cqdr1x8mypnko?at_medium=RSS&amp;at_campaign=rss"
-  },
-  {
-   "region": "Policy",
-   "headline": "TRUMP THREATENS MASSIVE TAX PENALTIES ON US TECH FIRMS **BUILDING DATA CENTERS ABROAD**",
-   "caption": "Donald Trump announced plans to prevent American technology companies from constructing critical computing infrastructure on foreign soil. The administration warned that firms moving server facilities overseas will face heavy punitive tariffs.",
-   "scene_prompt": "Photorealistic 4:5 editorial portrait of Donald Trump speaking vigorously from behind a formal podium in the White House briefing room, gesturing emphatically with both hands under bright press studio lighting, no text.",
-   "badge": "NEW TARIFFS",
-   "photo": 25,
-   "source_post": 25,
-   "source_url": "https://www.bbc.co.uk/news/articles/cmde1lw9y54ko?at_medium=RSS&amp;at_campaign=rss"
-  },
-  {
-   "region": "Justice",
-   "headline": "INDIAN NATIONAL GETS NINETEEN YEARS FOR PLOTTING **ASSASSINATION OF SIKH SEPARATIST** LEADER",
-   "caption": "Nikhil Gupta received a 235-month federal prison sentence after pleading guilty to murder-for-hire charges in New York. Prosecutors revealed the thwarted scheme specifically targeted dual US-Canadian activist Gurpatwant Singh Pannun.",
-   "scene_prompt": "Photorealistic 4:5 editorial illustration depicting an expressive courtroom sketch of a solemn middle-aged defendant in custody, rendered in expressive pastels and colored pencils inside an imposing federal courtroom, no text.",
-   "badge": "19-YEAR SENTENCE",
-   "photo": 27,
-   "source_post": 27,
-   "source_url": "https://www.independent.co.uk/news/world/americas/crime/sikh-nikhil-gupta-hitman-b3088957.html"
-  },
-  {
-   "region": "Policy",
-   "headline": "MAYOR ZOHRAN MAMDANI UNVEILS PLAN TO PERMANENTLY CLOSE **NEW YORK'S RIKERS ISLAND**",
-   "caption": "New York City plans to shutter the infamous jail complex by late 2032 and transfer detainees to smaller borough facilities. A new 146 million dollar investment aims to reduce pretrial detention and eliminate persistent court case delays.",
-   "scene_prompt": "Photorealistic 4:5 editorial view of Mayor Zohran Mamdani seated among men in correctional uniforms during a discussion inside a communal institutional facility room, framed with documentary clarity, no text.",
-   "badge": "CLOSING 2032",
-   "photo": 17,
-   "source_post": 17,
-   "source_url": "https://www.independent.co.uk/news/world/americas/mamdani-rikers-island-jail-closing-b3088549.html"
-  },
-  {
-   "region": "Security",
-   "headline": "WHITE HOUSE FIRES NATIONAL CYBER DIRECTOR FOLLOWING **WIDESPREAD TECHNOLOGICAL OUTAGES** ACROSS NATION",
-   "caption": "The administration removed the top federal cyber official after crippling digital network failures disrupted services across the United States. Federal authorities moved swiftly to replace leadership amid intense scrutiny over domestic infrastructure vulnerabilities.",
-   "scene_prompt": "Photorealistic 4:5 editorial wide shot of high-level officials seated along a cream linen banquet table in the White House State Dining Room, framed against gold drapery and American flags during a tense national security briefing, no text.",
-   "badge": "CYBER OUSTER",
-   "photo": 1,
-   "source_post": 1,
-   "source_url": "https://www.france24.com/en/americas/20261120-white-house-fires-national-cyber-director-over-widespread-outages"
-  },
-  {
-   "region": "Diplomacy",
-   "headline": "UNITED KINGDOM AND EUROPEAN UNION REACH **LANDMARK RESET ACCORD** TO REBUILD RELATIONS",
-   "caption": "British Prime Minister Andy Burnham and European leaders finalized terms covering food export checks, emissions quotas, and youth mobility. British officials estimate the cross-border pact could deliver a seventeen billion pound annual economic lift.",
-   "scene_prompt": "Photorealistic 4:5 editorial photograph of British Prime Minister Andy Burnham joining hands in unity with European Commission President Ursula von der Leyen in front of European Union summit banners in Brussels, no text.",
-   "badge": "POST-BREXIT DEAL",
-   "photo": 23,
-   "source_post": 23,
-   "source_url": "https://www.theguardian.com/world/live/2026/nov/20/uk-eu-european-union-brexit-deal-andy-burnham-latest-news-updates"
+   "headline": "RUSSIAN BALLISTIC MISSILE **STRIKES RESIDENTIAL BUILDING** IN UKRAINIAN CITY OF KRYVYI RIH",
+   "caption": "A devastating missile attack struck a high-rise residential building in President Volodymyr Zelensky's hometown. Emergency services and rescue teams immediately rushed to the impact site to respond to casualties.",
+   "scene_prompt": "A vivid photorealistic 4:5 editorial shot of rescue workers and fire engines operating near a heavily damaged red residential building at night.",
+   "badge": "MISSILE STRIKE",
+   "photo": 13,
+   "source_post": 13,
+   "source_url": "https://www.trend.az/azerbaijan/4249135.html"
   },
   {
    "region": "Technology",
-   "headline": "SIGNAL ROLLS OUT UPDATE BLOCKING **ARTIFICIAL INTELLIGENCE ASSISTANTS** FROM SCANNING CHATS",
-   "caption": "The encrypted messaging app has introduced safeguards preventing digital helpers like Siri and Gemini from reading on-screen messages. Activating the protective privacy control simultaneously shuts down internal screenshot functionality and app-switcher previews.",
-   "scene_prompt": "Photorealistic 4:5 close-up editorial shot of a sleek smartphone resting on a minimalist slate desk, displaying a clean dark-mode application security settings interface with a highlighted toggle switch, no text.",
-   "badge": "PRIVACY SHIELD",
-   "photo": 14,
-   "source_post": 14,
-   "source_url": "https://www.theverge.com/ai-artificial-intelligence/1038390/signal-blocking-ai-agent-screenshots-mobile-app"
+   "headline": "SIGNAL RESTRICTS MOBILE SCREENSHOTS TO **FIGHT EXISTENTIAL THREAT** OF AGENTIC AI SURVEILLANCE",
+   "caption": "The messaging app is limiting in-app screenshot capabilities on mobile devices to protect user privacy. Officials warned that operating systems running automated AI agents pose severe risks by scanning user screens.",
+   "scene_prompt": "A clean photorealistic 4:5 close-up of a modern smartphone displaying a privacy warning interface in a dimly lit room.",
+   "badge": "PRIVACY RESTRICTION",
+   "photo": null,
+   "source_post": 32,
+   "source_url": "https://techcrunch.com/2026/11/21/signal-restricts-mobile-screenshots-as-it-confronts-existential-threat-of-ai-surveillance/"
   },
   {
    "region": "Markets",
-   "headline": "BITCOIN TUMBLES BELOW FIFTY-NINE THOUSAND DOLLARS AS **INVESTORS FLEE TO CASH**",
-   "caption": "The premier cryptocurrency dropped sharply under 59,000 dollars as broad technology equities dragged digital tokens into steep losses. Market volatility gauges spiked across major financial asset classes as traders braced for fresh bear lows.",
-   "scene_prompt": "Photorealistic 4:5 vertical editorial view of a professional multi-monitor trading desk in a darkened Wall Street office, displaying sharply cascading red candlestick price charts and surging market volatility indexes, no text.",
-   "badge": "SUB-$59K DROP",
-   "photo": 29,
-   "source_post": 29,
-   "source_url": "https://www.coindesk.com/markets/2026/11/20/bitcoin-plunges-below-usd59-000-as-rush-to-cash-puts-new-bear-market-lows-back-in-play"
+   "headline": "NVIDIA STOCK PLUMMETS 14 PERCENT **AMID LONGEST LOSING STREAK** SINCE THE 2008 FINANCIAL CRISIS",
+   "caption": "Shares tumbled on Friday to complete a painful seven-week losing stretch for the prominent chipmaker. The prolonged downturn reflects intense investor anxiety surrounding market pressures and executive leadership.",
+   "scene_prompt": "A striking photorealistic 4:5 vertical shot of a glowing financial trading floor screen displaying plunging stock charts in red tones.",
+   "badge": "14 PERCENT DROP",
+   "photo": null,
+   "source_post": 4,
+   "source_url": "https://www.cnbc.com/2026/11/20/nvidias-7-week-losing-streak-is-longest-since-2008-financial-crisis.html"
+  },
+  {
+   "region": "World",
+   "headline": "DRONE ATTACK SETS **RUSSIA-BOUND CARGO SHIP** ABLAZE IN FINNISH WATERS",
+   "caption": "The vessel Sparta II caught fire following a Saturday drone strike while navigating toward Kaliningrad. Finnish defense forces assessed that Ukraine was likely behind the attack as the damaged ship drifted.",
+   "scene_prompt": "A vivid photorealistic 4:5 editorial view of a cargo ship smoking heavily on gray open waters under an overcast sky.",
+   "badge": "VESSEL ATTACKED",
+   "photo": 33,
+   "source_post": 33,
+   "source_url": "https://www.bbc.co.uk/news/articles/cj752ddve27ko?at_medium=RSS&amp;at_campaign=rss"
+  },
+  {
+   "region": "World",
+   "headline": "IMPRISONED FORMER BRAZILIAN PRESIDENT **JAIR BOLSONARO ADMITTED** TO ICU WITH ACUTE BOWEL OBSTRUCTION",
+   "caption": "The former leader was rushed to the DF Star hospital in Brasília following a sudden medical emergency. Hospital officials confirmed his condition while he serves a lengthy prison sentence.",
+   "scene_prompt": "A sharp photorealistic 4:5 editorial image of a modern hospital exterior building with emergency medical signage at dusk.",
+   "badge": "ICU ADMISSION",
+   "photo": 40,
+   "source_post": 40,
+   "source_url": "https://timesofindia.indiatimes.com/world/rest-of-world/brazils-imprisoned-ex-president-jair-bolsonaro-admitted-to-icu-with-acute-bowel-obstruction/articleshow/136062891.cms"
+  },
+  {
+   "region": "Technology",
+   "headline": "ARTIFICIAL INTELLIGENCE DISCOVERS **CRITICAL BITCOIN VULNERABILITY** THAT CAN STALL NODES",
+   "caption": "Researchers revealed that repeating a single transaction ID 50,000 times can crash Bitcoin network nodes. The alarming discovery underscores both the security risks and analytical power of artificial intelligence.",
+   "scene_prompt": "A detailed photorealistic 4:5 macro shot of abstract digital data streams glowing on a dark circuit board background.",
+   "badge": "SECURITY FLAW FOUND",
+   "photo": null,
+   "source_post": 11,
+   "source_url": "https://www.coindesk.com/markets/2026/11/21/bitcoin-nodes-could-be-stalled-by-repeating-one-id-50-000-times-ai-found-the-bug"
+  },
+  {
+   "region": "World",
+   "headline": "VOLODYMYR ZELENSKY LABELS PUTIN A KILLER **IN SHARP REBUKE** TO DONALD TRUMP",
+   "caption": "The Ukrainian president lashed out after Donald Trump publicly referred to the Russian leader as his friend. The fiery remarks highlight deep diplomatic tensions over ongoing peace efforts.",
+   "scene_prompt": "A crisp photorealistic 4:5 portrait of Ukrainian President Volodymyr Zelensky speaking firmly at a formal press conference podium.",
+   "badge": "DIPLOMATIC TENSIONS",
+   "photo": 16,
+   "source_post": 16,
+   "source_url": "https://www.bbc.co.uk/news/articles/cxnv4zvmdy0jo?at_medium=RSS&amp;at_campaign=rss"
+  },
+  {
+   "region": "World",
+   "headline": "US AGRICULTURE DEPARTMENT AND FBI **TARGETED BY CYBERATTACKS** IN UNAUTHORIZED DIGITAL INTRUSIONS",
+   "caption": "Federal authorities acknowledged experiencing sophisticated digital breaches following media disclosures. The incidents highlight growing vulnerabilities across critical government digital infrastructure.",
+   "scene_prompt": "A clean photorealistic 4:5 architectural view of the stone facade of a federal government building under natural daytime lighting.",
+   "badge": "FEDERAL BREACH",
+   "photo": 20,
+   "source_post": 20,
+   "source_url": "https://www.france24.com/en/americas/20261121-us-agriculture-department-fbi-hit-by-cyberattacks-media-report"
+  },
+  {
+   "region": "Markets",
+   "headline": "XRP FALLS TEN PERCENT AS TRADERS **UNWIND LEVERAGED BETS** AND ETF ASSETS SLIP",
+   "caption": "Cryptocurrency markets suffered a sharp sell-off as long positions were rapidly liquidated. Total assets held within exchange-traded funds dropped below the one billion dollar threshold during the decline.",
+   "scene_prompt": "A crisp photorealistic 4:5 graphic visualization of a downward financial trendline chart glowing against a dark trading background.",
+   "badge": "10 PERCENT DROP",
+   "photo": 14,
+   "source_post": 14,
+   "source_url": "https://www.coindesk.com/markets/2026/11/21/xrp-falls-10-as-long-bets-unwind-and-etf-assets-slip-below-usd1-billion"
   }
  ],
- "date": "2026-11-21",
- "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nRussian ballistic missiles struck transport hubs, warehouses, and energy facilities across Ukraine, killing at least eight people.\n\nAnthropic researcher Levent Alpöge produced a machine-verified proof for one of the Millennium Prize problems concerning prime numbers. The breakthrough proof was developed over six weeks of work utilizing the Claude chatbot system.\n\nThe United States military unveiled an eighth batch of declassified records featuring unidentified objects filmed across the Middle East.\n\nDonald Trump announced plans to prevent American technology companies from constructing critical computing infrastructure on foreign soil. The administration warned that firms moving server facilities overseas will face heavy punitive tariffs.\n\nNikhil Gupta received a 235-month federal prison sentence after pleading guilty to murder-for-hire charges in New York. Prosecutors revealed the thwarted scheme specifically targeted dual US-Canadian activist Gurpatwant Singh Pannun.\n\nNew York City plans to shutter the infamous jail complex by late 2032 and transfer detainees to smaller borough facilities. A new 146 million dollar investment aims to reduce pretrial detention and eliminate persistent court case delays.\n\nThe administration removed the top federal cyber official after crippling digital network failures disrupted services across the United States.\n\nBritish Prime Minister Andy Burnham and European leaders finalized terms covering food export checks, emissions quotas, and youth mobility.\n\nThe encrypted messaging app has introduced safeguards preventing digital helpers like Siri and Gemini from reading on-screen messages.\n\nThe premier cryptocurrency dropped sharply under 59,000 dollars as broad technology equities dragged digital tokens into steep losses. Market volatility gauges spiked across major financial asset classes as traders braced for fresh bear lows.\n\nWhich of today's global developments surprised or concerned you the most?\n\nFollow @midworlddaily — join our live 24/7 Telegram channels via the link in bio."
+ "date": "2026-11-22",
+ "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nFausto Isidro Meza Flores, one of the FBI's most wanted fugitives, was captured following a fierce firefight that left 11 people dead.\n\nA devastating missile attack struck a high-rise residential building in President Volodymyr Zelensky's hometown. Emergency services and rescue teams immediately rushed to the impact site to respond to casualties.\n\nThe messaging app is limiting in-app screenshot capabilities on mobile devices to protect user privacy.\n\nShares tumbled on Friday to complete a painful seven-week losing stretch for the prominent chipmaker. The prolonged downturn reflects intense investor anxiety surrounding market pressures and executive leadership.\n\nThe vessel Sparta II caught fire following a Saturday drone strike while navigating toward Kaliningrad. Finnish defense forces assessed that Ukraine was likely behind the attack as the damaged ship drifted.\n\nThe former leader was rushed to the DF Star hospital in Brasília following a sudden medical emergency. Hospital officials confirmed his condition while he serves a lengthy prison sentence.\n\nResearchers revealed that repeating a single transaction ID 50,000 times can crash Bitcoin network nodes. The alarming discovery underscores both the security risks and analytical power of artificial intelligence.\n\nThe Ukrainian president lashed out after Donald Trump publicly referred to the Russian leader as his friend. The fiery remarks highlight deep diplomatic tensions over ongoing peace efforts.\n\nFederal authorities acknowledged experiencing sophisticated digital breaches following media disclosures. The incidents highlight growing vulnerabilities across critical government digital infrastructure.\n\nCryptocurrency markets suffered a sharp sell-off as long positions were rapidly liquidated. Total assets held within exchange-traded funds dropped below the one billion dollar threshold during the decline.\n\nWhich of these breaking global developments surprised you the most today?\n\nFollow @midworlddaily — join our live 24/7 Telegram channels via the link in bio."
 }
