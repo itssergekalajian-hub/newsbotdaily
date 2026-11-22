@@ -1,108 +1,108 @@
 {
- "cover_scene_prompt": "A clean, vivid, high-impact photorealistic global collage with a dramatic Earth horizon and clear visual subjects and signature props from today's three most striking stories. Vertical 4:5 editorial composition with naturally rich light and color; no text.",
- "comment_question": "Which of these breaking global developments surprised you the most today?",
+ "cover_scene_prompt": "A clean, vivid, high-impact photorealistic global collage set against a dramatic curved Earth horizon, seamlessly blending visual elements from the day's top events: a damaged grey naval warship smoking against a Mediterranean harbor, emergency searchlights cutting through urban concrete rubble, and a silver robotic planetary probe gliding past a sunlit cratered world. Vertical 4:5 editorial composition with naturally rich cinematic lighting and atmospheric color, no text.",
+ "comment_question": "Which of today's headlines surprised or alarmed you the most?",
  "slides": [
   {
-   "region": "World",
-   "headline": "MEXICAN SPECIAL FORCES **CAPTURE NOTORIOUS CARTEL BOSS** EL CHAPO ISIDRO IN DEADLY SINALOA RAID",
-   "caption": "Fausto Isidro Meza Flores, one of the FBI's most wanted fugitives, was captured following a fierce firefight that left 11 people dead. The high-profile arrest triggered widespread panic and retaliatory security incidents across the Sinaloa region.",
-   "scene_prompt": "A dramatic photorealistic 4:5 editorial photo of armed Mexican special forces conducting a raid on a compound in Sinaloa under night lighting.",
-   "badge": "CARTEL BOSS ARRESTED",
-   "photo": 29,
-   "source_post": 29,
-   "source_url": "https://www.independent.co.uk/news/world/americas/el-chapo-isidro-captured-fbi-sinaloa-trump-b3089155.html"
-  },
-  {
-   "region": "World",
-   "headline": "RUSSIAN BALLISTIC MISSILE **STRIKES RESIDENTIAL BUILDING** IN UKRAINIAN CITY OF KRYVYI RIH",
-   "caption": "A devastating missile attack struck a high-rise residential building in President Volodymyr Zelensky's hometown. Emergency services and rescue teams immediately rushed to the impact site to respond to casualties.",
-   "scene_prompt": "A vivid photorealistic 4:5 editorial shot of rescue workers and fire engines operating near a heavily damaged red residential building at night.",
-   "badge": "MISSILE STRIKE",
-   "photo": 13,
-   "source_post": 13,
-   "source_url": "https://www.trend.az/azerbaijan/4249135.html"
-  },
-  {
-   "region": "Technology",
-   "headline": "SIGNAL RESTRICTS MOBILE SCREENSHOTS TO **FIGHT EXISTENTIAL THREAT** OF AGENTIC AI SURVEILLANCE",
-   "caption": "The messaging app is limiting in-app screenshot capabilities on mobile devices to protect user privacy. Officials warned that operating systems running automated AI agents pose severe risks by scanning user screens.",
-   "scene_prompt": "A clean photorealistic 4:5 close-up of a modern smartphone displaying a privacy warning interface in a dimly lit room.",
-   "badge": "PRIVACY RESTRICTION",
-   "photo": null,
-   "source_post": 32,
-   "source_url": "https://techcrunch.com/2026/11/21/signal-restricts-mobile-screenshots-as-it-confronts-existential-threat-of-ai-surveillance/"
-  },
-  {
-   "region": "Markets",
-   "headline": "NVIDIA STOCK PLUMMETS 14 PERCENT **AMID LONGEST LOSING STREAK** SINCE THE 2008 FINANCIAL CRISIS",
-   "caption": "Shares tumbled on Friday to complete a painful seven-week losing stretch for the prominent chipmaker. The prolonged downturn reflects intense investor anxiety surrounding market pressures and executive leadership.",
-   "scene_prompt": "A striking photorealistic 4:5 vertical shot of a glowing financial trading floor screen displaying plunging stock charts in red tones.",
-   "badge": "14 PERCENT DROP",
-   "photo": null,
-   "source_post": 4,
-   "source_url": "https://www.cnbc.com/2026/11/20/nvidias-7-week-losing-streak-is-longest-since-2008-financial-crisis.html"
-  },
-  {
-   "region": "World",
-   "headline": "DRONE ATTACK SETS **RUSSIA-BOUND CARGO SHIP** ABLAZE IN FINNISH WATERS",
-   "caption": "The vessel Sparta II caught fire following a Saturday drone strike while navigating toward Kaliningrad. Finnish defense forces assessed that Ukraine was likely behind the attack as the damaged ship drifted.",
-   "scene_prompt": "A vivid photorealistic 4:5 editorial view of a cargo ship smoking heavily on gray open waters under an overcast sky.",
-   "badge": "VESSEL ATTACKED",
+   "region": "Libya",
+   "headline": "RUSSIAN WARSHIP **SINKS IN LIBYA** AFTER A SUSPECTED UKRAINIAN **DRONE STRIKE** AT DOCKS",
+   "caption": "A suspected drone attack struck the Russian navy corvette Merkury while docked for refueling at the Benghazi naval base, causing a massive explosion and sinking the vessel. Satellite imagery verified by international observers confirmed heavy smoke rising from the destroyed ship at the eastern Libyan port.",
+   "scene_prompt": "A dramatic dawn photorealistic shot of a grey naval warship docked beside an industrial concrete pier in Benghazi, thick black smoke and bright orange flames rising from the ruptured hull across calm harbor waters. Vertical 4:5 composition, documentary maritime photography, no text.",
+   "badge": "WARSHIP SUNK",
    "photo": 33,
    "source_post": 33,
-   "source_url": "https://www.bbc.co.uk/news/articles/cj752ddve27ko?at_medium=RSS&amp;at_campaign=rss"
+   "source_url": "https://www.upi.com/Top_News/World-News/2026/11/22/libya-russia-ukraine-naval-attack/3851795380483/"
   },
   {
-   "region": "World",
-   "headline": "IMPRISONED FORMER BRAZILIAN PRESIDENT **JAIR BOLSONARO ADMITTED** TO ICU WITH ACUTE BOWEL OBSTRUCTION",
-   "caption": "The former leader was rushed to the DF Star hospital in Brasília following a sudden medical emergency. Hospital officials confirmed his condition while he serves a lengthy prison sentence.",
-   "scene_prompt": "A sharp photorealistic 4:5 editorial image of a modern hospital exterior building with emergency medical signage at dusk.",
-   "badge": "ICU ADMISSION",
-   "photo": 40,
-   "source_post": 40,
-   "source_url": "https://timesofindia.indiatimes.com/world/rest-of-world/brazils-imprisoned-ex-president-jair-bolsonaro-admitted-to-icu-with-acute-bowel-obstruction/articleshow/136062891.cms"
-  },
-  {
-   "region": "Technology",
-   "headline": "ARTIFICIAL INTELLIGENCE DISCOVERS **CRITICAL BITCOIN VULNERABILITY** THAT CAN STALL NODES",
-   "caption": "Researchers revealed that repeating a single transaction ID 50,000 times can crash Bitcoin network nodes. The alarming discovery underscores both the security risks and analytical power of artificial intelligence.",
-   "scene_prompt": "A detailed photorealistic 4:5 macro shot of abstract digital data streams glowing on a dark circuit board background.",
-   "badge": "SECURITY FLAW FOUND",
+   "region": "Mexico",
+   "headline": "MEXICAN FORCES CAPTURE **MOST WANTED CARTEL BOSS** IN BLOODY FIREFIGHT LEAVING **ELEVEN DEAD**",
+   "caption": "Mexican military special forces arrested fugitive cartel leader Fausto Isidro Meza Flores following an intense gun battle in the northern state of Sinaloa. The violent confrontation left 11 people dead and triggered widespread panic across the city of Guasave.",
+   "scene_prompt": "A gritty editorial photo of Mexican military special forces in tactical camouflage gear guarding a dusty street in northern Mexico, armored olive-drab vehicles positioned along a perimeter under bright desert daylight. Vertical 4:5 composition, photojournalism style, no text.",
+   "badge": "11 KILLED",
    "photo": null,
-   "source_post": 11,
-   "source_url": "https://www.coindesk.com/markets/2026/11/21/bitcoin-nodes-could-be-stalled-by-repeating-one-id-50-000-times-ai-found-the-bug"
+   "source_post": 1,
+   "source_url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQRGJ0ZlNfMk15LUxiOFhwZHhFVXlLM0pNcV8yU0JzSElqVkZTZHprRm1ZUl84SS1wY0kyTExIUXF3SEE1WXk5T2c3YTR4SHZWc2N6V3VvWnlOVHpJUW9RemlLQkRmNEdxUmFwQW9oSF95eE5aNU5fRmU5dXh3bXFRRGdoNVl6eFFXcmMxcHAtNTlreVRaLUtSVVFR?oc=5"
   },
   {
-   "region": "World",
-   "headline": "VOLODYMYR ZELENSKY LABELS PUTIN A KILLER **IN SHARP REBUKE** TO DONALD TRUMP",
-   "caption": "The Ukrainian president lashed out after Donald Trump publicly referred to the Russian leader as his friend. The fiery remarks highlight deep diplomatic tensions over ongoing peace efforts.",
-   "scene_prompt": "A crisp photorealistic 4:5 portrait of Ukrainian President Volodymyr Zelensky speaking firmly at a formal press conference podium.",
-   "badge": "DIPLOMATIC TENSIONS",
-   "photo": 16,
-   "source_post": 16,
-   "source_url": "https://www.bbc.co.uk/news/articles/cxnv4zvmdy0jo?at_medium=RSS&amp;at_campaign=rss"
+   "region": "Ukraine",
+   "headline": "RESCUERS PULL **SURVIVORS FROM DEBRIS** AFTER DEADLY RUSSIAN STRIKES HIT **APARTMENTS NEAR KYIV**",
+   "caption": "Emergency teams in Ukraine worked through the wreckage of a collapsed residential building near Kyiv after heavy Russian aerial bombardments struck the region. Rescuers successfully pulled a seven-year-old boy alive from the debris after fourteen hours as casualty counts continued to climb.",
+   "scene_prompt": "A poignant photorealistic rescue scene in a Kyiv suburb, where emergency responders wearing helmets and reflective protective jackets carefully navigate broken concrete slabs and tangled rebar beneath an overcast grey sky. Vertical 4:5 composition, authentic news photography, no text.",
+   "badge": "BOY RESCUED",
+   "photo": 23,
+   "source_post": 23,
+   "source_url": "https://www.azernews.az/region/267888.html"
   },
   {
-   "region": "World",
-   "headline": "US AGRICULTURE DEPARTMENT AND FBI **TARGETED BY CYBERATTACKS** IN UNAUTHORIZED DIGITAL INTRUSIONS",
-   "caption": "Federal authorities acknowledged experiencing sophisticated digital breaches following media disclosures. The incidents highlight growing vulnerabilities across critical government digital infrastructure.",
-   "scene_prompt": "A clean photorealistic 4:5 architectural view of the stone facade of a federal government building under natural daytime lighting.",
-   "badge": "FEDERAL BREACH",
-   "photo": 20,
-   "source_post": 20,
-   "source_url": "https://www.france24.com/en/americas/20261121-us-agriculture-department-fbi-hit-by-cyberattacks-media-report"
+   "region": "United States",
+   "headline": "MASKED ICE AGENTS SPARK **FIERCE OUTRAGE** AFTER ARRESTING PASSENGERS AT **SEATTLE AIRPORT GATE**",
+   "caption": "Masked Immigration and Customs Enforcement officers boarded a jet bridge at Seattle-Tacoma International Airport to detain a passenger boarding a Los Angeles-bound flight. Washington Governor Bob Ferguson strongly condemned the operation, calling the confrontation chilling and horrific.",
+   "scene_prompt": "An eye-level editorial view down an airport terminal jet bridge corridor with polished floors and glass windows, where law enforcement officers in dark tactical jackets conduct an enforcement action near a boarding gate. Vertical 4:5 composition, realistic interior lighting, no text.",
+   "badge": "AIRPORT DETENTION",
+   "photo": 17,
+   "source_post": 17,
+   "source_url": "https://www.dw.com/en/us-ice-arrests-2-at-seattle-airport-in-chilling-scenes-governor/a-80012480?maca=en-rss-en-top-1022-rdf"
   },
   {
-   "region": "Markets",
-   "headline": "XRP FALLS TEN PERCENT AS TRADERS **UNWIND LEVERAGED BETS** AND ETF ASSETS SLIP",
-   "caption": "Cryptocurrency markets suffered a sharp sell-off as long positions were rapidly liquidated. Total assets held within exchange-traded funds dropped below the one billion dollar threshold during the decline.",
-   "scene_prompt": "A crisp photorealistic 4:5 graphic visualization of a downward financial trendline chart glowing against a dark trading background.",
-   "badge": "10 PERCENT DROP",
-   "photo": 14,
-   "source_post": 14,
-   "source_url": "https://www.coindesk.com/markets/2026/11/21/xrp-falls-10-as-long-bets-unwind-and-etf-assets-slip-below-usd1-billion"
+   "region": "Baltic Sea",
+   "headline": "RUSSIAN CARGO VESSEL **BURSTS INTO FLAMES** IN BALTIC SEA AFTER **DEADLY DRONE STRIKE**",
+   "caption": "A Russian cargo vessel caught fire in the Gulf of Finland following a suspected sea drone strike in regional waters. Finnish officials warned that the incident demonstrates how the war in Ukraine is actively spilling over into Baltic maritime corridors.",
+   "scene_prompt": "A photorealistic maritime view across cold grey choppy waters of the Gulf of Finland, showing a large blue commercial container ship adrift with white and grey smoke rising from damaged containers on deck. Vertical 4:5 composition, natural northern coastal daylight, no text.",
+   "badge": "BALTIC ESCALATION",
+   "photo": 18,
+   "source_post": 18,
+   "source_url": "https://www.france24.com/en/europe/20261122-live-finland-says-war-spilling-over-after-baltic-sea-drone-strike-on-russian-cargo-ship"
+  },
+  {
+   "region": "Global",
+   "headline": "UN CLIMATE SUMMIT **ENDS IN TOTAL COLLAPSE** AS NATIONS REJECT **FOSSIL FUEL DEAL**",
+   "caption": "Negotiations at the COP31 climate conference in Antalya collapsed after running two days into overtime when delegates rejected the final draft agreement. The proposed deal sparked widespread outrage among the European Union and developing nations because it omitted any explicit mention of fossil fuels.",
+   "scene_prompt": "A photorealistic wide-angle interior of an expansive international summit plenary hall, featuring tired delegates in business suits whispering anxiously beneath bright ceiling floodlights and large blue conference backdrops. Vertical 4:5 composition, sharp editorial detail, no text.",
+   "badge": "TALKS COLLAPSE",
+   "photo": 9,
+   "source_post": 9,
+   "source_url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQRG9odk56QnZYYWdjalF0a2Zfc2hfLVUyUFVuVHh0aHN1TUFMTmNJbEhzYjRIWnctNDFxX3p1Zl9RY3h1VzZLbzBMWjB4cnh1cFNoX1NXY3EyaEF1VXlvWGkwSUlFa1dYUFRMcUxEbFNPa2FaUmkwRW90TUJXQklock10QXhlSVNpWHhIM2hPTmlxSWZRTmRINEZiTHI3cGlMLTRiUEVCQkk?oc=5"
+  },
+  {
+   "region": "Sudan",
+   "headline": "DRONES HIT **UNITED NATIONS BUILDING** IN SUDAN CAPITAL SPARKING ALARM OVER **HUMANITARIAN SAFETY**",
+   "caption": "A drone attack struck and damaged a United Nations facility located in a civilian residential neighborhood of Khartoum, Sudan. Humanitarian officials condemned the strike as unacceptable and raised grave concerns about the escalating perils confronting aid workers.",
+   "scene_prompt": "A photorealistic documentary view of a sun-baked urban neighborhood in Khartoum, showing fractured ochre brick walls, shattered windows, and scattered debris around a compound gate under a harsh midday sun. Vertical 4:5 composition, documentary journalism style, no text.",
+   "badge": "UN FACILITY HIT",
+   "photo": 34,
+   "source_post": 34,
+   "source_url": "https://www.dw.com/en/sudan-drones-hit-un-building-residential-area-in-khartoum/a-80015122?maca=en-rss-en-top-1022-rdf"
+  },
+  {
+   "region": "California",
+   "headline": "CALIFORNIA SURFER **SURVIVES SHARK ATTACK** AFTER MASSIVE TWENTY FOOT PREDATOR **SHREDS SURFBOARD**",
+   "caption": "Jack Canigiula, a 21-year-old surfer, was launched into the air off Santa Barbara when a 20-foot great white shark clamped down on his board. He miraculously escaped without a scratch, though the predator tore massive chunks out of the shredded surfboard.",
+   "scene_prompt": "A photorealistic shot of a wet surfboard resting on a rocky California beach, featuring a massive jagged semi-circular bite taken out of the tail with foam exposed, overlooking breaking ocean waves. Vertical 4:5 composition, golden hour coastal lighting, no text.",
+   "badge": "SURFBOARD SHREDDED",
+   "photo": null,
+   "source_post": null,
+   "source_url": "https://nypost.com/2026/11/22/us-news/california-surfers-chilling-encounter-with-20ft-great-white-shark-off-santa-barbara/"
+  },
+  {
+   "region": "South Korea",
+   "headline": "SOUTH KOREA EDUCATION MINISTER **RESIGNS IN DISGRACE** FOLLOWING SHOCKING **AI EXAM CHEATING SCANDAL**",
+   "caption": "South Korea Education Minister Choi Kyo-jin stepped down after a national cheating scandal involving miniature cameras and artificial intelligence exposed major security flaws. The confession from a top test scorer triggered nationwide anxiety just days before the high-stakes suneung university entrance exams.",
+   "scene_prompt": "A photorealistic editorial photo inside a Seoul government briefing room, showing an official in a dark suit offering a formal bow at a lectern packed with press microphones under cool studio lighting. Vertical 4:5 composition, solemn atmosphere, no text.",
+   "badge": "MINISTER RESIGNS",
+   "photo": null,
+   "source_post": null,
+   "source_url": "https://www.theguardian.com/world/2026/nov/22/south-korea-education-minister-resigns-after-ai-cheating-scandal-engulfs-university-exams"
+  },
+  {
+   "region": "Science",
+   "headline": "EUROPEAN AND JAPANESE SPACECRAFT **REACHES MERCURY ORBIT** AFTER AN EPIC **EIGHT YEAR JOURNEY**",
+   "caption": "The joint European-Japanese BepiColombo probe has entered orbit around Mercury after an eight-year interplanetary voyage from Earth. Scientists confirmed the spacecraft is safe and functioning despite investigating a brief software glitch during its arrival thruster burn.",
+   "scene_prompt": "A stunning photorealistic render of the metallic BepiColombo probe in space, its solar arrays gleaming in harsh unfiltered sunlight against the backdrop of Mercury's heavily cratered grey surface and deep velvet black space. Vertical 4:5 composition, scientific realism, no text.",
+   "badge": "MERCURY ORBIT",
+   "photo": null,
+   "source_post": null,
+   "source_url": "https://www.space.com/space-exploration/missions/esa-jaxa-bepicolomobo-mission-mercury-orbit-arrival"
   }
  ],
- "date": "2026-11-22",
- "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nFausto Isidro Meza Flores, one of the FBI's most wanted fugitives, was captured following a fierce firefight that left 11 people dead.\n\nA devastating missile attack struck a high-rise residential building in President Volodymyr Zelensky's hometown. Emergency services and rescue teams immediately rushed to the impact site to respond to casualties.\n\nThe messaging app is limiting in-app screenshot capabilities on mobile devices to protect user privacy.\n\nShares tumbled on Friday to complete a painful seven-week losing stretch for the prominent chipmaker. The prolonged downturn reflects intense investor anxiety surrounding market pressures and executive leadership.\n\nThe vessel Sparta II caught fire following a Saturday drone strike while navigating toward Kaliningrad. Finnish defense forces assessed that Ukraine was likely behind the attack as the damaged ship drifted.\n\nThe former leader was rushed to the DF Star hospital in Brasília following a sudden medical emergency. Hospital officials confirmed his condition while he serves a lengthy prison sentence.\n\nResearchers revealed that repeating a single transaction ID 50,000 times can crash Bitcoin network nodes. The alarming discovery underscores both the security risks and analytical power of artificial intelligence.\n\nThe Ukrainian president lashed out after Donald Trump publicly referred to the Russian leader as his friend. The fiery remarks highlight deep diplomatic tensions over ongoing peace efforts.\n\nFederal authorities acknowledged experiencing sophisticated digital breaches following media disclosures. The incidents highlight growing vulnerabilities across critical government digital infrastructure.\n\nCryptocurrency markets suffered a sharp sell-off as long positions were rapidly liquidated. Total assets held within exchange-traded funds dropped below the one billion dollar threshold during the decline.\n\nWhich of these breaking global developments surprised you the most today?\n\nFollow @midworlddaily — join our live 24/7 Telegram channels via the link in bio."
+ "date": "2026-11-23",
+ "caption": "Here's What Happened in the World in the Last 24 Hours:\n\nA suspected drone attack struck the Russian navy corvette Merkury while docked for refueling at the Benghazi naval base, causing a massive explosion and sinking the vessel.\n\nMexican military special forces arrested fugitive cartel leader Fausto Isidro Meza Flores following an intense gun battle in the northern state of Sinaloa. The violent confrontation left 11 people dead and triggered widespread panic across the city of Guasave.\n\nEmergency teams in Ukraine worked through the wreckage of a collapsed residential building near Kyiv after heavy Russian aerial bombardments struck the region.\n\nMasked Immigration and Customs Enforcement officers boarded a jet bridge at Seattle-Tacoma International Airport to detain a passenger boarding a Los Angeles-bound flight.\n\nA Russian cargo vessel caught fire in the Gulf of Finland following a suspected sea drone strike in regional waters. Finnish officials warned that the incident demonstrates how the war in Ukraine is actively spilling over into Baltic maritime corridors.\n\nNegotiations at the COP31 climate conference in Antalya collapsed after running two days into overtime when delegates rejected the final draft agreement.\n\nA drone attack struck and damaged a United Nations facility located in a civilian residential neighborhood of Khartoum, Sudan.\n\nJack Canigiula, a 21-year-old surfer, was launched into the air off Santa Barbara when a 20-foot great white shark clamped down on his board. He miraculously escaped without a scratch, though the predator tore massive chunks out of the shredded surfboard.\n\nSouth Korea Education Minister Choi Kyo-jin stepped down after a national cheating scandal involving miniature cameras and artificial intelligence exposed major security flaws.\n\nThe joint European-Japanese BepiColombo probe has entered orbit around Mercury after an eight-year interplanetary voyage from Earth.\n\nWhich of today's headlines surprised or alarmed you the most?\n\nFollow @midworlddaily — join our live 24/7 Telegram channels via the link in bio."
 }
