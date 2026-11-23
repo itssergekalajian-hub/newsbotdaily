@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-18",
-  "stories": [
-   {
-    "topic": "China Summit",
-    "headline": "Trump Putin and Xi Convene Historic Shenzhen Trilateral",
-    "tease": "World leaders shake hands in Shenzhen ahead of unprecedented trilateral talks"
-   },
-   {
-    "topic": "Technology",
-    "headline": "Nvidia Rejects Huang Return and Exits Chinese Market",
-    "tease": "Nvidia posts record sales while slamming the door on Jensen Huang"
-   },
-   {
-    "topic": "United States",
-    "headline": "Democrats Sweep Final Races and Nominate Jeffries",
-    "tease": "Hakeem Jeffries nominated for speaker as Democrats sweep final midterm races"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Gulf Escalation Deepens as US Navy War Stocks Strain",
-    "tease": "Rising Gulf clashes expose severe strains on American naval munitions"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Banks Move to Shed AI Liability as Inflation Ticks Up",
-    "tease": "Banks strip consumer protections for automated artificial intelligence agents"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "War Extends Underground as Pipeline Combat Intensifies",
-    "tease": "Ukrainian troops battle underground inside pipelines to escape drone strikes"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Court Actions Outages and Diplomatic Tours",
-    "tease": "Intelligence blackouts and royal diplomacy make headlines across the globe"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "APEC Trilateral and Upcoming International Court Rulings",
-    "tease": "Crucial diplomatic showdowns and major market tests anchor the week ahead"
-   }
-  ]
- },
- {
   "date": "2026-11-19",
   "stories": [
    {
@@ -181,6 +136,46 @@
     "topic": "What to Watch",
     "headline": "Israeli Talks and Tech Hearings Approach",
     "tease": "Marathon coalition talks and high-stakes tech showdowns ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-22",
+  "stories": [
+   {
+    "topic": "Climate",
+    "headline": "COP31 Summit Collapses Over Fossil Fuels",
+    "tease": "Historic UN climate talks collapse after delegates reject fossil fuel omission"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "War Spills Across Regional Borders and Seas",
+    "tease": "Russian strikes batter Ukraine as maritime drone warfare expands abroad"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Regional Tensions Flare from Gulf to Levant",
+    "tease": "Naval standoffs and diplomatic friction intensify across the Middle East"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Wall Street Enters Correction Territory",
+    "tease": "Stocks sink into correction as tech volatility rattles investors"
+   },
+   {
+    "topic": "United States",
+    "headline": "Border Enforcement Sparks Airport Outcry",
+    "tease": "Aggressive airport immigration arrests spark furious political backlash"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Dispatches and Industrial Unrest",
+    "tease": "German union walkouts and naval shifts around the globe"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Critical Coalitions and Legislative Clashes Ahead",
+    "tease": "High stakes coalition talks and economic deadlines loom ahead"
    }
   ]
  }
