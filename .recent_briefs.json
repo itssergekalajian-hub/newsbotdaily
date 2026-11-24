@@ -1,55 +1,5 @@
 [
  {
-  "date": "2026-11-19",
-  "stories": [
-   {
-    "topic": "Superpower Diplomacy",
-    "headline": "Trump Putin and Xi Sign Trilateral Peace Pact",
-    "tease": "World leaders conclude a surprise summit in Shenzhen with a historic pact"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Crimean Bridge Hit Again as Ceasefire Prospects Dim",
-    "tease": "Ukraine strikes the Crimean Bridge for the third time this week"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Israeli Troops Advance into Central Gaza Across Yellow Lin",
-    "tease": "Israeli tanks push into central Gaza as regional shipping faces fresh attacks"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Anthropic Shatters Records in Eighty-One Billion Dollar Wa",
-    "tease": "Anthropic debuts on Wall Street with the biggest IPO in history"
-   },
-   {
-    "topic": "Technology",
-    "headline": "Tech Giants Sound Alarm Over AI Vulnerabilities and Agent ",
-    "tease": "Tech leaders warn vital infrastructure cannot be patched against AI attacks"
-   },
-   {
-    "topic": "Human Rights",
-    "headline": "World Court Delivers Historic Genocide Verdict Against Mya",
-    "tease": "The International Court of Justice finds Myanmar guilty of Rohingya genocide"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Greenland Pact Approved and Armenia Demarcates Peace Trans",
-    "tease": "Quick hits on Arctic defense, Caucasus transit, and judicial nominations"
-   },
-   {
-    "topic": "Space",
-    "headline": "Voyager One Phones Home from Historic One Light-Day Bounda",
-    "tease": "Nasa's Voyager probe reaches an astonishing milestone across interstellar space"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "High Stakes Diplomatic Repercussions and Arctic Security I",
-    "tease": "Key international reactions to watch closely in the coming days"
-   }
-  ]
- },
- {
   "date": "2026-11-20",
   "stories": [
    {
@@ -176,6 +126,51 @@
     "topic": "What to Watch",
     "headline": "Critical Coalitions and Legislative Clashes Ahead",
     "tease": "High stakes coalition talks and economic deadlines loom ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-23",
+  "stories": [
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Ukrainian Drones Sink Russian Corvette in Libya",
+    "tease": "Ukrainian naval drones strike and sink a Russian warship in Libya."
+   },
+   {
+    "topic": "United States",
+    "headline": "Democrats Clinch Largest House Majority Since 1992",
+    "tease": "Democrats secure their largest congressional House majority in three decades."
+   },
+   {
+    "topic": "Markets",
+    "headline": "Wall Street Rallies as Jensen Huang Returns",
+    "tease": "Tech stocks surge as Jensen Huang is reinstated at Nvidia."
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Winter Crisis Deepens for Displaced Gazan Families",
+    "tease": "Over three hundred thousand families face freezing weather without shelter."
+   },
+   {
+    "topic": "Europe",
+    "headline": "Burnham Hails Landmark Post Brexit European Pact",
+    "tease": "Andy Burnham presents a sweeping new post-Brexit deal to Parliament."
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Drone Strikes Target Khartoum and Baku Talks",
+    "tease": "Sudan drone strikes, Italian business deals, and AI safeguards."
+   },
+   {
+    "topic": "Football",
+    "headline": "Diego Simeone Sets Historic La Liga Milestone",
+    "tease": "Diego Simeone breaks the all-time La Liga managerial record."
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Congressional Hearings and Climate Fallout Dominate Upcomi",
+    "tease": "Upcoming Capitol Hill battles, tech inquiries, and Middle East friction."
    }
   ]
  }
