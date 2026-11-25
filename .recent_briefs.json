@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-20",
-  "stories": [
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Massive Missile Strikes Pound Kyiv Infrastructure",
-    "tease": "Russian missiles pound Ukrainian cities following strikes on Crimean Bridge"
-   },
-   {
-    "topic": "Europe",
-    "headline": "UK and European Union Seal Reset Deal",
-    "tease": "Britain and Brussels agree landmark pact to restore bilateral ties"
-   },
-   {
-    "topic": "United States",
-    "headline": "Trump Issues Tariff Threat on Tech Infrastructure",
-    "tease": "Donald Trump threatens massive taxes on offshore artificial intelligence facilities"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Tech Rout Deepens as Volatility Surges",
-    "tease": "Tech stocks slide and Bitcoin tumbles as market volatility surges"
-   },
-   {
-    "topic": "Energy",
-    "headline": "Senate Passes Sweeping Infrastructure Permitting Reform",
-    "tease": "Senate approves major permitting overhaul to accelerate critical energy projects"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Espionage Sentencings and App Security Updates",
-    "tease": "Federal courts issue major rulings while messaging platforms tighten privacy"
-   },
-   {
-    "topic": "Mathematics",
-    "headline": "Researcher Claims Proof for Riemann Hypothesis",
-    "tease": "Anthropic mathematician claims solution to century old prime number riddle"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Diplomatic Follow-Up and High-Stakes Tech Hearings",
-    "tease": "Permitting showdowns and European diplomatic summits headline next week"
-   }
-  ]
- },
- {
   "date": "2026-11-21",
   "stories": [
    {
@@ -171,6 +126,46 @@
     "topic": "What to Watch",
     "headline": "Congressional Hearings and Climate Fallout Dominate Upcomi",
     "tease": "Upcoming Capitol Hill battles, tech inquiries, and Middle East friction."
+   }
+  ]
+ },
+ {
+  "date": "2026-11-24",
+  "stories": [
+   {
+    "topic": "Markets",
+    "headline": "Tech Stocks Slide Amid Nvidia Reinstatement Backlash",
+    "tease": "Tech shares tumble as politicians probe Trump's role at Nvidia"
+   },
+   {
+    "topic": "United States",
+    "headline": "Administration Faces Backlash Over Security and AI",
+    "tease": "Trump administration faces mounting pressure over AI national security"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Riyadh Scrambles for Air Defense Under Fire",
+    "tease": "Saudi Arabia urgently requests air defense interceptors from allies"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Zelenskyy Urges Immediate Winter Air Defense Deployment",
+    "tease": "Ukraine demands urgent anti-air missiles as winter strikes intensify"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Legal Clashes and Tragic Remnants Around Globe",
+    "tease": "States file lawsuits over AI as Syria faces explosive toll"
+   },
+   {
+    "topic": "Football",
+    "headline": "Tottenham Secures Future With Midfield Prodigy Williams-Ba",
+    "tease": "Tottenham secures rising teenage sensation with long-term deal"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Congressional Showdowns and Middle East Supply Deadlines",
+    "tease": "Key hearings and diplomatic decisions set to reshape coming days"
    }
   ]
  }
