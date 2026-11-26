@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-21",
-  "stories": [
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Russian Ballistic Missile Strikes Zelensky Hometown",
-    "tease": "Russian ballistic strikes ravage Kryvyi Rih as Baltic tensions flare"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Iraqi Forces Move on Militia Stronghold",
-    "tease": "Iraqi security forces deploy into militia territory to curb smuggling"
-   },
-   {
-    "topic": "Security",
-    "headline": "Cartel Boss Captured After Fierce Firefight",
-    "tease": "Mexican forces capture FBI top ten fugitive after bloody battle"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Tech Rout Deepens Around Chip Turmoil",
-    "tease": "Tech stocks slide further as Nvidia suffers historic losing streak"
-   },
-   {
-    "topic": "Europe",
-    "headline": "France Faces Sixth Week of Rallies",
-    "tease": "Street protests test France as Brussels proposes Big Tech tax"
-   },
-   {
-    "topic": "United States",
-    "headline": "Secret Memo Restricts Canada Defense Ties",
-    "tease": "Pentagon memo curbs Canada defense cooperation amid cyber breach fallout"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Diplomatic Talks Protests and Scientific Milestones",
-    "tease": "United Nations weapons talks collapse as climate negotiations stall"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Israeli Talks and Tech Hearings Approach",
-    "tease": "Marathon coalition talks and high-stakes tech showdowns ahead"
-   }
-  ]
- },
- {
   "date": "2026-11-22",
   "stories": [
    {
@@ -166,6 +121,51 @@
     "topic": "What to Watch",
     "headline": "Congressional Showdowns and Middle East Supply Deadlines",
     "tease": "Key hearings and diplomatic decisions set to reshape coming days"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-25",
+  "stories": [
+   {
+    "topic": "Trade Policy",
+    "headline": "Trump Proposes Sweeping Tariffs on Global Partners",
+    "tease": "Washington prepares sweeping tariffs targeting key allies and economic rivals"
+   },
+   {
+    "topic": "Technology",
+    "headline": "Nvidia Scrutiny Intensifies as Huang Faces Backlash",
+    "tease": "Jensen Huang admits conduct breaches as political scrutiny mounts"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Tech Rout Sinks Nasdaq Amid Tariff Fears",
+    "tease": "Wall Street slides as artificial intelligence valuations come under pressure"
+   },
+   {
+    "topic": "Middle East",
+    "headline": "Saudi Forces Intercept Houthis as Netanyahu Trial Wobbles",
+    "tease": "Regional strikes escalate while Israeli judges recommend dropping Netanyahu charges"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Kyiv Resets Central Europe Ties as Strategy Shifts",
+    "tease": "Zelenskyy requests funding as Hungarian relations begin fresh chapter"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Migrant Influx and Space Data Approvals",
+    "tease": "Record migration hits Spanish islands alongside federal approvals in space"
+   },
+   {
+    "topic": "Football",
+    "headline": "European Heavyweights Cruise Through Champions League",
+    "tease": "Real Madrid and Barcelona secure dominant continental victories"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Crucial Energy Summits and Transatlantic Trade Clashes",
+    "tease": "Major trade deadlines and regional security summits approach"
    }
   ]
  }
