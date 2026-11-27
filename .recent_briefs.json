@@ -1,45 +1,5 @@
 [
  {
-  "date": "2026-11-22",
-  "stories": [
-   {
-    "topic": "Climate",
-    "headline": "COP31 Summit Collapses Over Fossil Fuels",
-    "tease": "Historic UN climate talks collapse after delegates reject fossil fuel omission"
-   },
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "War Spills Across Regional Borders and Seas",
-    "tease": "Russian strikes batter Ukraine as maritime drone warfare expands abroad"
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Regional Tensions Flare from Gulf to Levant",
-    "tease": "Naval standoffs and diplomatic friction intensify across the Middle East"
-   },
-   {
-    "topic": "Markets",
-    "headline": "Wall Street Enters Correction Territory",
-    "tease": "Stocks sink into correction as tech volatility rattles investors"
-   },
-   {
-    "topic": "United States",
-    "headline": "Border Enforcement Sparks Airport Outcry",
-    "tease": "Aggressive airport immigration arrests spark furious political backlash"
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Global Dispatches and Industrial Unrest",
-    "tease": "German union walkouts and naval shifts around the globe"
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Critical Coalitions and Legislative Clashes Ahead",
-    "tease": "High stakes coalition talks and economic deadlines loom ahead"
-   }
-  ]
- },
- {
   "date": "2026-11-23",
   "stories": [
    {
@@ -166,6 +126,51 @@
     "topic": "What to Watch",
     "headline": "Crucial Energy Summits and Transatlantic Trade Clashes",
     "tease": "Major trade deadlines and regional security summits approach"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-26",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "Deadly Strikes Hit Gulf Infrastructure as Regional Conflic",
+    "tease": "Deadly strikes hit Gulf infrastructure as regional conflict expands tonight"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Kyiv Expands Naval Strikes Beyond Black Sea While Washingt",
+    "tease": "Ukrainian naval attacks hit Russian vessels far from the Black Sea"
+   },
+   {
+    "topic": "Technology and Markets",
+    "headline": "Semiconductor Exports Eclipse Fossil Fuels as AI Turmoil H",
+    "tease": "Microchips overtake oil and gas as tech supply chains face fresh freezes"
+   },
+   {
+    "topic": "Europe",
+    "headline": "European Politics Fractures From Snap Spanish Polls to Fre",
+    "tease": "Voters head to the polls as European politics faces deep ideological shifts"
+   },
+   {
+    "topic": "United States",
+    "headline": "Trump Rejects Economic Growth Revision While Courts Halt B",
+    "tease": "Donald Trump demands federal probe into revised economic data as courts intervene"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Key Developments in Global Migration Nuclear Deterrence an",
+    "tease": "Global dispatches trace historic migration drops and heightened nuclear deterrence directives"
+   },
+   {
+    "topic": "Football",
+    "headline": "Arsenal Star Kai Havertz Walks Champions League Disciplina",
+    "tease": "Disciplinary rules put top Champions League stars at risk of costly bans"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Spanish Election Results and Gulf Defense Talks Lead the W",
+    "tease": "Critical election results and sensitive security summits headline the week ahead"
    }
   ]
  }
