@@ -1,50 +1,5 @@
 [
  {
-  "date": "2026-11-23",
-  "stories": [
-   {
-    "topic": "Russia and Ukraine",
-    "headline": "Ukrainian Drones Sink Russian Corvette in Libya",
-    "tease": "Ukrainian naval drones strike and sink a Russian warship in Libya."
-   },
-   {
-    "topic": "United States",
-    "headline": "Democrats Clinch Largest House Majority Since 1992",
-    "tease": "Democrats secure their largest congressional House majority in three decades."
-   },
-   {
-    "topic": "Markets",
-    "headline": "Wall Street Rallies as Jensen Huang Returns",
-    "tease": "Tech stocks surge as Jensen Huang is reinstated at Nvidia."
-   },
-   {
-    "topic": "Middle East",
-    "headline": "Winter Crisis Deepens for Displaced Gazan Families",
-    "tease": "Over three hundred thousand families face freezing weather without shelter."
-   },
-   {
-    "topic": "Europe",
-    "headline": "Burnham Hails Landmark Post Brexit European Pact",
-    "tease": "Andy Burnham presents a sweeping new post-Brexit deal to Parliament."
-   },
-   {
-    "topic": "Also Today",
-    "headline": "Drone Strikes Target Khartoum and Baku Talks",
-    "tease": "Sudan drone strikes, Italian business deals, and AI safeguards."
-   },
-   {
-    "topic": "Football",
-    "headline": "Diego Simeone Sets Historic La Liga Milestone",
-    "tease": "Diego Simeone breaks the all-time La Liga managerial record."
-   },
-   {
-    "topic": "What to Watch",
-    "headline": "Congressional Hearings and Climate Fallout Dominate Upcomi",
-    "tease": "Upcoming Capitol Hill battles, tech inquiries, and Middle East friction."
-   }
-  ]
- },
- {
   "date": "2026-11-24",
   "stories": [
    {
@@ -171,6 +126,46 @@
     "topic": "What to Watch",
     "headline": "Spanish Election Results and Gulf Defense Talks Lead the W",
     "tease": "Critical election results and sensitive security summits headline the week ahead"
+   }
+  ]
+ },
+ {
+  "date": "2026-11-27",
+  "stories": [
+   {
+    "topic": "Middle East",
+    "headline": "United States Disables Tanker Enforcing Iranian Blockade",
+    "tease": "American military strikes disable commercial tanker defying naval blockade of Iran"
+   },
+   {
+    "topic": "Russia and Ukraine",
+    "headline": "Zelenskyy Urges Missiles as Deep Drone Strikes Continue",
+    "tease": "Kyiv strikes distant Russian infrastructure while demanding urgent air defense supplies"
+   },
+   {
+    "topic": "Markets",
+    "headline": "Tech Stocks Rebound While Norse Atlantic Enters Bankruptcy",
+    "tease": "Wall Street rallies on holiday trade while surging fuel sinks European airline"
+   },
+   {
+    "topic": "United States",
+    "headline": "Holiday Gales Batten Down Coasts Causing Blackouts",
+    "tease": "Fierce Thanksgiving storms submerge streets and knock out power across American coasts"
+   },
+   {
+    "topic": "Europe",
+    "headline": "German Parliament Passes Budget as Spain Awaits Polls",
+    "tease": "Berlin approves record spending plan as European capitals navigate diplomatic divides"
+   },
+   {
+    "topic": "Also Today",
+    "headline": "Global Briefs Cover Wellington Dhaka And Ottawa",
+    "tease": "Coalition math in New Zealand and troop movements across Central Africa"
+   },
+   {
+    "topic": "What to Watch",
+    "headline": "Spanish Elections and European Budget Battles Ahead",
+    "tease": "Crucial weekend snap elections and impending diplomatic deadlines ahead next week"
    }
   ]
  }
