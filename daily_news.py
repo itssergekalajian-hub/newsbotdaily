@@ -1678,6 +1678,13 @@ def publish_video(day: dt.date, headline: str, mp4_path: str) -> None:
                            "height": video.H}, {"video": f})
 
 
+def target_video_bitrate(duration_sec: float) -> int:
+    return min(
+        2200,
+        max(750, int((46 * 8192) / max(duration_sec, 1)) - 136),
+    )
+
+
 # ----------------------------------------------------------------------------
 def build(brief: dict, day: dt.date, work: str,
           posts: list[dict]) -> str:
@@ -1716,6 +1723,9 @@ def build(brief: dict, day: dt.date, work: str,
 
     total = sum(spans)
     print(f"bulletin: {len(segments)} segments, {total / 60:.1f} minutes")
+    target_kbps = target_video_bitrate(total)
+    video.set_video_bitrate(target_kbps)
+    print(f"target video bitrate: {target_kbps} kbps")
 
     sting = INTRO_VIDEO if os.path.exists(INTRO_VIDEO) else None
     if sting:
@@ -1878,23 +1888,13 @@ def build(brief: dict, day: dt.date, work: str,
     dur = video.probe_duration(final)
     print(f"final video: {size / 1e6:.1f} MB, {dur:.0f}s")
 
-    # Telegram bots may send up to 50 MB per file. A bulletin is always one
-    # video, never split across messages — if it is too big it is re-encoded to
-    # a target bitrate that fits, which for a talking-head-style still is
-    # visually lossless. This is why the day comes as a single post.
+    # The bitrate was sized from narration duration before rendering, so this
+    # should be the only full-resolution encode.
     limit = 49 * 1024 * 1024
     if size > limit:
-        target_kbps = int((limit * 8 / dur) / 1000 * 0.92) - 128   # leave room for audio
-        target_kbps = max(target_kbps, 300)
-        shrunk = os.path.join(work, "brief_fit.mp4")
-        print(f"over 50 MB — re-encoding to ~{target_kbps} kbps video")
-        video.run(["ffmpeg", "-y", "-loglevel", "error", "-i", final,
-                   "-c:v", "libx264", "-preset", "medium",
-                   "-b:v", f"{target_kbps}k", "-maxrate", f"{int(target_kbps * 1.3)}k",
-                   "-bufsize", f"{target_kbps * 2}k", "-pix_fmt", "yuv420p",
-                   "-c:a", "aac", "-b:a", "112k", "-movflags", "+faststart", shrunk])
-        final = shrunk
-        print(f"re-encoded to {os.path.getsize(final) / 1e6:.1f} MB")
+        raise RuntimeError(
+            f"first-pass bitrate encode exceeded Telegram's 49 MiB safety "
+            f"limit ({size / 1e6:.1f} MB at {target_kbps} kbps)")
     return final
 
 

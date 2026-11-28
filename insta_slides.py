@@ -5,6 +5,8 @@ Two entry points, run as separate workflow steps so the slides are committed
 
     python insta_slides.py render    — write slides/latest/*.jpg + deck.json
     python insta_slides.py publish   — post the carousel via the IG Graph API
+    python insta_slides.py render-reel — build a vertical story highlight Reel
+    python insta_slides.py publish-reel — publish the optional Reel
     python insta_slides.py check-auth — print the connected Instagram username
 
 Publishing needs two repo secrets — IG_USER_ID (the Instagram Business
@@ -14,6 +16,7 @@ aren't set, so the render keeps working before the account exists.
 """
 
 import base64
+import asyncio
 import concurrent.futures
 import datetime as dt
 import functools
@@ -26,6 +29,7 @@ import shutil
 import sys
 import tempfile
 import time
+import textwrap
 import xml.etree.ElementTree as ET
 from urllib.parse import urljoin
 
@@ -37,6 +41,7 @@ import daily_news as dn
 
 W, H = 1080, 1350                 # Instagram portrait
 OUT_DIR = "slides/latest"
+RECENT_HEADLINES_PATH = os.path.join("slides", "recent_headlines.json")
 TEMPLATES = "templates/ig"
 IG_MARKER = ".last_ig"            # last day actually POSTED to Instagram
 MAX_STORIES = 10                  # Instagram Graph API caps a carousel at 12 items
@@ -211,6 +216,9 @@ clear, vivid, beautiful and tailored to the exact topic and subject. No text.",
 Rules:
 - Return exactly ten stories and preserve their emotional/conversation value
 and importance order.
+- Avoid repeating any story from the recent published headlines below unless
+  today's reporting contains a major new factual development. For an update,
+  state the genuinely new facts and distinguish them from the prior coverage.
 - Headlines MUST be 8-16 words, uppercase, one sentence, and emphasize 1-2
 key phrases by wrapping each emphasized span in **double asterisks**. Do not
 use any other markdown.
@@ -236,6 +244,10 @@ AGENCY HEADLINES (context only):
 
 HUMAN-INTEREST AND VIRAL FEEDS:
 {emotion_items}
+
+RECENTLY PUBLISHED HEADLINES (last 3 days; do not repeat without a major new
+factual development):
+{recent_headlines}
 """
 
 
@@ -345,7 +357,8 @@ def _validate_generated_deck(deck: dict, posts: list[dict], day: dt.date,
 
 
 def write_deck(posts: list[dict], day: dt.date, wire: str | None = None,
-               emotion_items: list[dict] | None = None) -> dict:
+               emotion_items: list[dict] | None = None,
+               recent_headlines: list[str] | None = None) -> dict:
     items = "\n\n---\n\n".join(
         f"POST {i} [{p['time']}]{' [has photo]' if p.get('images') else ''}\n"
         f"{'ARTICLE LINKS: ' + ', '.join(p.get('links', [])) + chr(10) if p.get('links') else ''}"
@@ -361,7 +374,11 @@ def write_deck(posts: list[dict], day: dt.date, wire: str | None = None,
     prompt = SLIDES_PROMPT.format(date=f"{day:%A, %d %B %Y}",
                                   items=items[:300_000],
                                   wire=wire[:30_000],
-                                  emotion_items=emotion_context[:60_000])
+                                  emotion_items=emotion_context[:60_000],
+                                  recent_headlines="\n".join(
+                                      f"- {headline}"
+                                      for headline in (recent_headlines or []))
+                                  or "(none)")
     # the writer SEES the photos, so its "photo" picks are judged by what
     # each picture shows — the same grounding the video bulletin uses
     photos = dn._photo_parts(posts)
@@ -1290,6 +1307,60 @@ def _load_cached_deck(deck_path: str, day: dt.date) -> dict:
     return deck
 
 
+def _recent_headline_records(day: dt.date) -> list[dict]:
+    try:
+        with open(RECENT_HEADLINES_PATH, encoding="utf-8") as file:
+            records = json.load(file)
+    except FileNotFoundError:
+        return []
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"ignoring unreadable recent-headlines file: {exc}",
+              file=sys.stderr)
+        return []
+    if not isinstance(records, list):
+        return []
+
+    kept = []
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        try:
+            published = dt.date.fromisoformat(record.get("date", ""))
+        except (TypeError, ValueError):
+            continue
+        headline = record.get("headline")
+        age = (day - published).days
+        if isinstance(headline, str) and headline.strip() and 0 <= age < 3:
+            kept.append({"date": published.isoformat(),
+                         "headline": headline.strip()})
+    return kept[-40:]
+
+
+def _load_recent_headlines(day: dt.date) -> list[str]:
+    return [record["headline"] for record in _recent_headline_records(day)]
+
+
+def _record_recent_headlines(deck: dict, day: dt.date) -> None:
+    records = _recent_headline_records(day)
+    seen = {record["headline"].casefold() for record in records}
+    for slide in deck.get("slides", []):
+        headline = slide.get("headline")
+        if not isinstance(headline, str) or not headline.strip():
+            continue
+        normalized = re.sub(r"\s+", " ", headline.replace("**", "")).strip()
+        if normalized.casefold() in seen:
+            continue
+        records.append({"date": day.isoformat(), "headline": normalized})
+        seen.add(normalized.casefold())
+    records.sort(key=lambda record: record["date"])
+    records = records[-40:]
+    os.makedirs(os.path.dirname(RECENT_HEADLINES_PATH), exist_ok=True)
+    temporary_path = RECENT_HEADLINES_PATH + ".tmp"
+    with open(temporary_path, "w", encoding="utf-8") as file:
+        json.dump(records, file, ensure_ascii=False, indent=1)
+    os.replace(temporary_path, RECENT_HEADLINES_PATH)
+
+
 def render() -> None:
     target = os.getenv("TARGET_DATE", "").strip()
     if target:
@@ -1303,18 +1374,21 @@ def render() -> None:
     if not os.getenv("FORCE_SLIDES") and os.path.exists(deck_path):
         try:
             with open(deck_path, encoding="utf-8") as deck_file:
-                cached_date = json.load(deck_file).get("date")
+                cached_deck = json.load(deck_file)
+            cached_date = cached_deck.get("date")
             expected_jpegs = {
                 f"{index:02d}.jpg" for index in range(1, MAX_SLIDES + 1)}
             existing_jpegs = {
                 name for name in os.listdir(OUT_DIR)
                 if name.lower().endswith(".jpg")}
             has_stale_mp4 = any(name.lower().endswith(".mp4")
+                                 and name.lower() != "reel.mp4"
                                  for name in os.listdir(OUT_DIR))
             if (cached_date == day.isoformat()
                     and existing_jpegs == expected_jpegs
                     and not has_stale_mp4
                     and os.path.isfile(os.path.join(OUT_DIR, "caption.txt"))):
+                _record_recent_headlines(cached_deck, day)
                 print(f"slides for {day} already rendered — nothing to do")
                 return
         except (OSError, json.JSONDecodeError, AttributeError) as exc:
@@ -1330,8 +1404,10 @@ def render() -> None:
         print("not enough posts for a carousel")
         return
     try:
+        recent_headlines = _load_recent_headlines(day)
         deck = write_deck(posts, day, wire=wire,
-                          emotion_items=emotion_items)
+                          emotion_items=emotion_items,
+                          recent_headlines=recent_headlines)
     except DeckGenerationError as exc:
         if not exc.retryable_http_failure or not os.path.exists(deck_path):
             raise
@@ -1349,10 +1425,16 @@ def render() -> None:
     total = MAX_SLIDES
     date_text = f"{day:%d %B %Y}"
     os.makedirs(OUT_DIR, exist_ok=True)
+    reel_scenes_dir = os.path.join(OUT_DIR, "reel_scenes")
+    if os.path.isdir(reel_scenes_dir):
+        shutil.rmtree(reel_scenes_dir)
+    os.makedirs(reel_scenes_dir, exist_ok=True)
     for old in os.listdir(OUT_DIR):
         old_path = os.path.join(OUT_DIR, old)
         if (os.path.isfile(old_path)
-                and old.lower().endswith((".mp4", ".jpg"))):
+                and (old.lower().endswith(".jpg")
+                     or (old.lower().endswith(".mp4")
+                         and old.lower() != "reel.mp4"))):
             os.remove(old_path)
     work = tempfile.mkdtemp(prefix="ig-")
     cover_bg = None
@@ -1383,6 +1465,17 @@ def render() -> None:
         render_story(work, i + 1, total, slide, date_text, bg,
                      os.path.join(OUT_DIR, f"{i + 2:02d}.jpg"),
                      is_photo=graded)
+        if i < 3:
+            scene_image = Image.open(bg)
+            try:
+                scene_image = ImageOps.fit(
+                    scene_image.convert("RGB"), (1080, 1920),
+                    method=Image.Resampling.LANCZOS)
+                scene_image.save(
+                    os.path.join(reel_scenes_dir, f"{i + 1:02d}.jpg"),
+                    "JPEG", quality=92, optimize=True)
+            finally:
+                scene_image.close()
         print(f"  slide {i + 2}: {slide['headline']} ({label})")
     render_outro(work, date_text, os.path.join(OUT_DIR, f"{total:02d}.jpg"))
     caption_path = os.path.join(OUT_DIR, "caption.txt")
@@ -1390,6 +1483,7 @@ def render() -> None:
         f.write(deck["caption"])
     with open(deck_path, "w", encoding="utf-8") as f:
         json.dump(deck, f, ensure_ascii=False, indent=1)
+    _record_recent_headlines(deck, day)
     shutil.rmtree(work)
     print(f"rendered {total} slides for {day}")
 
@@ -1619,6 +1713,285 @@ def publish() -> None:
         f.write(day)
 
 
+def _reel_font_path() -> str:
+    for path in (
+            ANTON,
+            "C:/Windows/Fonts/arialbd.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"):
+        if os.path.isfile(path):
+            return path
+    raise RuntimeError("no font available for Reel captions")
+
+
+def _ffmpeg_filter_path(path: str) -> str:
+    return path.replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
+
+
+def _reel_script(slide: dict) -> str:
+    headline = re.sub(r"\*\*(.+?)\*\*", r"\1", str(slide.get("headline", "")))
+    caption = str(slide.get("caption", "")).strip()
+    return _safe_instagram_copy(f"{headline}. {caption}").strip()
+
+
+def _reel_scene_path(slide: dict, index: int, work: str) -> str:
+    scene_dir = os.path.join(OUT_DIR, "reel_scenes")
+    os.makedirs(scene_dir, exist_ok=True)
+    target = os.path.join(scene_dir, f"{index:02d}.jpg")
+    if os.path.isfile(target):
+        return target
+
+    generated = os.path.join(work, f"reel_scene_{index}.png")
+    if not gen_scene(str(slide.get("scene_prompt", "")), generated):
+        raise RuntimeError(
+            f"missing rendered Reel scene {index} and Nano Banana fallback failed")
+    with Image.open(generated) as image:
+        ImageOps.fit(
+            image.convert("RGB"), (1080, 1920),
+            method=Image.Resampling.LANCZOS,
+        ).save(target, "JPEG", quality=92, optimize=True)
+    return target
+
+
+def _caption_filters(work: str, slide: dict, duration: float) -> str:
+    font = _ffmpeg_filter_path(_reel_font_path())
+    headline = re.sub(
+        r"\*\*(.+?)\*\*", r"\1",
+        str(slide.get("headline", ""))).upper()
+    headline_path = dn.video._textfile(
+        work, "reel_headline.txt", textwrap.fill(headline, width=24))
+    expressions = [
+        "drawtext="
+        f"fontfile='{font}':textfile='{_ffmpeg_filter_path(headline_path)}':"
+        "fontcolor=white:fontsize=66:borderw=4:bordercolor=black:"
+        "box=1:boxcolor=black@0.50:boxborderw=20:"
+        "x=(w-text_w)/2:y=190"
+    ]
+    sentences = [
+        sentence.strip()
+        for sentence in re.split(r"(?<=[.!?])\s+", str(slide.get("caption", "")))
+        if sentence.strip()
+    ]
+    if not sentences:
+        sentences = [str(slide.get("headline", "")).replace("**", "")]
+    weights = [max(len(sentence), 1) for sentence in sentences]
+    total_weight = sum(weights)
+    cursor = 0.0
+    for index, (sentence, weight) in enumerate(zip(sentences, weights)):
+        start = duration * cursor / total_weight
+        cursor += weight
+        end = duration if index == len(sentences) - 1 else (
+            duration * cursor / total_weight)
+        path = dn.video._textfile(
+            work, f"reel_caption_{index}.txt",
+            textwrap.fill(sentence, width=32))
+        expressions.append(
+            "drawtext="
+            f"fontfile='{font}':textfile='{_ffmpeg_filter_path(path)}':"
+            "fontcolor=white:fontsize=56:borderw=3:bordercolor=black:"
+            "box=1:boxcolor=black@0.72:boxborderw=26:"
+            "x=(w-text_w)/2:y=h-520:"
+            f"enable='between(t,{start:.2f},{end:.2f})'"
+        )
+    return ",".join(expressions)
+
+
+def _render_reel_outro(work: str, output: str) -> None:
+    image_path = os.path.join(work, "reel_outro.jpg")
+    image = Image.new("RGB", (1080, 1920), "#070A0F")
+    draw = ImageDraw.Draw(image)
+    draw.ellipse((140, 180, 940, 980), fill="#071C2A", outline=CYAN, width=5)
+    draw.text((540, 540), "MW", font=_font(250), fill=SIGNAL_GOLD,
+              anchor="mm", stroke_width=3, stroke_fill="#000000")
+    draw.text((540, 1120), "FOLLOW", font=_font(120), fill="#FFFFFF",
+              anchor="mm", stroke_width=3, stroke_fill="#000000")
+    draw.text((540, 1290), "@midworlddaily", font=_ui_font(64),
+              fill=CYAN, anchor="mm")
+    draw.rounded_rectangle((190, 1450, 890, 1580), radius=42,
+                           fill=SIGNAL_GOLD)
+    draw.text((540, 1515), "LINK IN BIO", font=_ui_font(56),
+              fill="#0B0D12", anchor="mm")
+    draw.text((540, 1740), "THE WORLD, EVERY DAY", font=_ui_font(36),
+              fill="#FFFFFF", anchor="mm")
+    image.save(image_path, "JPEG", quality=92)
+    dn.video.run([
+        "ffmpeg", "-y", "-loglevel", "error", "-loop", "1",
+        "-framerate", "30", "-i", image_path,
+        "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+        "-t", "3.5", "-c:v", "libx264", "-preset", "veryfast",
+        "-b:v", "2200k", "-maxrate", "2600k", "-bufsize", "4400k",
+        "-pix_fmt", "yuv420p", "-r", "30",
+        "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
+        "-movflags", "+faststart", output,
+    ])
+
+
+def render_reel() -> str:
+    deck_path = os.path.join(OUT_DIR, "deck.json")
+    if not os.path.isfile(deck_path):
+        raise RuntimeError("render the Instagram carousel before the Reel")
+    with open(deck_path, encoding="utf-8") as file:
+        deck = json.load(file)
+    slides = deck.get("slides", [])[:3]
+    if len(slides) != 3:
+        raise RuntimeError("the Reel requires three story slides")
+
+    os.makedirs(OUT_DIR, exist_ok=True)
+    output = os.path.join(OUT_DIR, "reel.mp4")
+    marker = os.path.join(OUT_DIR, ".last_ig_reel")
+    if os.path.isfile(output) and os.path.isfile(marker):
+        with open(marker, encoding="utf-8") as file:
+            if file.read().strip() == str(deck.get("date", "")):
+                print(f"Reel for {deck.get('date')} already rendered and "
+                      "published — reusing asset")
+                return output
+    work = tempfile.mkdtemp(prefix="ig-reel-")
+    if os.path.isfile(output):
+        os.remove(output)
+    parts = []
+    try:
+        for index, slide in enumerate(slides, 1):
+            scene = _reel_scene_path(slide, index, work)
+            script = _reel_script(slide)
+            if not script:
+                raise RuntimeError(f"story {index} has no Reel narration")
+            voice = os.path.join(work, f"reel_voice_{index}.mp3")
+            asyncio.run(dn._speak(script, voice))
+            source_duration = dn.video.probe_duration(voice)
+            duration = max(15.0, min(20.0, source_duration))
+            tempo = max(1.0, source_duration / duration)
+            tempo_filters = []
+            while tempo > 2.0:
+                tempo_filters.append("atempo=2.0")
+                tempo /= 2.0
+            if tempo > 1.001:
+                tempo_filters.append(f"atempo={tempo:.4f}")
+            if source_duration < duration:
+                tempo_filters.append(
+                    f"apad=pad_dur={duration - source_duration:.3f}")
+            audio_filter = ",".join(tempo_filters) if tempo_filters else "anull"
+            frame_count = max(round(duration * 30) - 1, 1)
+            headline = str(slide.get("headline", "")).replace("**", "").upper()
+            visual_filter = (
+                "scale=2160:3840:force_original_aspect_ratio=increase:"
+                "flags=lanczos,crop=2160:3840,"
+                f"zoompan=z='min(1+0.035*on/{frame_count}\\,1.035)'"
+                ":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+                ":d=1:s=1080x1920:fps=30,setsar=1,"
+                + _caption_filters(work, slide, duration)
+            )
+            clip = os.path.join(work, f"reel_story_{index}.mp4")
+            dn.video.run([
+                "ffmpeg", "-y", "-loglevel", "error",
+                "-loop", "1", "-framerate", "30", "-i", scene,
+                "-i", voice, "-vf", visual_filter, "-af", audio_filter,
+                "-map", "0:v:0", "-map", "1:a:0", "-t", f"{duration:.2f}",
+                "-c:v", "libx264", "-preset", "veryfast",
+                "-b:v", "2200k", "-maxrate", "2600k", "-bufsize", "4400k",
+                "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac",
+                "-b:a", "128k", "-ar", "48000", "-ac", "2",
+                "-movflags", "+faststart", clip,
+            ])
+            parts.append(clip)
+            print(f"  Reel story {index}: {headline} ({duration:.0f}s)")
+
+        outro = os.path.join(work, "reel_outro.mp4")
+        _render_reel_outro(work, outro)
+        parts.append(outro)
+        listing = os.path.join(work, "reel_concat.txt")
+        with open(listing, "w", encoding="utf-8") as file:
+            for part in parts:
+                escaped = os.path.abspath(part).replace("'", "'\\''")
+                file.write(f"file '{escaped}'\n")
+        dn.video.run([
+            "ffmpeg", "-y", "-loglevel", "error", "-f", "concat",
+            "-safe", "0", "-i", listing,
+            "-c:v", "libx264", "-preset", "veryfast",
+            "-b:v", "2200k", "-maxrate", "2600k", "-bufsize", "4400k",
+            "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac",
+            "-b:a", "128k", "-ar", "48000", "-ac", "2",
+            "-movflags", "+faststart", output,
+        ])
+        duration = dn.video.probe_duration(output)
+        size = os.path.getsize(output)
+        if not 45 <= duration <= 65:
+            raise RuntimeError(f"rendered Reel is {duration:.1f}s, expected 45-65s")
+        if size >= 25 * 1024 * 1024:
+            raise RuntimeError(
+                f"rendered Reel is {size / 1e6:.1f} MB; maximum is 25 MB")
+        print(f"rendered vertical Reel: {duration:.1f}s, {size / 1e6:.1f} MB")
+        return output
+    except Exception:
+        if os.path.isfile(output):
+            os.remove(output)
+        raise
+    finally:
+        shutil.rmtree(work)
+
+
+def publish_reel() -> None:
+    token = os.getenv("IG_ACCESS_TOKEN", "").strip()
+    user_id = os.getenv("IG_USER_ID", "").strip()
+    try:
+        if not token or not user_id:
+            raise RuntimeError("IG_ACCESS_TOKEN and IG_USER_ID must be set")
+        deck_path = os.path.join(OUT_DIR, "deck.json")
+        with open(deck_path, encoding="utf-8") as file:
+            deck = json.load(file)
+        day = str(deck.get("date", ""))
+        marker = os.path.join(OUT_DIR, ".last_ig_reel")
+        if os.path.isfile(marker):
+            with open(marker, encoding="utf-8") as file:
+                if file.read().strip() == day:
+                    print(f"Reel for {day} already published — skipping")
+                    return
+        reel_path = os.path.join(OUT_DIR, "reel.mp4")
+        if not os.path.isfile(reel_path):
+            render_reel()
+
+        repository = os.getenv(
+            "GITHUB_REPOSITORY", "itssergekalajian-hub/newsbotdaily")
+        video_url = (
+            f"https://raw.githubusercontent.com/{repository}/main/"
+            f"{OUT_DIR}/reel.mp4")
+        caption = "\n\n".join(
+            str(slide.get("caption", "")).strip()
+            for slide in deck.get("slides", [])[:3]
+            if slide.get("caption"))
+        caption = (caption[:1800]
+                   + "\n\nFollow @midworlddaily — link in bio.")
+        graph = graph_base(token)
+        response = requests.post(
+            f"{graph}/{user_id}/media",
+            data={"media_type": "REELS", "video_url": video_url,
+                  "share_to_feed": "true", "caption": caption,
+                  "access_token": token},
+            timeout=60,
+        )
+        payload = _meta_response_json(response, "create Reel")
+        response.raise_for_status()
+        if isinstance(payload.get("error"), dict) or not payload.get("id"):
+            raise RuntimeError(json.dumps(payload, ensure_ascii=False))
+        container_id = payload["id"]
+        _wait_for_container(
+            container_id, token, graph, attempts=25, sleep_seconds=4)
+        response = requests.post(
+            f"{graph}/{user_id}/media_publish",
+            data={"creation_id": container_id, "access_token": token},
+            timeout=60,
+        )
+        payload = _meta_response_json(response, "publish Reel")
+        response.raise_for_status()
+        if isinstance(payload.get("error"), dict) or not payload.get("id"):
+            raise RuntimeError(json.dumps(payload, ensure_ascii=False))
+        with open(marker, "w", encoding="utf-8") as file:
+            file.write(day)
+        print(f"published Instagram Reel: {payload['id']}")
+    except Exception as exc:
+        print(f"::warning::Instagram Reel failed without affecting carousel: "
+              f"{type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
+
+
 if __name__ == "__main__":
     {"render": render, "publish": publish, "probe": probe,
-     "check-auth": check_auth}[sys.argv[1]]()
+     "check-auth": check_auth, "render-reel": render_reel,
+     "publish-reel": publish_reel}[sys.argv[1]]()

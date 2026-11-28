@@ -51,6 +51,25 @@ PALE = "0x9FB6D4"
 ENC = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
        "-pix_fmt", "yuv420p", "-r", str(FPS),
        "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2"]
+VIDEO_BITRATE_KBPS: int | None = None
+
+
+def set_video_bitrate(target_kbps: int) -> None:
+    global VIDEO_BITRATE_KBPS
+    VIDEO_BITRATE_KBPS = max(1, int(target_kbps))
+
+
+def _encoding_args() -> list[str]:
+    if VIDEO_BITRATE_KBPS is None:
+        return ENC
+    return [
+        "-c:v", "libx264", "-preset", "veryfast",
+        "-b:v", f"{VIDEO_BITRATE_KBPS}k",
+        "-maxrate", f"{int(VIDEO_BITRATE_KBPS * 1.3)}k",
+        "-bufsize", f"{VIDEO_BITRATE_KBPS * 2}k",
+        "-pix_fmt", "yuv420p", "-r", str(FPS),
+        "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
+    ]
 
 
 def run(cmd: list[str]) -> None:
@@ -134,6 +153,15 @@ def trim_silence(src: str, dst: str) -> float:
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", src,
          "-af", TRIM, "-ar", "48000", "-ac", "1", dst])
     return probe_duration(dst)
+
+
+def trim_leading_silence(src: str, dst: str) -> str:
+    """Remove only the TTS lead-in before using a fixed anchor lip-sync clip."""
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", src,
+         "-af", "silenceremove=start_periods=1:start_threshold=-45dB:"
+               "detection=peak,asetpts=PTS-STARTPTS",
+         "-c:a", "libmp3lame", "-q:a", "3", dst])
+    return dst
 
 
 def silence(work: str, seconds: float, name: str) -> str:
@@ -690,7 +718,8 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  "-f", "lavfi", "-i", prog,
                  "-f", "lavfi", "-i", story_prog,
                  "-filter_complex", graph,
-                 "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
+                 "-map", "[v]", "-map", "1:a", *_encoding_args(),
+                 "-shortest", out])
             return
         except RuntimeError as e:
             print(f"  scene '{topic}' immersive render failed: {e}",
@@ -719,7 +748,8 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  "-f", "lavfi", "-i", prog,
                  "-f", "lavfi", "-i", story_prog,
                  "-filter_complex", graph,
-                 "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
+                 "-map", "[v]", "-map", "1:a", *_encoding_args(),
+                 "-shortest", out])
             return
         except RuntimeError as e:
             print(f"  scene '{topic}' animated-anchor render failed "
@@ -735,7 +765,8 @@ def render_scene(work: str, presenter: str, audio: str, srt: str, topic: str,
                  "-f", "lavfi", "-i", prog,
                  "-f", "lavfi", "-i", story_prog,
                  "-filter_complex", graph,
-                 "-map", "[v]", "-map", "1:a", *ENC, "-shortest", out])
+                 "-map", "[v]", "-map", "1:a", *_encoding_args(),
+                 "-shortest", out])
             return
         except RuntimeError as e:
             print(f"  scene '{topic}' {label} render failed: {e}", file=sys.stderr)
@@ -779,7 +810,8 @@ def render_headlines(work: str, items: list[tuple[str, str, str, float]],
         run(["ffmpeg", "-y", "-loglevel", "error", "-i", backdrop, "-i", wav,
              "-filter_complex",
              f"[0:v]{chain}[v];[1:a]apad,aformat=channel_layouts=stereo[a]",
-             "-map", "[v]", "-map", "[a]", *ENC, "-t", f"{span:.2f}", piece])
+             "-map", "[v]", "-map", "[a]", *_encoding_args(),
+             "-t", f"{span:.2f}", piece])
         parts.append(piece)
     crossfade_concat(parts, out, 0.35)
 
@@ -814,6 +846,10 @@ def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
     beat of composure before the first word no longer reads as bad dubbing.
     """
     seconds = probe_duration(clip)
+    trimmed_voice = os.path.join(
+        work, os.path.splitext(os.path.basename(out))[0] + "_leadtrim.mp3")
+    trim_leading_silence(voice, trimmed_voice)
+    voice = trimmed_voice
     sync = ""
     try:
         offset = _speech_onset(clip) - _speech_onset(voice)
@@ -838,7 +874,8 @@ def render_anchor_talk(work: str, clip: str, voice: str, brand: str,
          "-filter_complex",
          f"[0:v]{chain}[v];[1:a]{sync}{SPEECH},apad,"
          f"aformat=channel_layouts=stereo[a]",
-         "-map", "[v]", "-map", "[a]", *ENC, "-t", f"{seconds:.2f}", out])
+         "-map", "[v]", "-map", "[a]", *_encoding_args(),
+         "-t", f"{seconds:.2f}", out])
 
 
 def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
@@ -887,7 +924,8 @@ def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
         try:
             run(["ffmpeg", "-y", "-loglevel", "error", *inputs,
                  "-filter_complex", graph,
-                 "-map", "[v]", "-map", "1:a", *ENC, "-t", str(seconds), out])
+                 "-map", "[v]", "-map", "1:a", *_encoding_args(),
+                 "-t", str(seconds), out])
             return
         except RuntimeError as e:
             print(f"  sting card failed ({str(e)[:80]}) — flat card",
@@ -903,7 +941,8 @@ def render_card(work: str, seconds: float, lines: list[tuple[str, int, str]],
 
     run(["ffmpeg", "-y", "-loglevel", "error", *inputs,
          "-filter_complex", graph,
-         "-map", "[v]", "-map", "1:a", *ENC, "-t", str(seconds), out])
+         "-map", "[v]", "-map", "1:a", *_encoding_args(),
+         "-t", str(seconds), out])
 
 
 def concat(parts: list[str], out: str) -> None:
@@ -918,7 +957,7 @@ def concat(parts: list[str], out: str) -> None:
         # stream copy is fussy about parameter drift between parts
         print("  concat copy failed, re-encoding", file=sys.stderr)
         run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
-             "-i", listing, *ENC, "-movflags", "+faststart", out])
+             "-i", listing, *_encoding_args(), "-movflags", "+faststart", out])
 
 
 def crossfade_concat(parts: list[str], out: str, fade: float = 0.5) -> None:
@@ -974,7 +1013,7 @@ def crossfade_concat(parts: list[str], out: str, fade: float = 0.5) -> None:
     try:
         run(["ffmpeg", "-y", "-loglevel", "error", *inputs,
              "-filter_complex", graph, "-map", f"[{vp}]", "-map", f"[{ap}]",
-             *ENC, "-movflags", "+faststart", out])
+             *_encoding_args(), "-movflags", "+faststart", out])
     except RuntimeError as e:
         print(f"  crossfade failed ({str(e)[:150]}) — hard cut", file=sys.stderr)
         concat(parts, out)

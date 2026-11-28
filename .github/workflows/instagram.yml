@@ -32,12 +32,18 @@ jobs:
         id: schedule_gate
         env:
           EVENT_NAME: ${{ github.event_name }}
-          TZ: Asia/Beirut
+          SCHEDULE: ${{ github.event.schedule }}
         run: |
-          if [ "$EVENT_NAME" != "schedule" ] || [ "$(date +%H)" = "00" ]; then
+          if [ "$EVENT_NAME" != "schedule" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          OFFSET=$(TZ=Asia/Beirut date +%z)
+          if { [ "$OFFSET" = "+0200" ] && [ "$SCHEDULE" = "15 22 * * *" ]; } \
+            || { [ "$OFFSET" = "+0300" ] && [ "$SCHEDULE" = "15 21 * * *" ]; }; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Off-season cron; Beirut local hour is not 00."
+            echo "Skipping non-current Beirut DST cron (offset=$OFFSET schedule=$SCHEDULE)."
             echo "run=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -67,8 +73,7 @@ jobs:
           IG_HANDLE: ${{ vars.IG_HANDLE }}
         run: python insta_slides.py render
 
-      # Commit all slide assets, including 01.mp4, before Instagram fetches
-      # them from their public raw URLs.
+      # Commit all slide assets before Instagram fetches them from their public raw URLs.
       - name: Commit slides
         if: steps.schedule_gate.outputs.run == 'true'
         run: |
@@ -102,6 +107,52 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add .last_ig
             git commit -m "Record Instagram post: $(cat .last_ig)"
+            git pull --rebase origin main || true
+            git push
+          fi
+
+      - name: Render optional Reel
+        if: steps.schedule_gate.outputs.run == 'true' && vars.PUBLISH_REEL == 'true'
+        continue-on-error: true
+        env:
+          SOURCE_CHANNEL: midworldnews
+          TARGET_CHAT_ID: ${{ secrets.TARGET_CHAT_ID }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TIMEZONE: Asia/Beirut
+          IG_HANDLE: ${{ vars.IG_HANDLE }}
+        run: python insta_slides.py render-reel
+
+      - name: Commit Reel asset
+        if: steps.schedule_gate.outputs.run == 'true' && vars.PUBLISH_REEL == 'true'
+        continue-on-error: true
+        run: |
+          if [ -f slides/latest/reel.mp4 ] && [ -n "$(git status --porcelain slides/latest/reel.mp4)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add slides/latest/reel.mp4
+            git commit -m "Reel: $(date -u +%F)"
+            git pull --rebase origin main || true
+            git push
+          fi
+
+      - name: Publish optional Reel
+        if: steps.schedule_gate.outputs.run == 'true' && vars.PUBLISH_REEL == 'true'
+        continue-on-error: true
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_HANDLE: ${{ vars.IG_HANDLE }}
+        run: python insta_slides.py publish-reel
+
+      - name: Record Reel marker
+        if: steps.schedule_gate.outputs.run == 'true' && vars.PUBLISH_REEL == 'true'
+        run: |
+          if [ -f slides/latest/.last_ig_reel ] && [ -n "$(git status --porcelain slides/latest/.last_ig_reel)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add slides/latest/.last_ig_reel
+            git commit -m "Record Instagram Reel: $(cat slides/latest/.last_ig_reel)"
             git pull --rebase origin main || true
             git push
           fi
